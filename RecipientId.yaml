@@ -1,0 +1,6 @@
+title: RecipientId
+x-stoplight:
+  id: 7vrcjgfjp8y8m
+type: string
+description: Recipient unique identifier
+example: REC2

@@ -1,0 +1,655 @@
+openapi: 3.1.0
+x-stoplight:
+  id: 9x5997x5dumr9
+servers:
+  - url: 'https://sandbox.skaleet.com/api/standardInterbanking/v1'
+    description: Skaleet Sandbox environment.
+info:
+  title: Standard Interbanking API
+  version: 2024.3.0
+  description: "Standard Interbanking API ||\r\n---------|----------|\r\n Use Cases Examples |**Account Recharge**<br>- Manage Request To Pay<br>**Credit Transfers**<br>- Manage credit transfers|\r\n\r\nThis API dedicated to Network or interbank operator to perform interbank transactions."
+  contact:
+    name: Skaleet
+    url: 'https://www.skaleet.com/en/'
+    email: api@skaleet.com
+  license:
+    name: Proprietary
+    url: 'https://www.skaleet.com/'
+paths:
+  '/heartbeat/{externalSystemId}':
+    parameters:
+      - in: path
+        required: true
+        name: externalSystemId
+        description: 'Configured external system id, that should be associated with current API Key.'
+        schema:
+          type: string
+          example: my-external-service
+    post:
+      security:
+        - OAuth2: []
+      tags:
+        - External System Monitoring
+      summary: Heartbeat
+      description: To send notifications on the status of a tier service.
+      operationId: HeartbeatExternalService
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  default: ALIVE
+                  enum:
+                    - ALIVE
+                    - WARNING
+                    - ALERT
+                value:
+                  type: integer
+                  description: custom metric value
+                  example: 124
+      responses:
+        '201':
+          description: Notification has been received.
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '403':
+          description: System External Service is not found or current API Key is not authorized.
+          $ref: '#/components/responses/ForbiddenErrorResponse'
+      x-stoplight:
+        id: 0a4r8xljl50zo
+  '/transfers/credits/{instructionId}':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Interbanking instruction identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    get:
+      security:
+        - OAuth2:
+            - transfer_view
+      tags:
+        - Standard Interbanking
+      summary: Get a credit transfer
+      operationId: GetCreditTransfer
+      description: Retrieves a Credit Transfer associated to the instruction ID.
+      responses:
+        '200':
+          $ref: '#/components/responses/CreditTransferResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: 8z8tkend9ioan
+  /transfers/credits:
+    post:
+      security:
+        - OAuth2:
+            - transfer_creation
+      tags:
+        - Standard Interbanking
+      summary: Initiate a credit transfer
+      operationId: CreditTransfer
+      description: Initiates a new credit transfer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditTransferRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/CreditTransferResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: 8cvvlgog9rm1p
+  '/transfers/credits/{instructionId}/accept':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2:
+            - transfer_update
+      tags:
+        - Standard Interbanking
+      summary: Accept a credit transfer
+      operationId: AcceptCreditTransfer
+      description: Mark a credit transfer as accepted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptCreditTransferRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateCreditTransferResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: p7n26l9c6m1l5
+  '/transfers/credits/{instructionId}/refuse':
+    parameters:
+      - name: instructionId
+        in: path
+        required: true
+        description: Instruction identifier.
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2:
+            - transfer_update
+      tags:
+        - Standard Interbanking
+      summary: Refuse a credit transfer
+      operationId: RefuseCreditTransfer
+      description: Refuse an existing Credit Transfer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefuseCreditTransferRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateCreditTransferResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: oe3in0mzycn6f
+  '/transfers/credits/{instructionId}/error':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2:
+            - transfer_update
+      tags:
+        - Standard Interbanking
+      summary: Error for credit transfer
+      operationId: ErrorCreditTransfer
+      description: Mark the Credit Transfer as in error state.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorCreditTransferRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateCreditTransferResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: 96zu2gnlkn821
+  '/RTP/{instructionId}':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    get:
+      security:
+        - OAuth2:
+            - rtp_view
+      tags:
+        - Standard Interbanking
+      summary: View a Request To Pay
+      operationId: GetRequestToPay
+      description: Retrieves the Request-To-Pay associated to the Instruction ID.
+      responses:
+        '200':
+          $ref: '#/components/responses/RequestToPayResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: kxppg5ohlc2ms
+  '/RTP/{instructionId}/accept':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2:
+            - rtp_update
+      tags:
+        - Standard Interbanking
+      summary: Accept a Request To Pay
+      operationId: AcceptRequestToPay
+      description: Mark Request-To-Pay associated to Instruction ID as Accepted.
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestToPay'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: jexn2xrwet39a
+  '/RTP/{instructionId}/refuse':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2:
+            - rtp_update
+      tags:
+        - Standard Interbanking
+      summary: Refuse a Request To Pay
+      operationId: RefuseRequestToPay
+      description: Mark the Request-To-Pay association to the Instruction ID as Refused.
+      requestBody:
+        required: true
+        description: |
+          Must contain all required information to refuse a request to pay.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refuse
+                - originator
+              properties:
+                refuse:
+                  $ref: '#/components/schemas/Reason'
+                originator:
+                  $ref: '#/components/schemas/Originator'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestToPay'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: la1up7tjetju9
+tags:
+  - name: External System Monitoring
+    description: System monitoring module.
+  - name: Standard Interbanking
+    description: All available API operations.
+components:
+  schemas:
+    InstructionId:
+      type: string
+      example: TRX2
+      description: Instruction ID in the issuer/receiver system (depending on the name of the parameter).
+      x-stoplight:
+        id: dptl500rqzqf2
+    Error:
+      type: object
+      description: Describes encountered error details.
+      x-stoplight:
+        id: v9ljxq2cy2rlz
+      required:
+        - error
+      properties:
+        error:
+          $ref: ./Error.yaml
+    CreditTransfer:
+      type: object
+      x-stoplight:
+        id: g14n0mkxhkzzw
+      description: A Credit Transfer instruction.
+      required:
+        - state
+        - operator
+        - operation
+        - amount
+        - debtor
+        - creditor
+      properties:
+        instructionId:
+          $ref: '#/components/schemas/InstructionId'
+        state:
+          type: string
+          description: Instruction state
+          example: SETTLED
+        operator:
+          type: string
+          description: Network / interbanking operator
+          example: OPERATOR_NAME
+        operation:
+          type: string
+          description: Operation executed type identifier
+          example: EXTERNAL_TO_ACCOUNT
+        amount:
+          $ref: ./Amount.yaml
+        debtor:
+          $ref: '#/components/schemas/StandardInterbankingOperator'
+        creditor:
+          $ref: '#/components/schemas/StandardInterbankingOperator'
+        externalReference:
+          type: string
+          description: Network / interbanking operator instruction id
+          example: Operator123
+        label:
+          type: string
+          description: Instruction label
+          example: Operation label
+        additional:
+          type: object
+          description: Additional data (JSON formatted)
+          example:
+            key1: value1
+            key2: value2
+    CreditTransferRequest:
+      type: object
+      x-stoplight:
+        id: 0uw046r49t3rp
+      description: Request to create a Credit Transfer instruction.
+      required:
+        - operator
+        - amount
+        - debtor
+        - creditor
+      properties:
+        operator:
+          type: string
+          description: Network / interbanking operator
+          example: OPERATOR_NAME
+        operation:
+          type: string
+          description: Operation executed (default EXTERNAL_TO_ACCOUNT)
+          enum:
+            - EXTERNAL_TO_ACCOUNT
+            - ACCOUNT_RECHARGE
+        amount:
+          $ref: ./Amount.yaml
+        debtor:
+          $ref: '#/components/schemas/StandardInterbankingOperator'
+        creditor:
+          $ref: '#/components/schemas/StandardInterbankingOperator'
+        externalReference:
+          type: string
+          description: Network / interbanking operator instruction id
+          example: Operator123
+        label:
+          type: string
+          description: Instruction label
+          example: Operation label
+        additional:
+          type: object
+          description: Additional data (JSON formatted)
+          example:
+            key1: value1
+            key2: value2
+    AcceptCreditTransferRequest:
+      type: object
+      description: Request to accept a Credit Transfer instruction.
+      properties:
+        externalReference:
+          type: string
+          description: Network / interbanking operator instruction id
+          example: Operator123
+      x-stoplight:
+        id: fd674r5672k4a
+    UpdateCreditTransferResponse:
+      type: object
+      description: Request to update information of a Credit Transfer instruction.
+      required:
+        - state
+      properties:
+        state:
+          type: string
+          description: Instruction state
+          example: SETTLED
+      x-stoplight:
+        id: 5t7z5al0mmkay
+    RefuseCreditTransferRequest:
+      type: object
+      description: Request to refuse a Credit Transfer instruction.
+      required:
+        - refuse
+        - originator
+      properties:
+        externalReference:
+          type: string
+          description: Network / interbanking operator instruction id
+          example: Operator123
+        refuse:
+          $ref: '#/components/schemas/Reason'
+        originator:
+          $ref: '#/components/schemas/Originator'
+      x-stoplight:
+        id: l08iy7b874bte
+    ErrorCreditTransferRequest:
+      type: object
+      description: Error description when handling the Credit Transfer request.
+      required:
+        - error
+      properties:
+        externalReference:
+          type: string
+          description: Network / interbanking operator instruction id
+          example: Operator123
+        error:
+          $ref: '#/components/schemas/Reason'
+      x-stoplight:
+        id: d7sx2cja1rrdi
+    RequestToPay:
+      type: object
+      description: Request-To-Pay instruction.
+      x-stoplight:
+        id: szhqcukjtjqag
+      required:
+        - instructionId
+        - state
+        - operator
+        - operation
+        - amount
+        - requestedPaymentDate
+        - creditor
+        - debtor
+      properties:
+        instructionId:
+          $ref: '#/components/schemas/InstructionId'
+        state:
+          $ref: '#/components/schemas/RequestToPayState'
+        operator:
+          type: string
+          description: Network / interbanking operator
+        operation:
+          type: string
+          description: Operation that will be executed
+          example: ACCOUNT_FROM_EXTERNAL
+        label:
+          type: string
+          description: Operation label
+        amount:
+          $ref: ./Amount.yaml
+        requestedPaymentDate:
+          $ref: ./DateTime.yaml
+        requesterId:
+          type: string
+          description: Requester identifier
+        creditor:
+          $ref: '#/components/schemas/RequestToPayUser'
+        debtor:
+          $ref: '#/components/schemas/RequestToPayUser'
+        additional:
+          type: object
+          description: Additional data (JSON formatted)
+          example:
+            key1: value1
+            key2: value2
+        velocityPreCheck:
+          $ref: ./VelocityPreCheck.yaml
+    Reason:
+      type: object
+      description: A displayable reason received on instruction handling error.
+      required:
+        - code
+        - reason
+      properties:
+        code:
+          type: string
+          description: error code
+          example: ERR1234
+        reason:
+          type: string
+          description: This is a functional error message that can be displayed to the end user
+          example: 'Dear user, sorry but something went wrong'
+      x-stoplight:
+        id: czsqji7csyfol
+    Originator:
+      type: object
+      description: Instruction originator party.
+      required:
+        - type
+        - value
+      properties:
+        type:
+          type: string
+          enum:
+            - ADMIN
+            - CUSTOMER
+            - SYSTEM
+        value:
+          type: string
+          description: A short text describing the originator
+          example: John Doe
+      x-stoplight:
+        id: 7q057b2a9eknr
+    StandardInterbankingOperator:
+      type: object
+      description: Interbanking operator details.
+      required:
+        - reference
+      properties:
+        reference:
+          type: string
+          description: Reference
+          example: '123456789'
+        name:
+          type: string
+          description: 'First and last names of a natural person, name of a legal entity, or bank name'
+        additional:
+          type: object
+          description: Additional information (JSON formatted)
+          example:
+            key1: value1
+            key2: value2
+      x-stoplight:
+        id: p7ae1t11rl6z6
+    RequestToPayUser:
+      type: object
+      description: A Request-To-Pay party.
+      x-stoplight:
+        id: 8lug3ir8t4ous
+      required:
+        - reference
+        - referenceType
+      properties:
+        reference:
+          type: string
+          description: User reference
+          example: FR000102030405060708091042
+        referenceType:
+          $ref: ./InterbankingReferenceType.yaml
+        bic:
+          type: string
+          description: 'BIC, mandatory when reference type is `ACCOUNT_REFERENCE`'
+        additional:
+          type: object
+          description: Additional data (JSON formatted)
+          example:
+            key1: value1
+            key2: value2
+    RequestToPayState:
+      description: Instruction life-cycle status.
+      type: string
+      enum:
+        - INITIATED
+        - CTRL_FAILED
+        - CTRL_PASSED
+        - ACCEPTED
+        - EXT_REFUSED
+        - EXT_ACCEPTED
+        - EXECUTED
+      example: INITIATED
+      x-stoplight:
+        id: ceb6qmq53o2gq
+  responses:
+    CreditTransferResponse:
+      description: Everything was fine.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreditTransfer'
+    RequestToPayResponse:
+      description: Everything was fine.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RequestToPay'
+    BadRequestErrorResponse:
+      description: Something went wrong and it was client fault.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ForbiddenErrorResponse:
+      description: Caller is not allowed to make this request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: ''
+      flows:
+        clientCredentials:
+          tokenUrl: /oauth2/token
+          refreshUrl: /oauth2/refresh
+          scopes:
+            transfer_view: View credit transfer
+            transfer_creation: Create credit transfer
+            transfer_update: Update an existing credit transfer
+            rtp_view: View request to pay
+            rtp_update: Update an existing request to pay
+x-internal: false

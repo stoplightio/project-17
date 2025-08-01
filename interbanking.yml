@@ -1,0 +1,1461 @@
+openapi: 3.0.0
+x-stoplight:
+  id: cupoll5su1v7z
+tags:
+  - name: Credit Cancellation
+    description: Managing Credit Transfer cancellation.
+  - name: Credit Transfer
+    description: Managing Credit Transfer initiation and consultation.
+  - name: Debit Cancellation
+    description: Managing Debit transfer cancellation.
+  - name: Debit Transfer
+    description: Managing Debit transfer initiation and consultation.
+  - name: Information Modification Advice
+    description: Managing information modification advice.
+servers:
+  - url: 'https://sandbox.skaleet.com/api/interbanking/v1'
+    description: Skaleet sandbox environment.
+info:
+  title: 'Interbanking API (deprecated, reserved to SEPA usage).'
+  version: '5.0'
+  description: "Interbanking API|  |\r\n---------|----------|\r\n Use Cases Examples | **SEPA Payment**<br>- Manage SEPA credit transfers<br>- Manage SEPA direct debits | \r\n\r\nThis API is used to exchange with the SEPA Gateway to manage SEPA credit transfers and direct debits.\r\nTo use this API, a back-office has to create an Interbanking API key through its web portal. When creating or editing an API key, the back-office can specify the scopes available for this key, determining wether access to specific endpoints is authorized or not."
+  contact:
+    name: Skaleet
+    url: 'https://www.skaleet.com/en/'
+    email: api@skaleet.com
+  license:
+    name: Proprietary
+    url: 'https://www.skaleet.com/'
+paths:
+  /transfers/credits:
+    post:
+      security:
+        - OAuth2: []
+      tags:
+        - Credit Transfer
+      summary: Initiate an external credit transfer
+      operationId: CreditTransfer
+      description: Initiate an external credit transfer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCreditTransferRequest'
+      responses:
+        '201':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: yzio1jsnlbkpm
+  '/transfers/credits/{instructionId}/accept':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Credit Transfer
+      summary: Accept an external credit transfer
+      operationId: AcceptCreditTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptCreditTransferRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: lsixxlu2y8wnw
+  '/transfers/credits/{instructionId}/refuse':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Credit Transfer
+      summary: Refuse an external credit transfer
+      operationId: RefuseCreditTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefuseCreditTransferRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: y0bvhqdxdsb36
+  '/transfers/credits/{instructionId}':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Credit Transfer
+      summary: Update an external credit transfer
+      operationId: UpdateCreditTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCreditTransferRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: 4vdahcvs4r66m
+  '/transfers/credits/{instructionId}/settle':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Credit Transfer
+      summary: Settle an external credit transfer
+      operationId: SettleCreditTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettleCreditTransferRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: 4p810inqz60bz
+  /cancellations/credits:
+    post:
+      security:
+        - OAuth2: []
+      tags:
+        - Credit Cancellation
+      summary: Cancel an external credit transfer
+      operationId: CreditCancellation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCreditCancellationRequest'
+      responses:
+        '201':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: abne1q99offqv
+  '/cancellations/credits/{instructionId}/accept':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Credit Cancellation
+      summary: Accept a credit transfer cancellation
+      operationId: AcceptCreditCancellation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptCreditCancellationRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: f1f7jp9ayqxe9
+  '/cancellations/credits/{instructionId}/refuse':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Credit Cancellation
+      summary: Refuse a credit transfer cancellation
+      operationId: RefuseCreditCancellation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefuseCreditCancellationRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: eii4b5noad5rr
+  '/cancellations/credits/{instructionId}/settle':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Credit Cancellation
+      summary: Settle a credit transfer cancellation
+      operationId: SettleCreditCancellation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettleCreditCancellationRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: strtcy02acqmy
+  /transfers/debits:
+    post:
+      security:
+        - OAuth2: []
+      tags:
+        - Debit Transfer
+      summary: Initiate an external debit transfer
+      operationId: DebitTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDebitTransferRequest'
+      responses:
+        '201':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: 1g4hk9lyi9ea1
+  '/transfers/debits/{instructionId}/accept':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Debit Transfer
+      summary: Accept an external debit transfer
+      operationId: AcceptDebitTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptDebitTransferRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: kjwk1dj7t29oy
+  '/transfers/debits/{instructionId}/refuse':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Debit Transfer
+      summary: Refuse an external debit transfer
+      operationId: RefuseDebitTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefuseDebitTransferRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: dtlyl3m4ogewf
+  '/transfers/debits/{instructionId}':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Debit Transfer
+      summary: Update an external debit transfer
+      operationId: UpdateDebitTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDebitTransferRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: clni7nri1e43s
+  '/transfers/debits/{instructionId}/settle':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Debit Transfer
+      summary: Settle an external debit transfer
+      operationId: SettleDebitTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettleDebitTransferRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: efil6qnhnu8fn
+  /cancellations/debits:
+    post:
+      security:
+        - OAuth2: []
+      tags:
+        - Debit Cancellation
+      summary: Cancel an external debit transfer
+      operationId: DebitCancellation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDebitCancellationRequest'
+      responses:
+        '201':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: 54xkkjcqjpdy8
+  '/cancellations/debits/{instructionId}/accept':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Debit Cancellation
+      summary: Accept a debit transfer cancellation
+      operationId: AcceptDebitCancellation
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: b1rj5ian90o0p
+  '/cancellations/debits/{instructionId}/refuse':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Debit Cancellation
+      summary: Refuse a debit transfer cancellation
+      operationId: RefuseDebitCancellation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefuseDebitCancellationRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: lrtcgt6dlx0wr
+  '/cancellations/debits/{instructionId}':
+    parameters:
+      - name: instructionId
+        in: path
+        description: Instruction unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/InstructionId'
+    patch:
+      security:
+        - OAuth2: []
+      tags:
+        - Debit Cancellation
+      summary: Update an external debit cancellation
+      operationId: UpdateDebitCancellation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDebitCancellationRequest'
+      responses:
+        '200':
+          description: Everything was fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: 1r3i6zo09x3zc
+  /modification:
+    post:
+      security:
+        - OAuth2: []
+      tags:
+        - Information Modification Advice
+      summary: Receive an information modification advice
+      operationId: InformationModificationAdvice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InformationModificationAdviceRequest'
+      responses:
+        '204':
+          description: Everything went fine.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+      x-stoplight:
+        id: n7ubs1kgrsy13
+x-tagGroups:
+  - name: Credit
+    tags:
+      - Credit Transfer
+      - Credit Cancellation
+  - name: Debit
+    tags:
+      - Debit Transfer
+      - Debit Cancellation
+  - name: Modification
+    tags:
+      - Information Modification Advice
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: 'https://sandbox.skaleet.com/api/interbanking/v1/oauth2/token'
+          scopes: {}
+          refreshUrl: ''
+  schemas:
+    CreateCreditTransferRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateInstructionRequest'
+        - type: object
+          required:
+            - amount
+            - creditor
+            - debtor
+          properties:
+            executionDate:
+              $ref: ./DateTime.yaml
+            amount:
+              $ref: ./AmountWithCurrencyNumericAndDisplay.yaml
+            creditor:
+              $ref: '#/components/schemas/InterbankingUser'
+            debtor:
+              $ref: '#/components/schemas/InterbankingUser'
+            additionalReferences:
+              type: object
+              properties:
+                instrId:
+                  type: string
+                  description: Instruction id
+                  maxLength: 35
+                endToEndId:
+                  type: string
+                  description: End-To-End id
+                  maxLength: 35
+                txId:
+                  type: string
+                  description: Transaction id
+                  maxLength: 35
+                purpose:
+                  type: string
+                  description: Purpose
+                  maxLength: 35
+            additional:
+              oneOf:
+                - $ref: '#/components/schemas/CreditTransferAdditionalSepa'
+                - $ref: '#/components/schemas/CreditTransferAdditionalExample'
+      x-stoplight:
+        id: my19bu40b2898
+    InstructionId:
+      type: string
+      example: TRX2
+      description: Instruction id in the issuer/receiver system (depending on the name of the parameter).
+      x-stoplight:
+        id: 8m8sildje4ot9
+    AcceptCreditTransferRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateCreditTransferRequest'
+        - type: object
+          properties:
+            additional:
+              oneOf:
+                - $ref: '#/components/schemas/CreditTransferAdditionalSepa'
+                - $ref: '#/components/schemas/CreditTransferAdditionalExample'
+      x-stoplight:
+        id: d8srlc0nunujc
+    RefuseCreditTransferRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateCreditTransferRequest'
+        - $ref: '#/components/schemas/RefuseInstructionRequest'
+        - type: object
+          properties:
+            originator:
+              $ref: '#/components/schemas/Originator'
+            additional:
+              oneOf:
+                - $ref: '#/components/schemas/CreditTransferAdditionalSepa'
+                - $ref: '#/components/schemas/CreditTransferAdditionalExample'
+      x-stoplight:
+        id: dfazsqtnygjtz
+    UpdateCreditTransferRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateInstructionRequest'
+        - type: object
+          properties:
+            creditor:
+              $ref: '#/components/schemas/InterbankingUser'
+            debtor:
+              $ref: '#/components/schemas/InterbankingUser'
+            settlementDate:
+              type: string
+              format: date-time
+              description: settlement date
+            additional:
+              oneOf:
+                - $ref: '#/components/schemas/UpdateCreditTransferAdditionalSepa'
+                - $ref: '#/components/schemas/UpdateCreditTransferAdditionalExample'
+      x-stoplight:
+        id: zp8oct6417gfg
+    SettleCreditTransferRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateCreditTransferRequest'
+        - type: object
+          required:
+            - settlementDate
+          properties:
+            additional:
+              oneOf:
+                - $ref: '#/components/schemas/CreditTransferAdditionalSepa'
+                - $ref: '#/components/schemas/CreditTransferAdditionalExample'
+      x-stoplight:
+        id: s6p8su29m768c
+    CreateCreditCancellationRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateInstructionRequest'
+        - type: object
+          required:
+            - originalInstruction
+            - creationDate
+            - additional
+          properties:
+            originalInstruction:
+              type: object
+              required:
+                - issuerId
+                - issuerIdType
+              properties:
+                issuerId:
+                  $ref: '#/components/schemas/InstructionId'
+                issuerIdType:
+                  $ref: '#/components/schemas/InterbankingReferenceType'
+                issuerBic:
+                  type: string
+                  description: 'Issuer BIC, mandatory when issuer ID type is `ACCOUNT_REFERENCE`'
+                receiverId:
+                  $ref: '#/components/schemas/InstructionId'
+                receiverIdType:
+                  $ref: '#/components/schemas/InterbankingReferenceType'
+                receiverBic:
+                  type: string
+                  description: 'Receiver BIC, mandatory when receiver ID type is `ACCOUNT_REFERENCE`'
+                orgnlEndToEndId:
+                  type: string
+                  description: Original transaction's end to end id
+                  maxLength: 35
+                orgnlTxId:
+                  type: string
+                  description: Original transaction's id
+                  maxLength: 35
+            originator:
+              $ref: '#/components/schemas/Originator'
+            additional:
+              oneOf:
+                - $ref: '#/components/schemas/CreditCancellationAdditionalSepa'
+                - $ref: '#/components/schemas/CreditCancellationAdditionalExample'
+      x-stoplight:
+        id: v8f7u99boqohm
+    AcceptCreditCancellationRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateCreditCancellationRequest'
+        - type: object
+          properties:
+            additional:
+              oneOf:
+                - $ref: '#/components/schemas/CreditCancellationAdditionalSepa'
+                - $ref: '#/components/schemas/CreditCancellationAdditionalExample'
+      x-stoplight:
+        id: piqa4613kru04
+    RefuseCreditCancellationRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateCreditCancellationRequest'
+        - $ref: '#/components/schemas/RefuseInstructionRequest'
+        - type: object
+          properties:
+            originator:
+              $ref: '#/components/schemas/Originator'
+            additional:
+              oneOf:
+                - $ref: '#/components/schemas/UpdateCreditCancellationAdditionalSepa'
+                - $ref: '#/components/schemas/CreditCancellationAdditionalExample'
+      x-stoplight:
+        id: jy67nuunz3x4d
+    SettleCreditCancellationRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateCreditCancellationRequest'
+        - type: object
+          required:
+            - settlementDate
+          properties:
+            settlementDate:
+              type: string
+              format: date-time
+              description: settlement date
+      x-stoplight:
+        id: zxrq4dgzqoirs
+    CreateDebitTransferRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateInstructionRequest'
+        - type: object
+          required:
+            - amount
+            - creditor
+            - debtor
+          properties:
+            executionDate:
+              $ref: ./DateTime.yaml
+            amount:
+              $ref: ./AmountWithCurrencyNumericAndDisplay.yaml
+            creditor:
+              $ref: '#/components/schemas/InterbankingUser'
+            debtor:
+              $ref: '#/components/schemas/InterbankingUser'
+            additional:
+              oneOf:
+                - $ref: '#/components/schemas/DebitTransferAdditionalSepa'
+                - $ref: '#/components/schemas/DebitTransferAdditionalExample'
+      x-stoplight:
+        id: m7l2za0dn04i6
+    AcceptDebitTransferRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateInstructionRequest'
+        - type: object
+          properties:
+            additional:
+              oneOf:
+                - $ref: '#/components/schemas/AcceptDebitTransferAdditionalSepa'
+      x-stoplight:
+        id: jz2wfqpvvd4hi
+    RefuseDebitTransferRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateInstructionRequest'
+        - type: object
+          required:
+            - fee
+          properties:
+            fee:
+              $ref: ./AmountWithCurrencyNumericAndDisplay.yaml
+            originator:
+              $ref: '#/components/schemas/Originator'
+            amount:
+              $ref: ./AmountWithCurrencyNumericAndDisplay.yaml
+            creditor:
+              $ref: '#/components/schemas/InterbankingUser'
+      x-stoplight:
+        id: 2z1detj7kf41n
+    UpdateDebitTransferRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateInstructionRequest'
+      x-stoplight:
+        id: hrl9u3sa6vpls
+    SettleDebitTransferRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateInstructionRequest'
+        - type: object
+          required:
+            - settlementDate
+          properties:
+            settlementDate:
+              type: string
+              format: date-time
+              description: settlement date
+      x-stoplight:
+        id: altte4ek5u7an
+    CreateDebitCancellationRequest:
+      type: object
+      required:
+        - issuerId
+        - originalInstruction
+        - creationDate
+        - issuer
+        - receiver
+        - refundedAmount
+        - originator
+        - reason
+      properties:
+        issuerId:
+          type: string
+          description: Cancellation instruction id
+        originalInstruction:
+          $ref: '#/components/schemas/OriginalDebitInstruction'
+        creationDate:
+          type: string
+          format: date-time
+        issuer:
+          $ref: '#/components/schemas/InterbankingOperator'
+        receiver:
+          $ref: '#/components/schemas/InterbankingOperator'
+        refundedAmount:
+          $ref: ./AmountWithCurrencyNumericAndDisplay.yaml
+        originator:
+          $ref: '#/components/schemas/Originator'
+        reason:
+          $ref: '#/components/schemas/Error'
+      x-stoplight:
+        id: jb3ugqdp6wdyv
+    RefuseDebitCancellationRequest:
+      allOf:
+        - $ref: '#/components/schemas/RefuseInstructionRequest'
+      x-stoplight:
+        id: cap2von6mj2w4
+    UpdateDebitCancellationRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateInstructionRequest'
+        - type: object
+          properties:
+            additional:
+              oneOf:
+                - $ref: '#/components/schemas/UpdateDebitCancellationAdditionalSepa'
+                - $ref: '#/components/schemas/UpdateDebitCancellationAdditionalExample'
+      x-stoplight:
+        id: sz160fp2ktkvu
+    InformationModificationAdviceRequest:
+      type: object
+      required:
+        - issuerId
+        - issuerIdType
+        - issuer
+        - receiver
+      properties:
+        modificationId:
+          type: string
+          description: a unique ID for the modification
+          example: VVEEVXJY1NG6HBBH19
+        instructingParty:
+          type: string
+          description: The party that instructed the change
+          example: BANQFRPPXXX
+        instructedParty:
+          type: string
+          description: The party for which the update is to be applied
+          example: FR7630027160211101234129991
+        originalIBAN:
+          type: string
+          description: IBAN to be updated
+          example: FR7630027160211101234129991
+        originalBIC:
+          type: string
+          description: BIC to be updated
+          example: BANQFRPPXXX
+        updatedIBAN:
+          type: string
+          description: Update to apply to the IBAN
+          example: FR7630027160211101234129991
+        updatedBIC:
+          type: string
+          description: Update to apply to the BIC
+          example: BANQFRPPXXX
+        creationDate:
+          type: string
+          format: date-time
+          description: creation date (sent by platform)
+          example: '2012-11-17 04:47:11'
+        additionalInformation:
+          type: string
+          description: Optional Additional Information
+          example: /ICS/FR87ZZZ006398/UMR/MAND21.10.12-1 PBK-Tx7
+      x-stoplight:
+        id: oogzisbkrp65o
+    CreateInstructionRequest:
+      type: object
+      required:
+        - issuerId
+        - issuerIdType
+        - issuer
+        - receiver
+      properties:
+        issuerId:
+          $ref: '#/components/schemas/InstructionId'
+        issuerIdType:
+          $ref: '#/components/schemas/InterbankingReferenceType'
+        issuerBic:
+          type: string
+          description: 'Issuer BIC, mandatory when issuer ID type is ACCOUNT_REFERENCE'
+        issuer:
+          $ref: '#/components/schemas/InterbankingOperator'
+        receiver:
+          $ref: '#/components/schemas/InterbankingOperator'
+        creationDate:
+          type: string
+          format: date-time
+          description: creation date (sent by platform)
+        additional:
+          type: object
+      x-stoplight:
+        id: sf99qg9pb9vtl
+    InterbankingUser:
+      type: object
+      required:
+        - issuerId
+        - issuerIdType
+      properties:
+        issuerId:
+          $ref: '#/components/schemas/UserId'
+        issuerIdType:
+          $ref: '#/components/schemas/InterbankingReferenceType'
+        issuerBic:
+          type: string
+          description: 'Issuer BIC, mandatory when issuer ID type is ACCOUNT_REFERENCE'
+        receiverId:
+          $ref: '#/components/schemas/UserId'
+        receiverIdType:
+          $ref: '#/components/schemas/InterbankingReferenceType'
+        receiverBic:
+          type: string
+          description: 'Issuer BIC, mandatory when receiverIdType is ACCOUNT_REFERENCE'
+        additional:
+          oneOf:
+            - $ref: '#/components/schemas/InterbankingUserAdditionalSepa'
+            - $ref: '#/components/schemas/InterbankingUserAdditionalExample'
+      x-stoplight:
+        id: xrr8v11on4k97
+    CreditTransferAdditionalSepa:
+      type: object
+      required:
+        - scheme
+      properties:
+        scheme:
+          description: SEPA Scheme used (sent by SepaGateway)
+          type: string
+          enum:
+            - SCT
+            - SCT_INST
+        category:
+          type: string
+          description: category (sent by platform)
+        messageId:
+          type: string
+          description: message id (sent by SepaGateway)
+        purpose:
+          type: string
+          minLength: 1
+          maxLength: 4
+          description: purpose (sent by platform)
+        remittanceInfo:
+          type: string
+          description: remittance info (sent by platform)
+        externalRef:
+          type: string
+          description: external system reference
+      x-stoplight:
+        id: qohel1f1x7eni
+    CreditTransferAdditionalExample:
+      type: object
+      description: Some example of additional data
+      properties:
+        someAttribute:
+          type: string
+        otherAttribute:
+          type: string
+      x-stoplight:
+        id: q8tdvqb9grk4p
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: error code
+          example: ERR1234
+        message:
+          type: string
+          description: This is a functional error message that can be displayed to the end user
+          example: 'Dear user, sorry but something went wrong'
+      x-stoplight:
+        id: kwpu2irjzimj5
+    RefuseInstructionRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          $ref: '#/components/schemas/Error'
+      x-stoplight:
+        id: ac6dw1i2bhbr5
+    Originator:
+      type: object
+      description: Originator of request
+      properties:
+        type:
+          type: string
+          enum:
+            - ADMIN
+            - CUSTOMER
+            - SYSTEM
+        value:
+          type: string
+          example: PSSTFRPPXXX
+      x-stoplight:
+        id: tp6neho51tqu1
+    UpdateInstructionRequest:
+      type: object
+      properties:
+        receiverId:
+          $ref: '#/components/schemas/InstructionId'
+        additional:
+          type: object
+      x-stoplight:
+        id: 2h5m5hcozr0wo
+    UpdateCreditTransferAdditionalSepa:
+      type: object
+      properties:
+        scheme:
+          description: SEPA Scheme used (sent by SepaGateway)
+          type: string
+          enum:
+            - SCT
+            - SCT_INST
+        category:
+          type: string
+          description: category (sent by platform)
+        messageId:
+          type: string
+          description: message id (sent by SepaGateway)
+        originatorRef:
+          type: string
+          description: originator ref (sent by platform)
+        purpose:
+          type: string
+          minLength: 1
+          maxLength: 4
+          description: purpose (sent by platform)
+        remittanceInfo:
+          type: string
+          description: remittance info (sent by platform)
+        clearingSystem:
+          type: string
+          enum:
+            - CORE
+            - CORS
+            - STP2
+        acquitted:
+          type: boolean
+          description: 'true/false if the instruction has been acquitted/rejected by Steffi though acquittal/rejection file, else null if no acquittal/rejection has been done yet'
+      x-stoplight:
+        id: jc4s7v4k5uaib
+    UpdateCreditTransferAdditionalExample:
+      type: object
+      description: Some example of additional data
+      properties:
+        someAttribute:
+          type: string
+        otherAttribute:
+          type: string
+      x-stoplight:
+        id: 4cotukcmyw037
+    InterbankingReferenceType:
+      description: Type of the reference
+      type: string
+      enum:
+        - IBAN
+        - ACCOUNT_NUMBER
+        - ACCOUNT_REFERENCE
+        - VISA_NUMBER
+        - PHONE
+        - OTHER
+      example: IBAN
+      x-stoplight:
+        id: 4isyjax2y3ltj
+    CreditCancellationAdditionalSepa:
+      type: object
+      required:
+        - scheme
+        - type
+        - reason
+      properties:
+        scheme:
+          description: SEPA Scheme used (sent by SepaGateway)
+          type: string
+          enum:
+            - SCT
+            - SCT_INST
+        type:
+          type: string
+          description: type of R message (sent by platform)
+          enum:
+            - RECALL
+            - REVERSAL
+        messageId:
+          type: string
+          description: message id (sent by SepaGateway)
+        reason:
+          $ref: '#/components/schemas/Error'
+        additionalReason:
+          type: string
+          description: additional reason (sent by platform)
+      x-stoplight:
+        id: 98v9dgxerp4kn
+    CreditCancellationAdditionalExample:
+      type: object
+      description: Some example of additional data
+      properties:
+        someAttribute:
+          type: string
+        otherAttribute:
+          type: string
+      x-stoplight:
+        id: dsa8j6dsg9cf4
+    UpdateCreditCancellationRequest:
+      allOf:
+        - $ref: '#/components/schemas/UpdateInstructionRequest'
+        - type: object
+          properties:
+            additional:
+              oneOf:
+                - $ref: '#/components/schemas/UpdateCreditCancellationAdditionalSepa'
+                - $ref: '#/components/schemas/UpdateCreditCancellationAdditionalExample'
+      x-stoplight:
+        id: nshumspmrvgor
+    UpdateCreditCancellationAdditionalSepa:
+      type: object
+      properties:
+        scheme:
+          description: SEPA Scheme used (sent by SepaGateway)
+          type: string
+          enum:
+            - SCT
+            - SCT_INST
+      x-stoplight:
+        id: 7w9st25sg4ou1
+    DebitTransferAdditionalSepa:
+      type: object
+      required:
+        - scheme
+        - mandateId
+        - mandateSignatureDate
+        - creditorSchemeId
+        - sequenceType
+        - mandateType
+      properties:
+        dueDate:
+          type: string
+          format: date-time
+          description: due date (sent by platform)
+        scheme:
+          description: SEPA Scheme used (sent by SepaGateway)
+          type: string
+          enum:
+            - SDD
+        mandateSignatureDate:
+          type: string
+          format: date-time
+          description: settlement date
+        creditorSchemeId:
+          type: string
+          minLength: 1
+          maxLength: 35
+        category:
+          type: string
+          description: category (sent by platform)
+        mandateId:
+          type: string
+          minLength: 1
+          maxLength: 35
+        mandateType:
+          type: string
+          minLength: 1
+          maxLength: 4
+          enum:
+            - CORE
+            - B2B
+        messageId:
+          type: string
+          description: message id (sent by SepaGateway)
+        originatorRef:
+          type: string
+          description: originator ref (sent by platform)
+        originalMandate:
+          type: object
+          description: To be used if mandate information have been updated since last direct debit (mandatory when using SEPA)
+          properties:
+            reference:
+              type: string
+            creditorRef:
+              type: string
+            debtorIban:
+              type: string
+              description: 'IBAN (International Bank Account Number), e.g. FR791680810000000538'
+              example: FR791680810000000538
+        purpose:
+          type: string
+          minLength: 1
+          maxLength: 4
+          description: purpose (sent by platform)
+        remittanceInfo:
+          type: string
+          description: remittance info (sent by platform)
+        sequenceType:
+          type: string
+          minLength: 1
+          maxLength: 4
+          enum:
+            - OOFF
+            - FRST
+            - RCUR
+            - FNAL
+        externalRef:
+          type: string
+          description: external system reference
+      x-stoplight:
+        id: 8n2n7srcanuxs
+    DebitTransferAdditionalExample:
+      type: object
+      description: Some example of additional data
+      properties:
+        someAttribute:
+          type: string
+        otherAttribute:
+          type: string
+      x-stoplight:
+        id: y1je5zhy3akds
+    AcceptDebitTransferAdditionalSepa:
+      type: object
+      properties:
+        dueDate:
+          type: string
+          format: date-time
+          description: due date (sent by platform)
+      x-stoplight:
+        id: jtomjp7qxlb5y
+    OriginalDebitInstruction:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        scheme:
+          type: string
+        creditorSchemeId:
+          type: string
+        transactionId:
+          type: string
+      x-stoplight:
+        id: o9n4ysgnajaqf
+    InterbankingOperator:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: APP1
+        name:
+          type: string
+          example: Skom It Bank master
+      x-stoplight:
+        id: pm6e66qq59v57
+    UpdateDebitCancellationAdditionalSepa:
+      type: object
+      x-stoplight:
+        id: 72p44iyy3z8xe
+    UpdateDebitCancellationAdditionalExample:
+      type: object
+      description: Some example of additional data
+      properties:
+        someAttribute:
+          type: string
+        otherAttribute:
+          type: string
+      x-stoplight:
+        id: y7q6qb6dy04ag
+    UserId:
+      type: string
+      example: FR1420041010050500013M02606
+      description: 'User id in the system, can be an IBAN or other id depending on the system'
+      x-stoplight:
+        id: cf6184wqhqw95
+    InterbankingUserAdditionalSepa:
+      type: object
+      required:
+        - fullName
+        - country
+        - BIC
+      properties:
+        BIC:
+          $ref: '#/components/schemas/BIC'
+        fullName:
+          type: string
+          example: John Doe
+        address:
+          type: string
+          example: 88 rue du dôme
+        city:
+          type: string
+          example: Boulogne-Billancourt
+        zipcode:
+          type: string
+          example: '92100'
+        region:
+          type: string
+          example: Île de france
+        district:
+          type: string
+          example: République
+        province:
+          type: string
+        country:
+          type: string
+          example: FR
+        code:
+          type: string
+          description: originator or beneficiary code
+        ultimate:
+          type: object
+          properties:
+            id:
+              type: string
+              pattern: '^[A-Z]{6,6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3,3}){0,1}$'
+            name:
+              type: string
+              maxLength: 140
+      x-stoplight:
+        id: 9sr2c8i41uybz
+    InterbankingUserAdditionalExample:
+      type: object
+      description: Some example of additional data
+      properties:
+        someAttribute:
+          type: string
+        otherAttribute:
+          type: string
+      x-stoplight:
+        id: r4pc1cxs9b9i4
+    UpdateCreditCancellationAdditionalExample:
+      type: object
+      description: Some example of additional data
+      properties:
+        someAttribute:
+          type: string
+        otherAttribute:
+          type: string
+      x-stoplight:
+        id: hvlzglu4yac0z
+    BIC:
+      type: string
+      pattern: '^[A-Z]{6,6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3,3}){0,1}$'
+      example: PSSTFRPPXXX
+      x-stoplight:
+        id: 613hnt4xotoa3
+  responses:
+    BadRequestErrorResponse:
+      description: Something went wrong and it was client fault.
+      content:
+        application/json:
+          schema:
+            $ref: ./Error.yaml
+x-internal: true

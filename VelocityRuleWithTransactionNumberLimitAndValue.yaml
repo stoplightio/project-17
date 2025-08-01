@@ -1,0 +1,17 @@
+title: VelocityRuleWithTransactionNumberLimitAndValue
+x-stoplight:
+  id: o8py7jg08tmje
+allOf:
+  - $ref: ./VelocityRuleWithTransactionNumberLimit.yaml
+    x-stoplight:
+      id: 498k8hj5mfs3y
+  - type: object
+    properties:
+      transactionNumber:
+        type: integer
+        description: Current transaction number limit value for given Identity
+        example: 10
+        x-stoplight:
+          id: 9tb811c9hjqlf
+    x-stoplight:
+      id: 3e71n8b9cl30z

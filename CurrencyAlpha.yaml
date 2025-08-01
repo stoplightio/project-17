@@ -1,0 +1,10 @@
+title: Currency (alpha)
+x-stoplight:
+  id: 0qen556aupz51
+type: string
+description: Currency's ISO 4217 alpha code
+pattern: '^[A-Z]{3}$'
+minLength: 3
+maxLength: 3
+readOnly: true
+example: EUR

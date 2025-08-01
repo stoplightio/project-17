@@ -1,0 +1,11 @@
+title: IdentityStatusEnum
+x-stoplight:
+  id: ack45wajfq545
+type: string
+enum:
+  - INITIATED
+  - PENDING
+  - OPENED
+  - BLOCKED
+  - CLOSED
+  - INIBLOCKED

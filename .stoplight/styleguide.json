@@ -1,0 +1,50 @@
+{
+  "name": "api-documentation",
+  "description": "",
+  "spectralExtends": [],
+  "extends": [],
+  "formats": [
+    "oas2",
+    "oas3",
+    "oas3.0",
+    "oas3.1"
+  ],
+  "aliases": {},
+  "rules": {},
+  "inheritedOverrides": {
+    "path-parameters-snake-case": {
+      "severity": "hint"
+    },
+    "path-casing": {
+      "severity": "hint"
+    },
+    "query-parameters-snake-case": {
+      "severity": "warn"
+    },
+    "path-parameters-on-path-only": {
+      "severity": "error"
+    },
+    "resource-names-plural": {
+      "severity": "hint"
+    },
+    "docs-descriptions": {
+      "severity": "off"
+    },
+    "operation-description": {
+      "severity": "info"
+    },
+    "tag-description": {
+      "severity": "off"
+    },
+    "parameter-description": {
+      "severity": "info"
+    },
+    "docs-parameters-examples-or-schema": {
+      "severity": "warn"
+    },
+    "operation-tag-defined": {
+      "severity": "error"
+    }
+  },
+  "extendedDefault": false
+}

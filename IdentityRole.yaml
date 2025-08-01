@@ -1,0 +1,13 @@
+title: Identity role
+x-stoplight:
+  id: z9cerr96gwp7c
+type: string
+description: 'An Identity can be of type CLIENT, COMPANY, MERCHANT, AGENT, DISTRIBUTOR, DELEGATE_USER or NON_CUSTOMER'
+enum:
+  - CLIENT
+  - COMPANY
+  - MERCHANT
+  - AGENT
+  - NON_CUSTOMER
+  - DISTRIBUTOR
+  - DELEGATE_USER

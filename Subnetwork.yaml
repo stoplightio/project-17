@@ -1,0 +1,8 @@
+title: Subnetwork
+x-stoplight:
+  id: ek25coxu03cz8
+type: string
+description: Subnetwork associated to Payment Network
+enum:
+  - CREDIT_TRANSFER
+  - DIRECT_DEBIT

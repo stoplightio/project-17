@@ -1,0 +1,4671 @@
+openapi: 3.1.0
+x-stoplight:
+  id: h7v9g5cc0cxwu
+info:
+  title: Credit Module API
+  description: |-
+    Credit API ||
+    ---------|----------|
+     Use Cases Examples |**Credit Product Configuration**<br>- Configure Pricing Scheme<br>- Configure Credit Product<br>**Credit Request**<br>- Initiate and simulate a credit request<br>- Submit client information related to the credit request<br>**Credit Underwriting**<br>- Review credit additional data<br>- Funding Decision<br>- Manage borrower signature<br>**Credit Booking**<br>- Book credit<br>- Disburse credit amount<br>**Credit Servicing**<br>- Pay credit installment<br>- Process early repayments<br>- Manage unpaid installment|
+
+    This API is designed to empower developers to build for the financial institution its own intuitive user interfaces for managing credit module. 
+    This API may also help to seamlessly integrate with credit partners to enhance the financial services ecosystem.
+
+    To use this API, a back-office has to create a Service Domain API key through its web portal. When creating or editing an API key, the back-office can specify the scopes available for this key, determining wether access to specific endpoints is authorized or not.
+  version: '1.0'
+  contact:
+    name: Skaleet
+    url: 'https://www.skaleet.com/en/'
+    email: api@skaleet.com
+  license:
+    name: Proprietary
+    url: 'https://www.skaleet.com/'
+servers:
+  - url: 'https://sandbox.skaleet.com/credit/api/v1'
+    description: Skaleet sandbox environment.
+tags:
+  - name: CBS
+  - name: Configuration
+  - name: Credit Management
+  - name: Credit Offer
+  - name: Credit Request
+  - name: Credit Servicing
+  - name: Financial Accessories
+  - name: Installment
+  - name: Parameters
+  - name: Privilege
+  - name: Products
+  - name: Schedule
+  - name: Simulation
+  - name: System
+  - name: Translation
+paths:
+  /healthz:
+    get:
+      security: []
+      tags:
+        - System
+      summary: Get health status
+      operationId: getHealth
+      responses:
+        '200':
+          description: Get health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: meqz7amvlw29l
+  /configuration:
+    get:
+      security:
+        - OAuth2: []
+      tags:
+        - Configuration
+      summary: Get configuration
+      operationId: getConfiguration
+      responses:
+        '200':
+          description: Get configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Configuration'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 163xqtvo104m4
+  /parameters:
+    get:
+      security:
+        - OAuth2: []
+      tags:
+        - Parameters
+      summary: Get parameters
+      operationId: getParameters
+      responses:
+        '200':
+          description: Get parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Parameters'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: f0uxd2f4uoix3
+    put:
+      security:
+        - OAuth2: []
+      tags:
+        - Parameters
+      summary: Modify parameters
+      operationId: putParameters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Parameters'
+      responses:
+        '202':
+          description: Parameters edited
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: mhe80o1g5jna4
+  /general-accounts:
+    get:
+      security:
+        - OAuth2:
+            - cdt_pivot_account_read
+      tags:
+        - Parameters
+      summary: Get general accounts for credit transactions
+      operationId: getGeneralAccounts
+      responses:
+        '200':
+          description: Get general accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GeneralAccounts'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: ksqf2eov7j9pg
+  /currencies:
+    get:
+      security:
+        - OAuth2: []
+      tags:
+        - Configuration
+      summary: Get available currency list
+      operationId: getCurrencies
+      responses:
+        '200':
+          description: Currency configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyConfiguration'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 0ct4ixh59y5uk
+  /credits:
+    get:
+      security:
+        - OAuth2: []
+      tags:
+        - Credit Management
+      summary: Search credits using parameters
+      operationId: searchCredit
+      parameters:
+        - name: status
+          in: query
+          description: List of status to filter
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - ONGOING
+                - STUDY
+                - CANCELLED
+                - ADDITIONAL_DATA_DONE
+                - UNDER_VALIDATION
+                - ACCEPTED
+                - REFUSED
+                - OFFER_ISSUED
+                - OFFER_PENDING_SIGNATURE
+                - OFFER_SIGNED
+                - OFFER_REFUSED
+                - BOOKED
+                - LIVE
+                - UNPAID
+                - TERMINATED
+            example:
+              - ONGOING
+              - STUDY
+        - name: productCode
+          in: query
+          description: List of product codes to filter
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+            example:
+              - CONS
+              - VEH
+        - name: pricingSchemeCode
+          in: query
+          description: List of pricing scheme codes to filter
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+            example:
+              - BAR01
+              - BAR06
+        - name: clientId
+          in: query
+          description: Borrower reference to filter
+          schema:
+            type: string
+            example: '141689'
+        - name: clientFirstname
+          in: query
+          description: Borrower firstname to filter
+          schema:
+            type: string
+            example: Jeremy
+        - name: clientLastname
+          in: query
+          description: Borrower lastname to filter
+          schema:
+            type: string
+            example: Martin
+        - name: code
+          in: query
+          description: Credit code to filter
+          schema:
+            type: string
+            example: 220524121957DT
+        - name: minStartDate
+          in: query
+          description: Filter credit starting after this date
+          schema:
+            type: string
+            format: date
+            example: '2022-03-31'
+        - name: maxEndDate
+          in: query
+          description: Filter credit ending before this date
+          schema:
+            type: string
+            format: date
+            example: '2023-03-31'
+        - name: currency
+          in: query
+          description: Currency ISO code to filter
+          schema:
+            type: string
+            example: EUR
+        - name: minAmountValue
+          in: query
+          description: Filter amount superior to this amount
+          schema:
+            type: integer
+            example: 100000
+        - name: maxAmountValue
+          in: query
+          description: Filter amount inferior to this amount
+          schema:
+            type: integer
+            example: 1000000
+        - name: page
+          in: query
+          description: Position of the starting item
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 1
+        - name: sort
+          in: query
+          description: 'Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +, descending (newer first) fields may be prefixed with -. Ascending is the default sorting direction.'
+          schema:
+            type: string
+            enum:
+              - status
+              - +status
+              - '-status'
+              - productCode
+              - +productCode
+              - '-productCode'
+              - pricingSchemeCode
+              - +pricingSchemeCode
+              - '-pricingSchemeCode'
+              - clientId
+              - +clientId
+              - '-clientId'
+              - clientFirstname
+              - +clientFirstname
+              - '-clientFirstname'
+              - clientLastname
+              - +clientLastname
+              - '-clientLastname'
+              - code
+              - +code
+              - '-code'
+              - startDate
+              - +startDate
+              - '-startDate'
+              - endDate
+              - +endDate
+              - '-endDate'
+              - currency
+              - +currency
+              - '-currency'
+              - amount
+              - +amount
+              - '-amount'
+      responses:
+        '200':
+          description: Credit list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditPaginatedCollection'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: syigongutzsuw
+  '/products/{productCode}/pricing-schemes':
+    parameters:
+      - name: productCode
+        in: path
+        description: code of the product to fetch pricing schemes from
+        required: true
+        schema:
+          type: string
+          example: CONS
+    get:
+      security:
+        - OAuth2:
+            - cdt_product_read
+      tags:
+        - Products
+      summary: Get pricing schemes by product code
+      operationId: getPricingSchemesByProductCode
+      responses:
+        '200':
+          description: Pricing schemes list
+          content:
+            application/json:
+              schema:
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PricingScheme'
+                type: object
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: xpludzg0zk2ca
+    post:
+      security:
+        - OAuth2:
+            - cdt_product_write
+      tags:
+        - Products
+      summary: Add a new pricing scheme to an existing product
+      operationId: associatePricingSchemeToProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PricingSchemeParameters'
+      responses:
+        '201':
+          description: Pricing scheme associated
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: k1obiobuai9em
+  /products:
+    get:
+      security:
+        - OAuth2:
+            - cdt_product_read
+      tags:
+        - Products
+      summary: Get products list
+      operationId: getProducts
+      parameters:
+        - name: activeOnly
+          in: query
+          description: Filter on only active products
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          description: Products list
+          content:
+            application/json:
+              schema:
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductItem'
+                type: object
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: dkxv8rax9y6wl
+    post:
+      security:
+        - OAuth2:
+            - cdt_product_write
+      tags:
+        - Products
+      summary: Create a product
+      operationId: createProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreate'
+      responses:
+        '201':
+          description: Product created
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: z4e9edjsfdax6
+  '/products/{productCode}/pricing-schemes/{pricingSchemeCode}':
+    parameters:
+      - name: productCode
+        in: path
+        description: Product code of pricing scheme to be loaded
+        required: true
+        schema:
+          type: string
+          example: CONS
+      - name: pricingSchemeCode
+        in: path
+        description: Pricing scheme code to be loaded
+        required: true
+        schema:
+          type: string
+          example: PSC
+    get:
+      security:
+        - OAuth2:
+            - cdt_product_read
+      tags:
+        - Products
+      summary: Load a pricing scheme
+      operationId: loadPricingScheme
+      responses:
+        '201':
+          description: Pricing scheme created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingScheme'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 3bpvduooecnoy
+    put:
+      security:
+        - OAuth2:
+            - cdt_product_write
+      tags:
+        - Products
+      summary: Modify a pricing scheme
+      operationId: modifyPricingScheme
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PricingSchemeParameters'
+      responses:
+        '204':
+          description: Pricing scheme Modified
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 4lhqy8iza82pq
+    delete:
+      security:
+        - OAuth2:
+            - cdt_product_write
+      tags:
+        - Products
+      summary: Delete a pricing scheme
+      operationId: deletePricingScheme
+      responses:
+        '200':
+          description: Pricing scheme deleted
+      x-stoplight:
+        id: zpj8xlucdtzjc
+  '/products/{code}':
+    parameters:
+      - name: code
+        in: path
+        description: code of the product to load
+        required: true
+        schema:
+          type: string
+          example: CONS
+    get:
+      security:
+        - OAuth2:
+            - cdt_product_read
+      tags:
+        - Products
+      summary: Get a product by code
+      operationId: getProductByCode
+      responses:
+        '200':
+          description: Product Information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 2qknomy0qw93j
+    put:
+      security:
+        - OAuth2:
+            - cdt_product_write
+      tags:
+        - Products
+      summary: Modify a product
+      operationId: modifyProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductEdit'
+      responses:
+        '200':
+          description: Product updated
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: s9v7rbtiw6mdj
+  '/products/{productCode}/pricing-schemes/{pricingSchemeCode}/update-as-default':
+    parameters:
+      - name: productCode
+        in: path
+        description: Product code of pricing scheme to update as default
+        required: true
+        schema:
+          type: string
+          example: PRODUCT01
+      - name: pricingSchemeCode
+        in: path
+        description: Pricing scheme code to update as default
+        required: true
+        schema:
+          type: string
+          example: BAR01
+    put:
+      security:
+        - OAuth2:
+            - cdt_product_write
+      tags:
+        - Products
+      summary: Update pricing scheme as default
+      operationId: updatePricingSchemeAsDefault
+      responses:
+        '204':
+          description: Pricing scheme updated as default
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: vakl5weopyl8p
+  /financialAccessories:
+    get:
+      security:
+        - OAuth2:
+            - cdt_product_read
+      tags:
+        - Financial Accessories
+      summary: Retrieve financial accessories list
+      operationId: getFinancialAccessoriesByCurrency
+      parameters:
+        - name: productCode
+          in: query
+          description: Filter financial accessories by product code
+          schema:
+            type: string
+            example: CREDIT01
+        - name: pricingSchemeCode
+          in: query
+          description: Filter financial accessories by pricing scheme code
+          schema:
+            type: string
+            default: default
+            example: CONS01
+      responses:
+        '200':
+          description: Financial accessories retrieved
+          content:
+            application/json:
+              schema:
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FinancialAccessory'
+                type: object
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: jcczp1bet4zya
+  /schedules/bullet:
+    post:
+      security:
+        - OAuth2:
+            - cdt_simulation_read
+      tags:
+        - Schedule
+      summary: Compute a bullet schedule
+      operationId: computeBulletSchedule
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleComputation'
+      responses:
+        '200':
+          description: Schedule computed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleComputed'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 6nslvnmekc7jt
+  /schedules/revol:
+    post:
+      security:
+        - OAuth2:
+            - cdt_simulation_read
+      tags:
+        - Schedule
+      summary: Compute a revol schedule
+      operationId: computeRevolSchedule
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleComputation'
+      responses:
+        '200':
+          description: Schedule computed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleComputed'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: v6d68dw4pcd5e
+  /schedules/samcap:
+    post:
+      security:
+        - OAuth2:
+            - cdt_simulation_read
+      tags:
+        - Schedule
+      summary: Compute a samcap schedule
+      operationId: computeSamcapSchedule
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleComputation'
+      responses:
+        '200':
+          description: Schedule computed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleComputed'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 3mryozrsrgq8l
+  /schedules/samins:
+    post:
+      security:
+        - OAuth2:
+            - cdt_simulation_read
+      tags:
+        - Schedule
+      summary: Compute a samins schedule
+      operationId: computeSaminsSchedule
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleComputation'
+      responses:
+        '200':
+          description: Schedule computed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleComputed'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 7ddo57y2e2off
+  /translations:
+    get:
+      security:
+        - OAuth2: []
+      tags:
+        - Translation
+      summary: Get translation
+      operationId: getTranslation
+      parameters:
+        - name: langs
+          in: query
+          description: 'Filter of the langs list separated by '','''
+          schema:
+            type: string
+            example: 'fr_FR,en_US'
+        - name: domain
+          in: query
+          description: Filter on the domain of the translations
+          schema:
+            type: string
+            default: default
+            example: front
+      responses:
+        '200':
+          description: Get translation
+          content:
+            application/json:
+              schema:
+                description: Object with langs keys and domain translations objects as value
+                type: object
+              example:
+                en_US:
+                  FRONT_HEALTH_GENERAL_AVAILABILITY: Availability
+                  FRONT_HEALTH_DATABASE_AVAILABILITY: Database
+                fr_FR:
+                  FRONT_HEALTH_GENERAL_AVAILABILITY: Disponibilité
+                  FRONT_HEALTH_DATABASE_AVAILABILITY: Base de données
+                es_ES:
+                  FRONT_HEALTH_GENERAL_AVAILABILITY: Availability
+                  FRONT_HEALTH_DATABASE_AVAILABILITY: Database
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 4co57gimfm437
+  /requests/simulations:
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_request_read
+      tags:
+        - Simulation
+      summary: Generate a simulation
+      operationId: generateSimulation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateSimulation'
+      responses:
+        '200':
+          description: Simulation information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleComputed'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: abhkie5i4m9tw
+  '/requests/{code}':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_request_read
+      tags:
+        - Credit Request
+      summary: Get a credit request
+      operationId: getCreditRequest
+      responses:
+        '200':
+          description: Credit request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditRequest'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: b158etl8s9tku
+    put:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Request
+      summary: Modify a credit request
+      operationId: modifyCreditRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifyCreditRequest'
+      responses:
+        '200':
+          description: Product modified
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: mpbvmpii21sl9
+  '/requests/{creditRequestCode}/documents/{documentCode}/validate':
+    parameters:
+      - name: creditRequestCode
+        in: path
+        description: Code of the credit request
+        required: true
+        schema:
+          type: string
+          example: CREDITREQUEST01
+      - name: documentCode
+        in: path
+        description: Code of the document to validate
+        required: true
+        schema:
+          type: string
+          example: DOCUMENT001
+    put:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Request
+      summary: Validate credit request document
+      operationId: validateCreditRequestDocument
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  description: Reason to validate document
+                  type: string
+                  example: Reason given to validate document
+      responses:
+        '200':
+          description: Credit request document is validated
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: vei7yqvridgec
+  '/requests/{creditRequestCode}/documents/{documentCode}/refuse':
+    parameters:
+      - name: creditRequestCode
+        in: path
+        description: Code of the credit request
+        required: true
+        schema:
+          type: string
+          example: CREDITREQUEST01
+      - name: documentCode
+        in: path
+        description: Code of the document to refuse
+        required: true
+        schema:
+          type: string
+          example: DOCUMENT001
+    put:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Request
+      summary: Refuse credit request document
+      operationId: refuseCreditRequestDocument
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  description: Reason to refuse document
+                  type: string
+                  example: Reason given to refuse document
+      responses:
+        '200':
+          description: Credit request document is refused
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: e3m92zdxvohaj
+  '/requests/{code}/simulations':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_request_read
+      tags:
+        - Credit Request
+      summary: Get the simulation associated to a credit request
+      operationId: getCreditRequestSimulation
+      responses:
+        '200':
+          description: Credit request simulation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleComputed'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 86z04o8r9n96t
+  '/requests/{code}/score-result':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_request_read
+      tags:
+        - Credit Request
+      summary: Get the score result of credit request
+      operationId: getCreditRequestScoreResult
+      responses:
+        '200':
+          description: Credit request score result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreResult'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: lh1ll1wjvb6ok
+  '/requests/{code}/accept':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request to accept
+        required: true
+        schema:
+          type: string
+          example: 220621110215PP
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Request
+      summary: Accept a credit request
+      operationId: acceptCreditRequest
+      responses:
+        '200':
+          description: Credit request is accepted
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: doaiazf8nw7g8
+  '/requests/{code}/cancel':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request to cancel
+        required: true
+        schema:
+          type: string
+          example: 220621110215PP
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Request
+      summary: Cancel a credit request
+      operationId: cancelCreditRequest
+      responses:
+        '200':
+          description: Credit request is canceled
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 8z1idrat3figi
+  '/requests/{code}/correct':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request to correct
+        required: true
+        schema:
+          type: string
+          example: 220621110215PP
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Request
+      summary: Correct a credit request
+      operationId: correctCreditRequest
+      responses:
+        '200':
+          description: Credit request is corrected
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: my5g6m2ovkamy
+  '/requests/{code}/book':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request to book
+        required: true
+        schema:
+          type: string
+          example: 220621110215PP
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Request
+      summary: Book credit request
+      operationId: bookedCreditRequest
+      responses:
+        '200':
+          description: Credit request is booked
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 8w9uciemcf4g9
+  /requests:
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Request
+      summary: Initiate a credit request
+      operationId: initiateCreditRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiateCreditRequest'
+      responses:
+        '201':
+          description: Product Information
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    description: Generated code of the credit request initiated
+                    type: string
+                    example: 220524130049YN
+                type: object
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: h9nqyiom7xzhw
+  '/requests/{code}/refuse':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request to refuse
+        required: true
+        schema:
+          type: string
+          example: 220621110215PP
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Request
+      summary: Refuse a credit request
+      operationId: refuseCreditRequest
+      responses:
+        '200':
+          description: Credit request is refused
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 2n209kpy5tj7n
+  '/requests/{code}/manual-validation':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request
+        required: true
+        schema:
+          type: string
+          example: '2022041913183236882459'
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Request
+      summary: Request manual validation of a credit request
+      operationId: requestManualValidationForCreditRequest
+      responses:
+        '200':
+          description: Credit request was set under manual validation
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: w71atv129ko4i
+  '/requests/{code}/submit':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request to submit
+        required: true
+        schema:
+          type: string
+          example: '2022041913183236882459'
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Request
+      summary: Submit a credit request
+      operationId: submitCreditRequest
+      responses:
+        '200':
+          description: Credit request is submitted
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: wb4onezb779nr
+  '/requests/{code}/additional-data-form':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request to get additional data form
+        required: true
+        schema:
+          type: string
+          example: '2022041913183236882459'
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_request_read
+      tags:
+        - Credit Request
+      summary: Get additional data form for a credit request
+      operationId: GetAdditionalDataForm
+      responses:
+        '200':
+          description: Get additional data form for the credit request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditRequestAdditionalDataForm'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 4713c8k5jf6du
+  '/requests/{code}/complete-additional-data-form':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request to submit additional data
+        required: true
+        schema:
+          type: string
+          example: '2022041913183236882459'
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Request
+      summary: Complete additional data form for a credit request
+      operationId: CompleteAdditionalDataForm
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - form
+              properties:
+                form:
+                  $ref: '#/components/schemas/InputValues'
+      responses:
+        '204':
+          description: Additional data for the Credit request are completed
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: qox89dh88eyim
+  '/requests/{code}/additional-data':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request to retrieve additional data
+        required: true
+        schema:
+          type: string
+          example: '2022041913183236882459'
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_request_read
+      tags:
+        - Credit Request
+      summary: Retrieve additional data for a credit request
+      operationId: RetrieveAdditionalDataCreditRequest
+      responses:
+        '200':
+          description: Retrieve Additional data for the Credit request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditRequestAdditionalData'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 5o9cftkekmza5
+  '/requests/{code}/offer':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_offer_read
+      tags:
+        - Credit Offer
+      summary: Get the credit offer of a request
+      operationId: GetCreditOffer
+      responses:
+        '200':
+          description: Credit offer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditRequestOffer'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: h2z6dnlf4z521
+  '/requests/{code}/offer/document':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_offer_read
+      tags:
+        - Credit Offer
+      summary: Get the PDF of the credit offer
+      operationId: GetCreditOfferDocument
+      responses:
+        '200':
+          description: PDF of the credit offer
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: lrgwtxb4ay1d9
+  '/requests/{code}/offer/sign':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Offer
+      summary: Sign manually a credit offer document
+      operationId: ManuallySignCreditOfferDocument
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                signedDocument:
+                  description: Credit offer document signed (base64)
+                  type: string
+      responses:
+        '200':
+          description: The credit offer document is being signed
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: usz2huudyc6c6
+  '/requests/{code}/offer/e-sign':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Offer
+      summary: Trigger credit offer electronic signature by customer
+      operationId: TriggerCreditOfferElectronicSignature
+      responses:
+        '202':
+          description: The credit offer document is being signed
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 1l4abv5nkmtft
+  '/requests/{code}/offer/refuse':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit request
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    put:
+      security:
+        - OAuth2:
+            - cdt_credit_request_write
+      tags:
+        - Credit Offer
+      summary: Refuse a credit offer
+      operationId: RefuseCreditOffer
+      responses:
+        '200':
+          description: The credit offer document is refused
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: cw8cu1xmoybw7
+  /servicing:
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_servicing_read
+      tags:
+        - Credit Servicing
+      summary: Search Credit Servicing
+      operationId: SearchCreditServicing
+      parameters:
+        - name: code
+          in: query
+          description: list of code to filter
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+            example:
+              - 220510085510MP
+              - 2205510TATA
+        - name: status
+          in: query
+          description: List of status to filter
+          style: form
+          explode: false
+          schema:
+            type: string
+            enum:
+              - BOOKED
+              - LIVE
+            example: BOOKED
+        - name: productCode
+          in: query
+          description: List of product codes to filter
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+            example:
+              - CONS
+              - VEH
+        - name: borrowerId
+          in: query
+          description: List borrower reference to filter
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+            example:
+              - '1365'
+              - '48363'
+        - name: borrowerFirstName
+          in: query
+          description: List borrower firstname to filter
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+            example:
+              - Isabella
+              - Rebekah
+        - name: borrowerLastName
+          in: query
+          description: List borrower lastname to filter
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+            example:
+              - Schultz
+              - McCullough
+        - name: minStartDate
+          in: query
+          description: Filter credit starting after this date
+          schema:
+            type: string
+            format: date
+            example: '2022-03-31'
+        - name: currency
+          in: query
+          description: Currency ISO code to filter
+          schema:
+            type: string
+            example: EUR
+        - name: minInitialAmount
+          in: query
+          description: Filter amount >= to this amount
+          schema:
+            type: integer
+            example: 100
+        - name: maxInitialAmount
+          in: query
+          description: Filter amount <= to this amount
+          schema:
+            type: integer
+            example: 100000
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 1
+        - name: atPage
+          in: query
+          description: Current page number
+          schema:
+            type: integer
+            default: 100
+            minimum: 0
+        - name: sort
+          in: query
+          description: 'Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +, descending (newer first) fields may be prefixed with -. Ascending is the default sorting direction.'
+          schema:
+            type: string
+            enum:
+              - code
+              - +code
+              - '-code'
+              - status
+              - +status
+              - '-status'
+              - productCode
+              - +productCode
+              - '-productCode'
+              - borrowerId
+              - +borrowerId
+              - '-borrowerId'
+              - borrowerFirstName
+              - +borrowerFirstName
+              - '-borrowerFirstName'
+              - borrowerLastName
+              - +borrowerLastName
+              - '-borrowerLastName'
+              - minStartDate
+              - +minStartDate
+              - '-minStartDate'
+              - initialAmount
+              - +initialAmount
+              - '-initialAmount'
+      responses:
+        '200':
+          description: Credit Servicing list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditServicingDetailPaginatedCollection'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 84vy8lh4a6105
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_servicing_write
+      tags:
+        - Credit Servicing
+      summary: Initiate a credit servicing
+      operationId: initiateCreditServicing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiateCreditServicing'
+      responses:
+        '201':
+          description: The credit servicing is initiated
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 1u7m23ca2v8lx
+  '/servicing/{code}':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit servicing
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_servicing_read
+      tags:
+        - Credit Servicing
+      summary: Retrieve credit servicing
+      operationId: RetrieveCreditServicing
+      responses:
+        '200':
+          description: Credit servicing detail
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditServicingDetail'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: zwqxd2flwzo8x
+  '/servicing/{code}/disburse':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit servicing
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_servicing_write
+      tags:
+        - Credit Servicing
+      summary: Fully disburse credit servicing
+      operationId: CreditTotalDisbursement
+      responses:
+        '200':
+          description: the credit is fully disbursed
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 2lnpdykwb1y30
+  '/servicing/{code}/cancel-disbursement':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit servicing
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_cancellation_management
+      tags:
+        - Credit Servicing
+      summary: Cancel credit servicing disbursement
+      operationId: CreditCancelDisbursement
+      responses:
+        '200':
+          description: The credit is no longer disbursed
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: pjjkvh7e78jg6
+  '/servicing/{code}/schedule-total-early-repayment':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit servicing
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_servicing_write
+      tags:
+        - Credit Servicing
+      summary: Schedule a total early repayment
+      operationId: TotalEarlyRepayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Repayment date
+              required:
+                - repaymentDate
+              properties:
+                repaymentDate:
+                  type: string
+      responses:
+        '201':
+          description: The installment for the total repayment of the credit has been scheduled.
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: ekoaxa22psk17
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_servicing_read
+      tags:
+        - Credit Servicing
+      summary: Simulate a total early repayment
+      operationId: TotalEarlyRepaymentSimulation
+      parameters:
+        - name: repaymentDate
+          in: query
+          description: Repayment date
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: This is the simulation for an early repayment of the credit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditServicingScheduleInstallmentDetail'
+      x-stoplight:
+        id: 4bd4tqd0phtrv
+  '/servicing/{code}/schedule-partial-early-repayment':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit servicing
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_servicing_write
+      tags:
+        - Credit Servicing
+      summary: Schedule a partial early repayment
+      operationId: PartialEarlyRepayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditServicingEarlyRepaymentParameters'
+      responses:
+        '200':
+          description: The installment for the partial repayment of the credit has been scheduled.
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: al4b1dpyqil6l
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_servicing_read
+      tags:
+        - Credit Servicing
+      summary: Simulate a partial early repayment
+      operationId: PartialEarlyRepaymentSimulation
+      parameters:
+        - name: repaymentDate
+          in: query
+          description: Repayment date
+          required: true
+          schema:
+            type: string
+        - name: amount
+          in: query
+          description: Early repayment amount
+          required: true
+          schema:
+            type: integer
+        - name: option
+          in: query
+          description: Should we reduce the number of remaining installments or their amount?
+          required: true
+          schema:
+            type: string
+            enum:
+              - DURATIONREDUCTION
+              - INSTALLMENTREDUCTION
+      responses:
+        '200':
+          description: This is the simulation for a partial early repayment of the credit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditServicingSchedule'
+      x-stoplight:
+        id: jzvtp0oc6e133
+  '/servicing/{code}/installments/{date}':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+      - name: date
+        in: path
+        description: Date of the installment
+        required: true
+        schema:
+          type: string
+          format: date
+          example: '2023-03-31'
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_servicing_read
+      tags:
+        - Installment
+      summary: Get an installment of a credit
+      operationId: getCreditInstallment
+      responses:
+        '200':
+          description: installment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditServicingScheduleInstallmentDetail'
+      x-stoplight:
+        id: eo2as40zd7dob
+  /servicing/pay-due-installments:
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_servicing_write
+      tags:
+        - Credit Servicing
+      summary: Credit pay installments due today
+      operationId: CreditPayDueInstallments
+      responses:
+        '200':
+          description: Push due installments to pay
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: dgm2yqd6urrfl
+  '/servicing/{code}/installments':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+    get:
+      security:
+        - OAuth2:
+            - cdt_credit_servicing_read
+      tags:
+        - Installment
+      summary: Get all installments of a credit
+      operationId: getAllCreditInstallments
+      responses:
+        '200':
+          description: installment details
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditServicingScheduleInstallmentDetail'
+      x-stoplight:
+        id: dmdcgzt90plz7
+  '/servicing/{code}/installment/{date}/pay':
+    parameters:
+      - name: code
+        in: path
+        description: Code of the credit servicing
+        required: true
+        schema:
+          type: string
+          example: 220510085510MP
+      - name: date
+        in: path
+        description: Date of the installment
+        required: true
+        schema:
+          type: string
+          format: date
+          example: '2023-03-31'
+    post:
+      security:
+        - OAuth2:
+            - cdt_credit_servicing_write
+      tags:
+        - Credit Servicing
+      summary: Pay one credit servicing installment
+      operationId: PayInstallment
+      responses:
+        '200':
+          description: The installment is paid
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: ohwbczl9zq36y
+  /privileges:
+    get:
+      security:
+        - OAuth2:
+            - cdt_privilege_read
+      tags:
+        - Privilege
+      summary: List of privileges
+      operationId: readPrivileges
+      responses:
+        '200':
+          description: privilege defined
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrivilegeOutputViewModel'
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: 0hpj56biv0qmh
+    post:
+      security:
+        - OAuth2:
+            - cdt_privilege_write
+      tags:
+        - Privilege
+      summary: Define privilege
+      operationId: definePrivilege
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PrivilegeInputViewModel'
+      responses:
+        '201':
+          description: privilege defined
+        default:
+          $ref: '#/components/responses/default'
+      x-stoplight:
+        id: befgpwvycwsvf
+  /groups:
+    get:
+      security:
+        - OAuth2:
+            - cdt_privilege_read
+      tags:
+        - CBS
+      summary: Get group list
+      operationId: groupList
+      responses:
+        '200':
+          description: list of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+      x-stoplight:
+        id: 9ezbxrsipueoz
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: /api/service-domain/v1/oauth2/token
+          scopes:
+            cdt_product_read: Read product
+            cdt_product_write: Update product
+            cdt_credit_request_read: Read credit request
+            cdt_credit_request_write: Update credit request
+            cdt_privilege_read: Read privileges
+            cdt_privilege_write: Update privileges
+            cdt_simulation_read: Execute simulation
+            cdt_person_read: Person read
+            cdt_credit_servicing_read: Read Credit Servicing
+            cdt_credit_servicing_write: Update Credit Servicing
+            cdt_credit_cancellation_management: Manage Credit Servicing
+            cdt_pivot_account_read: Read account
+            cdt_credit_offer_read: Read credit offer
+  schemas:
+    InputCollection:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            inputs:
+              type: array
+              items:
+                $ref: '#/components/schemas/Input'
+      x-stoplight:
+        id: 1qyk8qujswpmz
+    InputType:
+      type: string
+      enum:
+        - TEXT
+        - COLLECTION
+        - AMOUNT
+        - BOOL
+        - DATE
+        - DATE_TIME
+        - DURATION
+        - EMAIL
+        - FILE
+        - FILE_CONTENT
+        - IMAGE
+        - INT
+        - IP
+        - MULTI_SELECT
+        - NUMBER
+        - PASSWORD
+        - PERCENT
+        - PHONE
+        - PINCODE
+        - RATE
+        - SELECT
+        - SELECT_WITH_AMOUNT
+      x-stoplight:
+        id: tes1xoli738zz
+    Input:
+      oneOf:
+        - $ref: '#/components/schemas/TextInput'
+        - $ref: '#/components/schemas/AmountInput'
+        - $ref: '#/components/schemas/BoolInput'
+        - $ref: '#/components/schemas/DateInput'
+        - $ref: '#/components/schemas/DateTimeInput'
+        - $ref: '#/components/schemas/DurationInput'
+        - $ref: '#/components/schemas/EmailInput'
+        - $ref: '#/components/schemas/FileInput'
+        - $ref: '#/components/schemas/ImageInput'
+        - $ref: '#/components/schemas/FileContentInput'
+        - $ref: '#/components/schemas/InputCollection'
+        - $ref: '#/components/schemas/IntInput'
+        - $ref: '#/components/schemas/IpInput'
+        - $ref: '#/components/schemas/SelectInput'
+        - $ref: '#/components/schemas/MultiSelectInput'
+        - $ref: '#/components/schemas/NumberInput'
+        - $ref: '#/components/schemas/PercentInput'
+        - $ref: '#/components/schemas/PasswordInput'
+        - $ref: '#/components/schemas/PhoneInput'
+        - $ref: '#/components/schemas/RateInput'
+        - $ref: '#/components/schemas/SelectWithAmountInput'
+      discriminator:
+        propertyName: type
+        mapping:
+          TEXT: '#/components/schemas/TextInput'
+          COLLECTION: '#/components/schemas/InputCollection'
+          AMOUNT: '#/components/schemas/AmountInput'
+          BOOL: '#/components/schemas/BoolInput'
+          DATE: '#/components/schemas/DateInput'
+          DATE_TIME: '#/components/schemas/DateTimeInput'
+          DURATION: '#/components/schemas/DurationInput'
+          EMAIL: '#/components/schemas/EmailInput'
+          FILE: '#/components/schemas/FileInput'
+          FILE_CONTENT: '#/components/schemas/FileContentInput'
+          IMAGE: '#/components/schemas/ImageInput'
+          INT: '#/components/schemas/IntInput'
+          IP: '#/components/schemas/IpInput'
+          MULTI_SELECT: '#/components/schemas/MultiSelectInput'
+          NUMBER: '#/components/schemas/NumberInput'
+          PASSWORD: '#/components/schemas/PasswordInput'
+          PERCENT: '#/components/schemas/PercentInput'
+          PHONE: '#/components/schemas/PhoneInput'
+          RATE: '#/components/schemas/RateInput'
+          SELECT: '#/components/schemas/SelectInput'
+          SELECT_WITH_AMOUNT: '#/components/schemas/SelectWithAmountInput'
+          COMPLIANCE: '#/components/schemas/SelectInput'
+      x-stoplight:
+        id: 21i69gd3dgspw
+    AbstractInput:
+      type: object
+      required:
+        - id
+        - type
+      properties:
+        id:
+          type: string
+          description: the identification key of the Input. Use that ID as object key in form submission.
+          example: lastName
+        type:
+          $ref: '#/components/schemas/InputType'
+        label:
+          type: string
+          description: Displayable Input label
+          example: Last Name
+        description:
+          type: string
+          description: A potentially long description of the input content
+          example: Enter your last name
+        required:
+          type: boolean
+          description: 'If true, an input value must be provided on form submission'
+        validators:
+          type: array
+          items:
+            $ref: '#/components/schemas/Validator'
+        disabled:
+          type: boolean
+          default: false
+          description: 'If true, this input cannot be change'
+      x-stoplight:
+        id: b2sqerdh6xsl9
+    Validator:
+      oneOf:
+        - $ref: '#/components/schemas/AmountValidator'
+        - $ref: '#/components/schemas/MinValidator'
+        - $ref: '#/components/schemas/MaxValidator'
+        - $ref: '#/components/schemas/BetweenValidator'
+        - $ref: '#/components/schemas/BlacklistValidator'
+        - $ref: '#/components/schemas/WhitelistValidator'
+        - $ref: '#/components/schemas/LengthValidator'
+        - $ref: '#/components/schemas/MaxLengthValidator'
+        - $ref: '#/components/schemas/MinLengthValidator'
+        - $ref: '#/components/schemas/PasswordValidator'
+        - $ref: '#/components/schemas/RegexValidator'
+      discriminator:
+        propertyName: type
+        mapping:
+          AMOUNT: '#/components/schemas/AmountValidator'
+          MIN: '#/components/schemas/MinValidator'
+          MAX: '#/components/schemas/MaxValidator'
+          BETWEEN: '#/components/schemas/BetweenValidator'
+          BLACKLIST: '#/components/schemas/BlacklistValidator'
+          WHITELIST: '#/components/schemas/WhitelistValidator'
+          LENGTH: '#/components/schemas/LengthValidator'
+          MAX_LENGTH: '#/components/schemas/MaxLengthValidator'
+          MIN_LENGTH: '#/components/schemas/MinLengthValidator'
+          PASSWORD: '#/components/schemas/PasswordValidator'
+          REGEX: '#/components/schemas/RegexValidator'
+      x-stoplight:
+        id: 7pi4lhmugx6zl
+    AmountValidator:
+      allOf:
+        - $ref: '#/components/schemas/AbstractValidator'
+        - type: object
+          required:
+            - currencies
+          properties:
+            currencies:
+              type: array
+              items:
+                $ref: '#/components/schemas/Currency'
+      x-stoplight:
+        id: rqd83szqda3bt
+    MinValidator:
+      allOf:
+        - $ref: '#/components/schemas/AbstractValidator'
+        - type: object
+          required:
+            - min
+          properties:
+            min:
+              type: number
+      x-stoplight:
+        id: fy1rpg7g2vb9d
+    MaxValidator:
+      allOf:
+        - $ref: '#/components/schemas/AbstractValidator'
+        - type: object
+          required:
+            - max
+          properties:
+            max:
+              type: number
+      x-stoplight:
+        id: gxq7ja8r884na
+    BetweenValidator:
+      allOf:
+        - $ref: '#/components/schemas/AbstractValidator'
+        - type: object
+          required:
+            - min
+            - max
+          properties:
+            min:
+              type: number
+            max:
+              type: number
+      x-stoplight:
+        id: q0k49hon86vwe
+    BlacklistValidator:
+      allOf:
+        - $ref: '#/components/schemas/AbstractValidator'
+        - type: object
+          required:
+            - blacklist
+          properties:
+            blacklist:
+              type: array
+              items:
+                type: string
+      x-stoplight:
+        id: 36jwwr7bol5sg
+    WhitelistValidator:
+      allOf:
+        - $ref: '#/components/schemas/AbstractValidator'
+        - type: object
+          required:
+            - whitelist
+          properties:
+            whitelist:
+              type: array
+              items:
+                type: string
+      x-stoplight:
+        id: g5vkbe60zp0f4
+    LengthValidator:
+      allOf:
+        - $ref: '#/components/schemas/AbstractValidator'
+        - type: object
+          required:
+            - length
+          properties:
+            length:
+              type: integer
+      x-stoplight:
+        id: amblxji3y1ct9
+    MaxLengthValidator:
+      allOf:
+        - $ref: '#/components/schemas/AbstractValidator'
+        - type: object
+          required:
+            - maxLength
+          properties:
+            maxLength:
+              type: integer
+      x-stoplight:
+        id: awib7cu0eixes
+    MinLengthValidator:
+      allOf:
+        - $ref: '#/components/schemas/AbstractValidator'
+        - type: object
+          required:
+            - minLength
+          properties:
+            minLength:
+              type: integer
+      x-stoplight:
+        id: 16qskorgb7vej
+    PasswordValidator:
+      allOf:
+        - $ref: '#/components/schemas/AbstractValidator'
+        - type: object
+          properties:
+            minLength:
+              type: integer
+            regexp:
+              type: string
+              description: regexp in PCRE format. Password must match this regexp
+            forbidRegex:
+              type: string
+              description: regexp in PCRE format. Password must not match this regexp
+            forbidDates:
+              type: boolean
+              description: 'if true, you cannot choose a date as a password'
+            blacklist:
+              type: array
+              description: list of forbidden passwords
+              example:
+                - azerty
+                - qwerty
+                - '123456'
+                - password
+              items:
+                type: string
+      x-stoplight:
+        id: mzu5vsi15840w
+    RegexValidator:
+      allOf:
+        - $ref: '#/components/schemas/AbstractValidator'
+        - type: object
+          required:
+            - regex
+          properties:
+            regex:
+              type: string
+              description: regexp in PCRE format. Value must match this regexp
+      x-stoplight:
+        id: 0zc1wqnfpzhk3
+    AbstractValidator:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/ValidatorType'
+      x-stoplight:
+        id: 7125x9mrvpnrn
+    ValidatorType:
+      type: string
+      enum:
+        - AMOUNT
+        - MIN
+        - MAX
+        - BETWEEN
+        - BLACKLIST
+        - LENGTH
+        - MAX_LENGTH
+        - MIN_LENGTH
+        - PASSWORD
+        - REGEX
+        - WHITELIST
+      x-stoplight:
+        id: 02fcvmkjnuapc
+    AbstractFileInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            maxSize:
+              type: integer
+              description: 'Maximum allowed file size, in bytes'
+            acceptedTypes:
+              type: array
+              description: Accepted file types list as MIME types
+              items:
+                type: string
+              example:
+                - text/plain
+                - text/csv
+                - application/vnd.ms-excel
+                - image/png
+            minimumPageCount:
+              type: integer
+              description: Expected minimum page count
+            maximumPageCount:
+              type: integer
+              description: Expected maximum page count
+      x-stoplight:
+        id: alacw68y26jvn
+    TextInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: string
+      x-stoplight:
+        id: y8zkul76muxcg
+    AmountInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              $ref: '#/components/schemas/Amount'
+            currencies:
+              type: array
+              items:
+                $ref: '#/components/schemas/Currency'
+      x-stoplight:
+        id: 8rb0eul05wdra
+    BoolInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: boolean
+      x-stoplight:
+        id: zathg4eeb7plm
+    DateInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              example: '20180717'
+            format:
+              type: string
+              description: 'Possible formats are the ones accepted by the [date function (php)](https://php.net/manual/en/function.date.php)'
+              example: Ymd
+      x-stoplight:
+        id: gu70q0sbjvapt
+    DateTimeInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              example: '20180717162042'
+            format:
+              type: string
+              description: 'Possible formats are the ones accepted by the [date function (php)](https://php.net/manual/en/function.date.php)'
+              example: YmdHis
+      x-stoplight:
+        id: md2f9fsc9mdee
+    DurationInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              $ref: '#/components/schemas/DurationInputValue'
+            periodicities:
+              type: array
+              items:
+                $ref: '#/components/schemas/PeriodicityInputValue'
+      x-stoplight:
+        id: 6uthdz12znon8
+    DurationInputValue:
+      type: object
+      properties:
+        value:
+          type: integer
+          example: 42
+        unit:
+          $ref: '#/components/schemas/PeriodicityInputValue'
+      x-stoplight:
+        id: 9pf5gr7rosne4
+    PeriodicityInputValue:
+      description: Available periodicities
+      type: string
+      enum:
+        - HOUR
+        - WEEK
+        - DAY
+        - MONTH
+        - YEAR
+      example: DAY
+      x-stoplight:
+        id: 5lyct8u7ps5m6
+    EmailInput:
+      allOf:
+        - $ref: '#/components/schemas/TextInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              format: email
+      x-stoplight:
+        id: xtw4vp7gvute1
+    FileInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractFileInput'
+        - type: object
+          properties:
+            value:
+              type: object
+              readOnly: true
+              properties:
+                content:
+                  type: string
+                  description: 'File content, Base64 encoded'
+                  format: byte
+                name:
+                  type: string
+                  description: Original file name and extension
+                  example: fileName.txt
+                type:
+                  type: string
+                  description: File MIME type
+                  example: text/plain
+                size:
+                  type: integer
+                  description: 'File size, in bytes'
+      x-stoplight:
+        id: ytadre19hqmsh
+    ImageInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractFileInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              description: Image content base64 encoded
+      x-stoplight:
+        id: dvwqy4ss3uz1j
+    FileContentInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractFileInput'
+        - type: object
+          properties:
+            value:
+              oneOf:
+                - type: object
+                  properties:
+                    documentId:
+                      $ref: '#/components/schemas/ReadOnlyDocumentId'
+                - type: string
+                  description: File content as Base64 encoded string
+            links:
+              type: array
+              readOnly: true
+              description: |
+                Can contain the following actions (identified by their `rel` attribute):
+                  * `getDocument` [GET] Load the document details linked to this input
+                  * `getDocumentContent` [GET] Load the document content
+                  * `getDocumentPreview` [GET] Get a small sized preview of the document content
+              items:
+                $ref: '#/components/schemas/Link'
+              example:
+                - rel: getDocument
+                  href: 'https://sandbox.skaleet.com/api/service-domain/v1/documents/42'
+                - rel: getDocumentContent
+                  href: 'https://sandbox.skaleet.com/api/service-domain/v1/documents/42/content'
+                - rel: getDocumentPreview
+                  href: 'https://sandbox.skaleet.com/api/service-domain/v1/documents/42/preview'
+      x-stoplight:
+        id: froh7md4wq13t
+    IntInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: integer
+      x-stoplight:
+        id: 66gzumiw773hb
+    IpInput:
+      allOf:
+        - $ref: '#/components/schemas/TextInput'
+        - type: object
+          properties:
+            value:
+              type: string
+      x-stoplight:
+        id: zh5svecx76nok
+    SelectInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              example: someValue
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/Option'
+      x-stoplight:
+        id: 91v2fwazgoh1i
+    MultiSelectInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - someValue
+                - anotherValue
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/Option'
+      x-stoplight:
+        id: is434uabeh6ak
+    NumberInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: number
+              format: float
+      x-stoplight:
+        id: un0yu64ouxajh
+    PercentInput:
+      allOf:
+        - $ref: '#/components/schemas/NumberInput'
+      x-stoplight:
+        id: 1j4wfzszg5isx
+    PasswordInput:
+      allOf:
+        - $ref: '#/components/schemas/TextInput'
+      x-stoplight:
+        id: x2iu3qzld3u3w
+    PhoneInput:
+      allOf:
+        - $ref: '#/components/schemas/TextInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              example: '33612345678'
+              description: Phone number in international format (MSISDN)
+      x-stoplight:
+        id: jonv982t5b3wg
+    RateInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            inputs:
+              type: object
+              required:
+                - value
+                - periodicity
+              properties:
+                value:
+                  $ref: '#/components/schemas/NumberInput'
+                periodicity:
+                  $ref: '#/components/schemas/SelectInput'
+      x-stoplight:
+        id: vgr6k2v1pd3to
+    SelectWithAmountInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              example: someValue
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/OptionWithAmount'
+      x-stoplight:
+        id: 3l2zwneeel4n9
+    ReadOnlyDocumentId:
+      allOf:
+        - $ref: '#/components/schemas/DocumentId'
+        - readOnly: true
+      x-stoplight:
+        id: bdycar2j2xn4q
+    DocumentId:
+      type: string
+      example: DOC123
+      description: credit document id
+      x-stoplight:
+        id: yggqs761bhcgi
+    OptionWithAmount:
+      allOf:
+        - $ref: '#/components/schemas/Option'
+        - type: object
+          required:
+            - amount
+          properties:
+            amount:
+              $ref: '#/components/schemas/Amount'
+      x-stoplight:
+        id: m2i3qqxflp1f3
+    Option:
+      type: object
+      required:
+        - id
+        - label
+      properties:
+        id:
+          type: string
+          example: someValue
+        label:
+          type: string
+          example: Label for someValue
+      x-stoplight:
+        id: 1nnpsss787ej4
+    Link:
+      type: object
+      readOnly: true
+      required:
+        - rel
+        - href
+      properties:
+        rel:
+          type: string
+          description: Link relation
+        href:
+          type: string
+          format: uri
+          description: Location URI
+      x-stoplight:
+        id: yr7mlunjgni24
+    GenerateSimulation:
+      required:
+        - product
+        - amount
+        - dateConditions
+        - pricingScheme
+      properties:
+        product:
+          description: Product code
+          type: string
+          example: CONS
+        pricingScheme:
+          description: Pricing scheme code
+          type: string
+          example: BAR01
+        amount:
+          $ref: '#/components/schemas/Amount'
+        dateConditions:
+          $ref: '#/components/schemas/DateConditions'
+        financialAccessories:
+          $ref: '#/components/schemas/FinancialAccessories'
+      type: object
+      x-stoplight:
+        id: 1siotyedvczxg
+    InitiateCreditRequest:
+      required:
+        - client
+        - product
+        - amount
+        - dateConditions
+        - pricingScheme
+      properties:
+        client:
+          description: Borrower id
+          type: string
+          example: '516'
+        product:
+          description: Product code
+          type: string
+          example: CONS
+        pricingScheme:
+          description: Pricing scheme code
+          type: string
+          example: BAR01
+        amount:
+          $ref: '#/components/schemas/Amount'
+        financialAccessories:
+          $ref: '#/components/schemas/FinancialAccessories'
+        dateConditions:
+          $ref: '#/components/schemas/DateConditions'
+      type: object
+      x-stoplight:
+        id: 9wf7newnmi6tk
+    CreditRequestAdditionalDataForm:
+      type: object
+      required:
+        - formCode
+        - status
+        - sessionId
+        - label
+        - input
+      properties:
+        formCode:
+          type: string
+          description: Code of the additional data form
+          example: ADDITIONALDATAFORM001
+        sessionId:
+          type: string
+          description: Id of the session fill additional data form
+        label:
+          type: string
+          description: Description of the additional data form
+          example: Valid onboarding form
+        status:
+          type: string
+          enum:
+            - STARTED
+            - SUBMITTED
+        input:
+          $ref: '#/components/schemas/InputCollection'
+      x-stoplight:
+        id: ns07ccqodkgni
+    CreditRequestAdditionalData:
+      type: array
+      items:
+        type: object
+        description: Additional data completed by user
+        anyOf:
+          - $ref: '#/components/schemas/CreditRequestAdditionalDatumInput'
+          - $ref: '#/components/schemas/CreditRequestAdditionalDatumDocument'
+      x-stoplight:
+        id: yayie6dnetrlq
+    CreditRequestAdditionalDatumInput:
+      type: object
+      required:
+        - key
+        - type
+        - label
+        - value
+      properties:
+        key:
+          type: string
+          description: Identifier of the KYC used
+          example: creditFamilySituation
+        type:
+          type: string
+          description: INPUT
+          example: INPUT
+        label:
+          type: string
+          description: Label of the field
+          example: CREDIT - Situation familiale
+        value:
+          anyOf:
+            - $ref: '#/components/schemas/CreditRequestAdditionalDatumInputSelectValue'
+            - $ref: '#/components/schemas/CreditRequestAdditionalDatumInputValue'
+      x-stoplight:
+        id: 58uuf5m3xoef6
+    CreditRequestAdditionalDatumInputValue:
+      type: string
+      example: value1
+      x-stoplight:
+        id: g2wou3h2wz4ab
+    CreditRequestAdditionalDatumInputSelectValue:
+      type: object
+      required:
+        - code
+        - label
+      properties:
+        code:
+          type: string
+          example: selected value
+        label:
+          type: string
+          example: translated label of the selected value
+      x-stoplight:
+        id: kv5reu5rdarqg
+    CreditRequestAdditionalDatumDocument:
+      type: object
+      required:
+        - key
+        - type
+        - label
+        - value
+      properties:
+        key:
+          type: string
+          description: Identifier of the KYC document used
+          example: PROOF_OF_RESIDENCE
+        type:
+          type: string
+          description: DOCUMENT
+          example: DOCUMENT
+        label:
+          type: string
+          description: Label of the document
+          example: Proof of residence
+        value:
+          $ref: '#/components/schemas/CreditRequestAdditionalDatumDocumentValue'
+      x-stoplight:
+        id: gpxrtjbyifu5w
+    CreditRequestAdditionalDatumDocumentValue:
+      type: object
+      required:
+        - status
+        - content
+        - code
+      properties:
+        content:
+          type: string
+          description: The content of the document encoded in base64
+        status:
+          type: string
+          description: Status document
+        code:
+          type: string
+          description: Code of the document
+        reason:
+          type: string
+          description: The reason to update status document
+      x-stoplight:
+        id: 19y3psyp0ntii
+    ModifyCreditRequest:
+      required:
+        - product
+        - pricingScheme
+        - amount
+        - dateConditions
+      properties:
+        product:
+          description: Product code
+          type: string
+          example: CONS
+        pricingScheme:
+          description: Pricing scheme code
+          type: string
+          example: BAR01
+        amount:
+          $ref: '#/components/schemas/Amount'
+        dateConditions:
+          $ref: '#/components/schemas/DateConditions'
+        financialAccessories:
+          $ref: '#/components/schemas/FinancialAccessories'
+      type: object
+      x-stoplight:
+        id: wsakuejxtqpof
+    Health:
+      description: Health status
+      required:
+        - alive
+        - dbAlive
+        - brokerAlive
+      properties:
+        alive:
+          description: Check if system is alive
+          type: boolean
+        dbAlive:
+          description: Check if the database is available
+          type: boolean
+        brokerAlive:
+          description: Check if the message broker is available
+          type: boolean
+      type: object
+      x-stoplight:
+        id: oriz7wwcx84ah
+    Parameters:
+      type: object
+      required:
+        - creditSignedToBookedAuto
+        - allowAutomaticPayment
+        - generalAccounts
+      properties:
+        creditSignedToBookedAuto:
+          description: Automatically pass signed credit to state booked
+          type: boolean
+        allowAutomaticPayment:
+          description: Allow automatic payment for all due installments
+          type: boolean
+        generalAccounts:
+          description: General accounts used for payment and disbursement
+          type: array
+          items:
+            type: object
+            properties:
+              currency:
+                description: Currency of the account
+                type: string
+                example: EUR
+              accountNumber:
+                description: Account number
+                type: string
+                example: '21488454'
+              iban:
+                description: Account iban
+                type: string
+                example: FR4512739000401425874848J38
+              label:
+                description: Account label
+                type: string
+                example: General account for loans in EUR
+      x-stoplight:
+        id: wy1np1q1kxa4k
+    GeneralAccounts:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: 'Account currency, for example "EUR".'
+          example: EUR
+        accountNumber:
+          type: string
+          description: Account number.
+          example: '13010742918'
+        iban:
+          type: string
+          description: Account IBAN.
+          example: FR76564649
+        label:
+          description: Account label
+          type: string
+          example: General account for loans in EUR
+      required:
+        - currency
+        - accountNumber
+        - iban
+        - label
+      x-stoplight:
+        id: a6ouyc34t8zfc
+    Configuration:
+      description: Configuration
+      required:
+        - defaultLang
+        - userLang
+        - langs
+        - productTypes
+      properties:
+        defaultLang:
+          description: locale of default lang
+          type: string
+          example: fr_FR
+        userLang:
+          description: locale of user
+          type: string
+          example: fr_FR
+        langs:
+          description: Available lang
+          type: array
+          items:
+            type: string
+            example: fr_FR
+        productTypes:
+          description: Available products types
+          type: array
+          items:
+            type: string
+            example: LOAN
+      type: object
+      x-stoplight:
+        id: 8j71h21900wzv
+    CurrencyConfiguration:
+      description: Currency configuration
+      required:
+        - default
+        - currencies
+      properties:
+        default:
+          description: 'default currency, ISO 4217 currency three letters code'
+          type: string
+          example: EUR
+        currencies:
+          description: Available currency list
+          type: array
+          items:
+            $ref: '#/components/schemas/Currency'
+      type: object
+      x-stoplight:
+        id: 3ghxccos2g64b
+    Currency:
+      description: Currency
+      required:
+        - iso
+        - symbol
+        - name
+        - decimal
+      properties:
+        iso:
+          description: ISO 4217 currency three letters code
+          type: string
+          example: EUR
+        symbol:
+          description: Symbol to use for this currency
+          type: string
+          example: €
+        name:
+          description: Name of currency
+          type: string
+          example: Euro
+        decimal:
+          description: Number of decimal for this currency
+          type: integer
+          example: 2
+      type: object
+      x-stoplight:
+        id: e700roaft7x8h
+    Person:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '123651'
+        type:
+          type: string
+          enum:
+            - NATURAL_PERSON
+            - LEGAL_ENTITY
+          example: NATURAL_PERSON
+        name:
+          type: string
+          example: Jeremy Martin
+        lastName:
+          type: string
+          description: null for NATURAL_PERSON type
+          example: Martin
+        firstName:
+          type: string
+          description: null for NATURAL_PERSON type
+          example: Jeremy
+        legalName:
+          type: string
+          description: null for LEGAL_ENTITY type
+          example: C&O Company
+      x-stoplight:
+        id: c5y49x61c8nf5
+    Borrower:
+      type: object
+      required:
+        - id
+        - lastName
+        - firstName
+      properties:
+        id:
+          type: string
+          example: '123651'
+        lastName:
+          type: string
+          example: Gio
+        firstName:
+          oneOf:
+            - type: 'null'
+            - type: string
+              example: Fuerte
+      x-stoplight:
+        id: zj3rg39gwin3j
+    CreditPaginatedCollection:
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Credit'
+        total:
+          description: Total number of items corresponding to the research
+          type: integer
+          example: 341
+        page:
+          description: Current page of the paginated request
+          type: integer
+          example: 5
+        pageSize:
+          description: Number of items displayed per page
+          type: integer
+          example: 100
+        lastPage:
+          description: Last page available for the research
+          type: integer
+          example: 66
+        sort:
+          description: 'Field used to sort the research and its direction. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +, descending (newer first) fields may be prefixed with -. Ascending is the default sorting direction.'
+          type: string
+          example: +amount
+      type: object
+      x-stoplight:
+        id: 1mqrfz4hf4ace
+    Credit:
+      properties:
+        code:
+          description: Credit code
+          type: string
+          example: 220524130049YN
+        client:
+          $ref: '#/components/schemas/Person'
+        product:
+          $ref: '#/components/schemas/ProductCreditManagement'
+        pricingScheme:
+          $ref: '#/components/schemas/PricingSchemeCreditManagement'
+        amount:
+          $ref: '#/components/schemas/Amount'
+        period:
+          $ref: '#/components/schemas/Period'
+        status:
+          description: Status of the credit
+          type: string
+          example: ONGOING
+        financialAccessories:
+          description: List of financial accessories code
+          type: array
+          items:
+            type: string
+            example: TARIFF001
+        sessionForm:
+          $ref: '#/components/schemas/SessionForm'
+      type: object
+      x-stoplight:
+        id: mn8g6m4imix5w
+    Period:
+      properties:
+        startDate:
+          description: Start date
+          type: string
+          example: '2022-03-31'
+        endDate:
+          description: End date
+          type: string
+          example: '2023-03-31'
+      type: object
+      x-stoplight:
+        id: nqfxnkoncdroi
+    PricingSchemeCreditManagement:
+      properties:
+        code:
+          description: Pricing scheme code
+          type: string
+          example: BAR01
+        name:
+          description: Pricing scheme name translated in current language
+          type: string
+          example: Christmas flash offer
+      type: object
+      x-stoplight:
+        id: qej4t1jehiat1
+    ProductCreditManagement:
+      properties:
+        code:
+          description: Product code
+          type: string
+          example: CONS
+        name:
+          description: Product name translated in current language
+          type: string
+          example: Consumer Credit
+        scoreCode:
+          description: Code of score
+          type: string
+          example: UNIQUESCORECODE
+      type: object
+      x-stoplight:
+        id: mgesvuev50m86
+    AmountBoundaries:
+      properties:
+        minimum:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/Amount'
+        maximum:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/Amount'
+        default:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/Amount'
+      type: object
+      x-stoplight:
+        id: 5xg2n0h237brt
+    DurationBoundaries:
+      properties:
+        minimum:
+          description: Minimum duration
+          type: integer
+          minimum: 0
+          example: 6
+        maximum:
+          description: Maximum duration
+          type: integer
+          minimum: 0
+          example: 48
+        default:
+          description: Default duration
+          type: integer
+          minimum: 0
+          example: 12
+        available:
+          description: Available durations
+          type: array
+          items:
+            type: integer
+            minimum: 0
+          example:
+            - 6
+            - 12
+            - 24
+            - 48
+      type: object
+      x-stoplight:
+        id: o9ccbljgoubuv
+    Frequency:
+      required:
+        - type
+      properties:
+        type:
+          description: Frequency periodicity
+          type: string
+          enum:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - YEARLY
+          example: MONTHLY
+        default:
+          description: Default frequency
+          type: boolean
+          example: true
+        gracePeriod:
+          description: Grace period
+          type: integer
+          minimum: 0
+          example: 2
+        paymentDay:
+          description: 'Payment day only for type : MONTHLY, QUARTERLY, SEMESTER, YEARLY'
+          type: integer
+          maximum: 31
+          minimum: 1
+          example: 5
+        durationBoundaries:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/DurationBoundaries'
+      type: object
+      x-stoplight:
+        id: 8tjzl0nh0yuvk
+    PricingSchemeMatrixRateItem:
+      required:
+        - fixed
+      properties:
+        fixed:
+          description: the rate to apply
+          type: number
+          format: float
+          example: 1.4
+        duration:
+          description: Duration
+          type: integer
+          minimum: 1
+          example: 2
+        frequency:
+          description: Frequency periodicity is mandatory for frequency matrix
+          type: string
+          enum:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - YEARLY
+          example: MONTHLY
+        threshold:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/Amount'
+      type: object
+      x-stoplight:
+        id: c1vwpgrff2s22
+    PricingSchemeMatrixRate:
+      required:
+        - isFrequencyMatrix
+        - isAmountMatrix
+        - rates
+      properties:
+        isFrequencyMatrix:
+          description: 'in case of MATRIX rate, determine if it is a frequency matrix'
+          oneOf:
+            - type: 'null'
+            - type: boolean
+              example: false
+        isAmountMatrix:
+          description: 'in case of MATRIX rate, determine if it is a amount matrix'
+          oneOf:
+            - type: 'null'
+            - type: boolean
+              example: false
+        rates:
+          description: 'in case of MATRIX rate, matrix rates'
+          oneOf:
+            - type: 'null'
+            - type: array
+              items:
+                $ref: '#/components/schemas/PricingSchemeMatrixRateItem'
+      type: object
+      x-stoplight:
+        id: ewdl4x05r07b3
+    PricingSchemeParameters:
+      required:
+        - code
+        - names
+        - currency
+        - scheduleType
+        - rate
+        - frequencies
+      properties:
+        code:
+          description: Pricing Scheme code
+          type: string
+          example: BAR01
+          maxLength: 32
+        names:
+          description: Translated names list
+          type: object
+          example:
+            fr_FR: nom en francais
+            en_US: english name
+        scheduleType:
+          description: Pricing scheme schedule type
+          type: string
+          enum:
+            - BULLET
+            - SAMCAP
+            - SAMINS
+            - TIER
+            - FREE
+            - REVOL
+          example: BULLET
+        period:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/SalesPeriod'
+        currency:
+          description: Pricing scheme currency
+          type: string
+          example: EUR
+        rate:
+          $ref: '#/components/schemas/PricingSchemeRate'
+        amountBoundaries:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/AmountBoundaries'
+        frequencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Frequency'
+        taxProfileId:
+          description: Pricing scheme tax profile id
+          oneOf:
+            - type: 'null'
+            - type: string
+        pricingCodes:
+          description: Pricing scheme's associated pricings
+          type: array
+          items:
+            type: string
+            example: PRC001
+        earlyRepaymentAllowed:
+          description: Is early repayment allowed
+          type: boolean
+      type: object
+      x-stoplight:
+        id: n3wf3v22v9ub9
+    PricingScheme:
+      required:
+        - code
+        - names
+        - currency
+        - scheduleType
+        - rate
+        - frequencies
+      properties:
+        code:
+          description: Pricing scheme code (less than or equals to 32 characters)
+          type: string
+          example: BAR01
+        names:
+          description: Translated names list
+          type: object
+          example:
+            fr_FR: nom en francais
+            en_US: english name
+        default:
+          description: Default product pricing scheme to use
+          type: boolean
+        scheduleType:
+          description: Pricing scheme schedule type
+          type: string
+          enum:
+            - BULLET
+            - SAMCAP
+            - SAMINS
+            - TIER
+            - FREE
+            - REVOL
+          example: BULLET
+        period:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/SalesPeriod'
+        currency:
+          description: Pricing scheme currency
+          type: string
+          example: EUR
+        rate:
+          $ref: '#/components/schemas/PricingSchemeRate'
+        amountBoundaries:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/AmountBoundaries'
+        frequencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Frequency'
+        taxProfileId:
+          description: Pricing scheme tax profile id
+          oneOf:
+            - type: 'null'
+            - type: string
+        pricingCodes:
+          description: Pricing scheme associated pricings
+          type: array
+          items:
+            type: string
+            example: PRC001
+        earlyRepaymentAllowed:
+          description: Is early repayment allowed?
+          type: boolean
+      type: object
+      x-stoplight:
+        id: blny06usn4vlp
+    ProductCreate:
+      required:
+        - code
+        - type
+        - names
+      properties:
+        code:
+          description: Created product code
+          type: string
+          example: CONS
+        type:
+          description: Created product type
+          type: string
+          enum:
+            - REVOLVING
+            - LOAN
+            - LEASING
+            - OVERDRAFT
+          example: LOAN
+        names:
+          description: Translated names list
+          type: object
+          example:
+            fr_FR: nom en francais
+            en_US: english name
+        salesPeriod:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/SalesPeriod'
+        scoreCode:
+          type: string
+          example: CODESCORE
+          description: Score ID
+        formCode:
+          type: string
+          example: FORMCODE
+          description: Form for additional data identifier
+      type: object
+      x-stoplight:
+        id: zr3pgxe3t22e1
+    ProductEdit:
+      required:
+        - names
+      properties:
+        names:
+          description: Translated names list
+          type: object
+          example:
+            fr_FR: nom en francais
+            en_US: english name
+        salesPeriod:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/SalesPeriod'
+        scoreCode:
+          type: string
+          example: CODESCORE
+          description: Score ID
+        formCode:
+          type: string
+          example: FORMCODE
+          description: Form for additional data identifier
+      type: object
+      x-stoplight:
+        id: 1ss5z9sbbdzsl
+    ProductItem:
+      properties:
+        code:
+          description: Product indentifier
+          type: string
+          example: CONS
+        names:
+          description: Translated names list
+          type: object
+          example:
+            fr_FR: nom en francais
+            en_US: english name
+      x-stoplight:
+        id: yb3qhryotpqxm
+    Product:
+      properties:
+        code:
+          description: Created product code
+          type: string
+          example: CONS
+        type:
+          description: Created product type
+          type: string
+          enum:
+            - REVOLVING
+            - LOAN
+            - LEASING
+            - OVERDRAFT
+          example: LOAN
+        names:
+          description: Translated names list
+          type: object
+          example:
+            fr_FR: nom en francais
+            en_US: english name
+        salesPeriod:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/SalesPeriod'
+        pricingSchemes:
+          type: array
+          items:
+            $ref: '#/components/schemas/PricingScheme'
+        scoreCode:
+          description: Code of the score linked to the product
+          type: string
+          example: LOAN_8F
+        formCode:
+          description: Code of the additional data to link to the product
+          type: string
+          example: FORM_CODE
+      type: object
+      x-stoplight:
+        id: t5ej8hs5h475g
+    PricingSchemeRate:
+      required:
+        - type
+        - calculationType
+        - term
+      properties:
+        type:
+          description: Rate type
+          type: string
+          enum:
+            - FIXED
+            - MATRIX
+          example: FIXED
+        calculationType:
+          description: Calculation type
+          type: string
+          enum:
+            - ACTUARIAL
+            - PROPORTIONAL
+          example: ACTUARIAL
+        term:
+          description: Term
+          type: string
+          enum:
+            - ARREARS
+            - ADVANCE
+          example: ARREARS
+        vat:
+          description: Tax profile
+          type: string
+          example: '42'
+        fixed:
+          description: 'in case of FIXED rate, the rate to apply'
+          type: number
+          format: float
+          example: 1.4
+        matrix:
+          description: 'in case of MATRIX rate, the matrix rate to apply'
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/PricingSchemeMatrixRate'
+      type: object
+      x-stoplight:
+        id: 6xcwig2j2m4p4
+    FinancialAccessory:
+      properties:
+        code:
+          description: Code of the financial accessory
+          type: string
+          example: PRC002
+        name:
+          description: Name of the financial accessory
+          type: string
+          example: Pricing 002
+        currency:
+          description: Currency of the pricing
+          type: string
+          example: EUR
+        nature:
+          description: Nature of the financial accessory
+          type: string
+          enum:
+            - FEES
+            - COMMISSIONS
+            - INSURANCE
+          example: FEES
+        type:
+          description: Type of the financial accessory
+          type: string
+          enum:
+            - AMOUNT
+            - FORMULA
+          example: AMOUNT
+        frequency:
+          description: Frequency at which the financial accessory is to be paid
+          type: string
+          enum:
+            - SINGLE
+            - CONTRACT
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - YEARLY
+          example: CONTRACT
+        amount:
+          $ref: '#/components/schemas/Amount'
+        amountIncludingTax:
+          $ref: '#/components/schemas/Amount'
+        taxRate:
+          description: 'Tax rate of the financial accessory, in ratio (from 0 to 1)'
+          type: number
+          format: float
+          example: 0.2
+        rate:
+          description: 'Rate of the financial accessory, in percentage'
+          type: number
+          format: float
+          example: 1.456
+        calculationBasis:
+          description: Amount used to calculate the amount of the financial accessory
+          type: string
+          enum:
+            - TRANSACTIONAMOUNT
+            - CAPITALINITIALAMOUNT
+            - CAPITALCURRENTAMOUNT
+        isMandatory:
+          description: Field to know if financial accessory is mandatory
+          type: boolean
+          example: false
+        isAprc:
+          description: Field to know if financial accessory should be used in the aprc computation
+          type: boolean
+          example: false
+      x-stoplight:
+        id: rsopu8iqdtmq1
+    SalesPeriod:
+      description: The start date (if exists) have to be inferior or equal to the end date (if exists)
+      properties:
+        startDate:
+          description: Start date of the period
+          type: string
+          format: date
+          example: '2022-01-02'
+        endDate:
+          description: End date of the period
+          type: string
+          format: date
+          example: '2022-03-02'
+      type: object
+      x-stoplight:
+        id: blcrmikiqhden
+    Group:
+      type: object
+      description: group
+      properties:
+        id:
+          description: id of group
+          type: string
+          example: '42'
+        name:
+          description: group label
+          type: string
+          example: user
+      x-stoplight:
+        id: b75zqxv7ohosr
+    ScheduleComputation:
+      required:
+        - rate
+        - capital
+        - duration
+        - calculationType
+      properties:
+        rate:
+          type: number
+          description: rate
+          format: float
+          example: 1.456
+        capital:
+          $ref: '#/components/schemas/Amount'
+        startDate:
+          description: Credit start date
+          oneOf:
+            - type: 'null'
+            - type: string
+              format: date
+              example: '2022-03-02'
+        duration:
+          $ref: '#/components/schemas/ScheduleDuration'
+        calculationType:
+          description: Credit calculation type
+          type: string
+          enum:
+            - ACTUARIAL
+            - PROPORTIONAL
+        term:
+          description: Credit term
+          type: string
+          enum:
+            - ARREARS
+            - ADVANCE
+        paymentDay:
+          description: Payment day
+          type: integer
+          example: 5
+      type: object
+      x-stoplight:
+        id: 9ltnczbkzlxc9
+    ScheduleDuration:
+      description: Credit duration
+      required:
+        - value
+        - periodicity
+      properties:
+        value:
+          description: Number of payement
+          type: integer
+          example: 12
+        periodicity:
+          description: Frequency of payment
+          type: string
+          enum:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - YEARLY
+          example: MONTHLY
+      type: object
+      x-stoplight:
+        id: 2jhicnyvikixs
+    Amount:
+      required:
+        - currency
+        - value
+      properties:
+        currency:
+          description: Currency ISO-4217 aplha code
+          type: string
+          pattern: '^[A-Z]{3}$'
+          example: EUR
+        value:
+          description: Amount value in cents
+          type: number
+          example: 1337
+      type: object
+      x-stoplight:
+        id: 4pi4fv1ljvbnb
+    ScoreResult:
+      type: object
+      required:
+        - id
+        - calculatedAt
+        - finalScore
+        - intermediateResults
+        - matchingStep
+        - scoreLimits
+      properties:
+        id:
+          type: string
+          description: The id of the calculation result. This id is a SHA-1 of the whole result.
+          example: 2aae6c35c94fcfb415dbe95f408b9ce91ee846ed
+        calculatedAt:
+          type: string
+          description: The date time the result was calculated
+          example: '2004-02-12 15:19:21.026587'
+        finalScore:
+          type: string
+          description: The final score of the calculation
+          example: '350'
+        scoreLimits:
+          properties:
+            min:
+              type: integer
+              description: The score minimum's limit
+              example: 100
+            max:
+              type: integer
+              description: The score maximum's limit
+              example: 800
+          description: The score's limits
+        thresholds:
+          properties:
+            refuse:
+              type: integer
+              description: 'Under or equal this bound, the refuse threshold is reached'
+              example: 200
+            accept:
+              type: integer
+              description: 'Above or equal this bound, the acceptance threshold is reached'
+              example: 600
+          description: The score's thresholds
+        matchingStep:
+          type: object
+          description: The score's step matching the calculation result
+          properties:
+            code:
+              type: string
+              description: The step's code
+              example: CRDT-1
+            translations:
+              type: object
+              description: The translations of the step
+              additionalProperties:
+                type: string
+                description: The locale of the step
+              example:
+                fr_FR: Correct
+                en_US: Fair
+            min:
+              type: integer
+              description: The step's minimal score
+              example: 200
+            max:
+              type: integer
+              description: The step's maximal score
+              example: 500
+            color:
+              type: string
+              description: The step's color
+              example: '#f0c2e8'
+        intermediateResults:
+          type: array
+          description: The score of each calculation parameter
+          items:
+            type: object
+            properties:
+              calculationParameter:
+                type: object
+                description: The calculation parameter that what given as input
+                properties:
+                  name:
+                    type: string
+                    example: MARITAL_STATUS
+                    description: The calculation parameter name that what given as input
+                  data:
+                    type: string
+                    example: MARRIED
+                    description: The calculation parameter data that what given as input
+              intermediateScore:
+                type: integer
+                description: The score for this calculation parameter
+                example: 350
+              matchedVariable:
+                type: boolean
+                description: Does the given calculation parameter matched a variable in the score?
+                example: true
+              matchedValue:
+                type: boolean
+                description: Does the given calculation parameter matched a value in the score?
+                example: true
+              variableTranslations:
+                type: object
+                description: The translations of the variable's name matching the calculation parameter
+                additionalProperties:
+                  type: string
+                  description: The locale of the variable's name
+                example:
+                  fr_FR: Statut marital
+                  en_US: Marital status
+              valueTranslations:
+                type: object
+                description: The translations of the value that matched the calculation parameter in case of a list value
+                additionalProperties:
+                  type: string
+                  description: The locale of the value
+                example:
+                  fr_FR: Marié
+                  en_US: Married
+      x-stoplight:
+        id: uva6kivyyyi36
+    ScheduleComputed:
+      description: Schedule computed
+      required:
+        - rate
+        - aprc
+        - totalCost
+        - accessoryCost
+      properties:
+        rate:
+          description: rate
+          type: number
+          format: float
+          example: 1.004
+        aprc:
+          description: aprc
+          type: number
+          format: float
+          example: 1.004
+        totalCost:
+          $ref: '#/components/schemas/Amount'
+        accessoryCost:
+          $ref: '#/components/schemas/Amount'
+        schedule:
+          description: Installments
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleInstallment'
+      type: object
+      x-stoplight:
+        id: dlohmku2micwz
+    ScheduleInstallmentCapital:
+      description: Schedule Installment Capital
+      required:
+        - start
+        - end
+      properties:
+        start:
+          $ref: '#/components/schemas/Amount'
+        end:
+          $ref: '#/components/schemas/Amount'
+      type: object
+      x-stoplight:
+        id: 120bg9z6k5vvf
+    ScheduleInstallment:
+      description: Schedule Installment
+      required:
+        - index
+        - date
+        - capital
+        - interests
+        - principal
+        - financialAccessories
+        - total
+      properties:
+        index:
+          description: index
+          type: integer
+          example: 1
+        date:
+          description: date
+          type: string
+          format: date
+          example: '2022-03-31'
+        capital:
+          $ref: '#/components/schemas/ScheduleInstallmentCapital'
+        interest:
+          $ref: '#/components/schemas/Amount'
+        principal:
+          $ref: '#/components/schemas/Amount'
+        financialAccessories:
+          $ref: '#/components/schemas/Amount'
+        total:
+          $ref: '#/components/schemas/Amount'
+        interestsCost:
+          $ref: '#/components/schemas/Amount'
+      type: object
+      x-stoplight:
+        id: j7zquls0g2dih
+    CreditRequest:
+      properties:
+        code:
+          description: Credit request code
+          type: string
+          example: '2022041913183236882459'
+        client:
+          $ref: '#/components/schemas/Person'
+        product:
+          description: Product code
+          type: string
+          example: CONS
+        pricingScheme:
+          description: Pricing scheme code
+          type: string
+          example: BAR01
+        amount:
+          $ref: '#/components/schemas/Amount'
+        dateConditions:
+          $ref: '#/components/schemas/DateConditions'
+        status:
+          description: Status of the credit request
+          type: string
+          example: ONGOING
+        scoreResultId:
+          description: id of score result
+          format: SHA-1
+          type: string
+          example: 6153a6fa0e4880d9b8d0be4720f78e895265d0a9
+        financialAccessories:
+          $ref: '#/components/schemas/FinancialAccessories'
+        sessionForm:
+          $ref: '#/components/schemas/SessionForm'
+      type: object
+      x-stoplight:
+        id: 7o1g80fna8yvf
+    FinancialAccessories:
+      description: Financial accessories ids
+      type: array
+      items:
+        type: string
+        example: TARIFF001
+      x-stoplight:
+        id: gyt9dndapgrxr
+    SessionForm:
+      description: Session form for additional data
+      required:
+        - formCode
+        - sessionId
+      properties:
+        formCode:
+          description: Form code used to display additional data
+          type: string
+          example: ADDITIONALDATA001
+        sessionId:
+          description: Session id used to submit additional data
+          type: string
+          example: 018b4728-aaaf-73a0-b90c-88dba9319d61
+      x-stoplight:
+        id: 0qqgnxxoz2rwe
+    DateConditions:
+      required:
+        - start
+        - duration
+      properties:
+        start:
+          description: Start date
+          oneOf:
+            - type: 'null'
+            - type: string
+              format: date
+              example: '2022-03-31'
+        duration:
+          $ref: '#/components/schemas/Duration'
+        paymentDay:
+          description: Payment day
+          type: integer
+          example: 5
+        gracePeriod:
+          description: Grace period
+          type: integer
+          example: 3
+      type: object
+      x-stoplight:
+        id: yi20slvumatjq
+    Duration:
+      required:
+        - number
+        - periodicity
+      properties:
+        number:
+          description: Number of payement
+          type: integer
+          example: 12
+        periodicity:
+          description: Frequency of payment
+          type: string
+          enum:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - YEARLY
+          example: MONTHLY
+      type: object
+      x-stoplight:
+        id: jubbptqgc4etg
+    InputValues:
+      type: object
+      description: Form values associated to the corresponding input id
+      additionalProperties:
+        anyOf:
+          - type: string
+          - type: number
+          - type: integer
+          - type: boolean
+          - type: array
+            items: {}
+          - $ref: '#/components/schemas/InputValues'
+      example:
+        '114':
+          creditFamilySituation: Married
+          creditChildren: 1
+          creditHouseSituation: owner
+          creditSector: Private
+          creditWorkSituation: Permanent
+        '115':
+          '200': doc base 64
+          '201': doc base 64
+          '202': doc base 64
+        StepId1:
+          id1: value1
+          id2: value2
+          id3: value3
+        StepId2:
+          creditIncome: 4000
+          creditExpenses: 300
+      x-stoplight:
+        id: erw6yjv9kaijj
+    CreditRequestOffer:
+      type: object
+      properties:
+        issuedAt:
+          type: string
+          format: ATOM
+          description: Date of the offer
+          example: '2022-02-12 15:19:21+01:00'
+        status:
+          type: string
+          description: Status of the offer
+          enum:
+            - VALID
+            - SIGNED
+            - REFUSED
+            - WITHDRAWN
+          example: VALID
+        signedDocumentId:
+          type: string
+          description: Id of the signed credit offer document
+          example: '127'
+        signedAt:
+          type: string
+          format: ATOM
+          description: Date of the signature
+          example: '2022-02-16 16:08:01+01:00'
+        variables:
+          type: object
+          description: List of variables that are used to compute the offer
+          additionalProperties:
+            type: string
+            description: The name of the variable
+          example:
+            rate: 1.7985%
+            firstname: John
+            lastName: Doe
+      x-stoplight:
+        id: trp987xvzc9ws
+    PrivilegeOutputViewModel:
+      required:
+        - permission
+        - groups
+      properties:
+        permission:
+          description: permission
+          type: string
+          example: right_view
+        translations:
+          description: all available translations
+          type: object
+          example:
+            fr_FR: traduction française
+            en_US: english translation
+        groups:
+          type: array
+          items:
+            type: string
+      type: object
+      x-stoplight:
+        id: 2ntpodv6o9bl7
+    PrivilegeInputViewModel:
+      required:
+        - permission
+        - groups
+      properties:
+        permission:
+          description: permission
+          type: string
+          example: right_view
+        groups:
+          type: array
+          items:
+            type: string
+      type: object
+      x-stoplight:
+        id: 4xz1p4mscci1g
+    CreditServicingDetailPaginatedCollection:
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditServicingDetail'
+        total:
+          description: Total number of items corresponding to the research
+          type: integer
+          example: 341
+        page:
+          description: Current page of the paginated request
+          type: integer
+          example: 5
+        pageSize:
+          description: Number of items displayed per page
+          type: integer
+          example: 100
+        lastPage:
+          description: Last page available for the research
+          type: integer
+          example: 66
+        sort:
+          description: 'Field used to sort the research and its direction. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +, descending (newer first) fields may be prefixed with -. Ascending is the default sorting direction.'
+          type: string
+          example: +amount
+      type: object
+      x-stoplight:
+        id: klwmc9ydkuonz
+    CreditServicingDetail:
+      type: object
+      required:
+        - borrower
+        - credit
+      properties:
+        borrower:
+          $ref: '#/components/schemas/Borrower'
+        credit:
+          type: object
+          required:
+            - code
+            - startAt
+            - signAt
+            - endAt
+            - duration
+            - initialAmount
+            - currentAmount
+            - currency
+            - productCode
+            - pricingSchemeCode
+            - financialAccessories
+            - schedule
+            - lateInstallmentsNumber
+            - document
+            - status
+            - disbursedAmount
+            - repaidAmount
+            - availableAmount
+            - rate
+            - aprc
+            - type
+          properties:
+            code:
+              type: string
+              description: credit's code
+              example: CREDITCODE
+            startAt:
+              type: string
+              format: ATOM
+              example: '2022-01-12T15:19:21+01:00'
+            signAt:
+              type: string
+              format: ATOM
+              example: '2022-01-12T15:19:21+01:00'
+            endAt:
+              type: string
+              format: ATOM
+              example: '2023-01-12T15:19:21+01:00'
+            duration:
+              type: object
+              required:
+                - periodicity
+                - number
+              properties:
+                periodicity:
+                  type: string
+                  enum:
+                    - DAILY
+                    - WEEKLY
+                    - MONTHLY
+                    - QUARTERLY
+                    - SEMESTER
+                    - YEARLY
+                  example: MONTHLY
+                number:
+                  type: integer
+                  example: 12
+            initialAmount:
+              $ref: '#/components/schemas/Amount'
+            currentAmount:
+              $ref: '#/components/schemas/Amount'
+            currency:
+              description: Currency ISO-4217 aplha code
+              type: string
+              pattern: '^[A-Z]{3}$'
+              example: EUR
+            productCode:
+              type: string
+              description: id of product
+              example: LOAN_XMAS_FERIES
+            pricingSchemeCode:
+              type: string
+              description: id of pricingScheme
+              example: PS_MONTHLY
+            financialAccessories:
+              type: array
+              items:
+                type: string
+                example: TVA
+              description: ids of financial Accessories
+            schedule:
+              $ref: '#/components/schemas/CreditServicingScheduleDetail'
+            lateInstallmentsNumber:
+              type: number
+              description: number of unpaid installments
+              example: 3
+            document:
+              type: string
+              description: id of credit offer document
+              example: document_id
+            disbursedAmount:
+              $ref: '#/components/schemas/Amount'
+            repaidAmount:
+              $ref: '#/components/schemas/Amount'
+            availableAmount:
+              $ref: '#/components/schemas/Amount'
+            drawnAmount:
+              $ref: '#/components/schemas/Amount'
+            unpaidAmount:
+              $ref: '#/components/schemas/Amount'
+            status:
+              type: string
+              enum:
+                - BOOKED
+                - LIVE
+              description: status of the credit servicing
+              example: BOOKED
+            rate:
+              description: rate
+              type: number
+              format: float
+              example: 0.9
+            aprc:
+              description: aprc
+              type: number
+              format: float
+              example: 1.004
+            type:
+              type: string
+              enum:
+                - REPAYMENT
+                - DISBURSEMENT
+              description: Type of the credit servicing installment
+              example: DISBURSEMENT
+      x-stoplight:
+        id: v6f0th27mongb
+    InitiateCreditServicing:
+      type: object
+      required:
+        - borrower
+        - credit
+      properties:
+        borrower:
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              minLength: 1
+              example: '54285'
+              description: Borrower Id
+        credit:
+          type: object
+          required:
+            - code
+            - startDate
+            - signDate
+            - endDate
+            - duration
+            - initialAmount
+            - currentAmount
+            - currency
+            - productCode
+            - pricingSchemeCode
+            - financialAccessories
+            - schedule
+            - document
+            - rate
+            - aprc
+            - targetAccountNumber
+            - targetAccountIban
+          properties:
+            code:
+              type: string
+              description: credit's code
+              example: CREDITCODE
+              minLength: 1
+            startDate:
+              type: string
+              format: ATOM
+              example: '2022-01-12T15:19:21+01:00'
+            signDate:
+              type: string
+              format: ATOM
+              example: '2022-01-12T15:19:21+01:00'
+            endDate:
+              type: string
+              format: ATOM
+              example: '2023-01-12T15:19:21+01:00'
+            gracePeriode:
+              type: integer
+              example: 5
+            duration:
+              type: object
+              required:
+                - periodicity
+                - number
+              properties:
+                periodicity:
+                  type: string
+                  enum:
+                    - DAILY
+                    - WEEKLY
+                    - MONTHLY
+                    - QUARTERLY
+                    - SEMESTER
+                    - YEARLY
+                  example: MONTHLY
+                number:
+                  type: integer
+                  example: 12
+            initialAmount:
+              $ref: '#/components/schemas/Amount'
+            currentAmount:
+              $ref: '#/components/schemas/Amount'
+            currency:
+              description: Currency ISO 4217 three letters code
+              type: string
+              example: EUR
+            productCode:
+              type: string
+              description: id of product
+              example: LOAN_XMAS_FERIES
+            pricingSchemeCode:
+              type: string
+              description: id of pricingScheme
+              example: PS_MONTHLY
+            financialAccessories:
+              type: array
+              items:
+                type: string
+                example: TVA
+              description: ids of financial accessories
+            schedule:
+              $ref: '#/components/schemas/CreditServicingSchedule'
+            document:
+              type: string
+              description: id of credit offer document
+              example: document_id
+            rate:
+              description: rate
+              type: number
+              format: float
+              example: 0.9
+            aprc:
+              description: aprc
+              type: number
+              format: float
+              example: 1.004
+            targetAccountNumber:
+              type: string
+              description: target Account Number
+              example: '10000000603'
+            targetAccountIban:
+              type: string
+              description: target Account Iban
+              example: FR7616808000011000000060388
+      x-stoplight:
+        id: 01eoz4f1xq8ov
+    CreditServicingSchedule:
+      type: array
+      items:
+        $ref: '#/components/schemas/CreditServicingScheduleInstallment'
+      x-stoplight:
+        id: qgure77bue18t
+    CreditServicingScheduleInstallment:
+      type: object
+      description: Installment of the schedule
+      required:
+        - number
+        - installmentDate
+        - startCapital
+        - interests
+        - principal
+        - installment
+        - fees
+        - endCapital
+      properties:
+        number:
+          type: integer
+          minimum: 1
+          example: 1
+        installmentDate:
+          type: string
+          format: ATOM
+          example: '2022-01-12T15:19:21+01:00'
+        startCapital:
+          $ref: '#/components/schemas/Amount'
+        interests:
+          $ref: '#/components/schemas/Amount'
+        principal:
+          $ref: '#/components/schemas/Amount'
+        fees:
+          $ref: '#/components/schemas/Amount'
+        installment:
+          $ref: '#/components/schemas/Amount'
+        endCapital:
+          $ref: '#/components/schemas/Amount'
+      x-stoplight:
+        id: fg49s1f8jlf87
+    CreditServicingScheduleDetail:
+      type: array
+      items:
+        $ref: '#/components/schemas/CreditServicingScheduleInstallmentDetail'
+      x-stoplight:
+        id: b04tz6tetvsb5
+    CreditServicingScheduleInstallmentDetail:
+      type: object
+      description: Detail Installment of the schedule
+      required:
+        - number
+        - installmentDate
+        - startCapital
+        - interests
+        - principal
+        - earlyRepayment
+        - installment
+        - fees
+        - endCapital
+        - status
+      properties:
+        number:
+          type: integer
+          minimum: 1
+          example: 1
+        installmentDate:
+          type: string
+          format: ATOM
+          example: '2022-01-12T15:19:21+01:00'
+        startCapital:
+          $ref: '#/components/schemas/Amount'
+        interests:
+          $ref: '#/components/schemas/Amount'
+        principal:
+          $ref: '#/components/schemas/Amount'
+        earlyRepayment:
+          $ref: '#/components/schemas/Amount'
+        fees:
+          $ref: '#/components/schemas/Amount'
+        installment:
+          $ref: '#/components/schemas/Amount'
+        endCapital:
+          $ref: '#/components/schemas/Amount'
+        status:
+          $ref: '#/components/schemas/CreditServicingScheduleInstallmentStatus'
+      x-stoplight:
+        id: lvrohbhkgh44v
+    CreditServicingScheduleInstallmentStatus:
+      type: string
+      example: SCHEDULED
+      enum:
+        - SCHEDULED
+      description: Status of installment
+      x-stoplight:
+        id: poym43b4ybbbh
+    CreditServicingEarlyRepaymentParameters:
+      type: object
+      required:
+        - repaymentDate
+        - amount
+        - option
+      properties:
+        repaymentDate:
+          type: string
+          format: ATOM
+          example: '2022-06-21'
+        amount:
+          type: integer
+          example: 45411
+        option:
+          type: string
+          enum:
+            - DURATIONREDUCTION
+            - INSTALLMENTREDUCTION
+          example: DURATIONREDUCTION
+      x-stoplight:
+        id: tqcwqmy5zgyi6
+  responses:
+    default:
+      description: Request could not be processed
+      content:
+        application/json:
+          schema:
+            required:
+              - code
+              - message
+              - hint
+            properties:
+              code:
+                description: The error numeric code
+                type: integer
+              message:
+                description: The error's localized message
+                type: string
+              hint:
+                description: 'On certain types of error, a localized message will be sent to indicate a way to solve the error'
+                type: string
+            type: object

@@ -1,0 +1,35 @@
+title: Error
+x-stoplight:
+  id: sro2273x752gu
+type: object
+description: Describes encountered error details.
+required:
+  - error
+properties:
+  error:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        description: Error unique identification code.
+        x-stoplight:
+          id: z5d614k4n32bq
+      message:
+        type: string
+        description: 'Error readable message, localized, if possible, according to Request `Accept-Language` specifications.'
+        x-stoplight:
+          id: sjj5hv0y82dce
+      hint:
+        type: string
+        description: 'On certain types of error, a localized message will be sent to indicate a way to solve the error.'
+        x-stoplight:
+          id: uur9kt0mkj911
+    example:
+      code: 1337
+      message: Something went wrong because requirement X was not met.
+      hint: Field X does not match the field requirements
+    x-stoplight:
+      id: 98j1i12fs39aq

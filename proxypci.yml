@@ -1,0 +1,1041 @@
+openapi: 3.1.0
+x-stoplight:
+  id: 1g830q46p0lkr
+info:
+  version: 0.0.8
+  title: API Proxy PCI-DSS for payment cards (Beta7)
+  description: "ProxyPCI API|  |\r\n---------|----------|\r\n Use Cases Examples |  | \r\n\r\nThis API is used to \r\nTo use this API, a back-office has to create an Interbanking API key through its web portal. When creating or editing an API key, the back-office can specify the scopes available for this key, determining wether access to specific endpoints is authorized or not."
+  contact:
+    name: Skaleet
+    url: 'https://www.skaleet.com/en/'
+    email: api@skaleet.com
+  license:
+    name: Proprietary
+    url: 'https://www.skaleet.com/'
+servers:
+  - url: 'https://sandbox.skaleet.com/api/v1'
+    description: Skaleet sandbox environment.
+tags:
+  - name: Card
+  - name: Stock
+paths:
+  '/stock/{distributorId}':
+    parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Stock/properties/distributorId'
+    post:
+      security:
+        - ApiKey: []
+      summary: Add anonymous card in stock
+      operationId: stockAnonymousCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Stock'
+      tags:
+        - Stock
+      responses:
+        '201':
+          $ref: '#/components/responses/EmptyResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: awgp9otyzeoyj
+  '/stock/{distributorId}/{embossedReference}':
+    parameters:
+      - name: embossedReference
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Stock/properties/embossedReference'
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Stock/properties/distributorId'
+    patch:
+      security:
+        - ApiKey: []
+      summary: Update card status in stock
+      description: Change status from NEW to PENDING
+      operationId: updateAnonymousCardStock
+      tags:
+        - Stock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Request body to be defined
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: d0m2qz19wxfkh
+  '/stock/{distributorId}/{embossedReference}/consume':
+    parameters:
+      - name: embossedReference
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Stock/properties/embossedReference'
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Stock/properties/distributorId'
+    post:
+      security:
+        - ApiKey: []
+      summary: create a card from anonymous card stock
+      description: 'Activate a card, change status from READY_TO_CONSUME to CONSUMED'
+      operationId: createAnonymousCard
+      tags:
+        - Stock
+      requestBody:
+        $ref: '#/components/requestBodies/ConsumeRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PanAlias'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: 4ea7gq1ayoiop
+  '/stock/{distributorId}/{embossedReference}/error':
+    parameters:
+      - name: embossedReference
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Stock/properties/embossedReference'
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Stock/properties/distributorId'
+    patch:
+      security:
+        - ApiKey: []
+      summary: Set card in error status
+      description: Set a card in error status. A CONSUMED card can't be set to ERROR.
+      operationId: setCardError
+      tags:
+        - Stock
+      requestBody:
+        $ref: '#/components/requestBodies/ErrorRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: mxt5ylvnxwjob
+  /stock:
+    get:
+      security:
+        - ApiKey: []
+      summary: get all stocked cards
+      description: 'Get a list of all Anonymous cards with detailed information, with total of all cards recorded and total by card status.'
+      operationId: getAllStock
+      tags:
+        - Stock
+      responses:
+        '200':
+          $ref: '#/components/responses/AllStockResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: eygpo8scw5b6v
+  '/card/{cardAlias}/activate':
+    parameters:
+      - name: cardAlias
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/PanAlias/properties/alias'
+    patch:
+      security:
+        - ApiKey: []
+      summary: activate an existing card
+      description: Activate a card
+      operationId: activateCard
+      tags:
+        - Card
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codDemande:
+                  type: string
+                  example: ACTIV
+                codCanalAcquisition:
+                  type: string
+                serviceMetierPublicAller:
+                  $ref: '#/components/schemas/serviceMetierPublicAller'
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: zc1if7idkjyz8
+  '/card/{cardAlias}/oppose':
+    parameters:
+      - name: cardAlias
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/PanAlias/properties/alias'
+    patch:
+      security:
+        - ApiKey: []
+      summary: oppose an existing card
+      description: Oppose a card
+      operationId: opposeCard
+      tags:
+        - Card
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codDemande:
+                  type: string
+                  example: OPPOS
+                codCanalAcquisition:
+                  type: string
+                codMotifOpposition:
+                  type: string
+                  example: P
+                datPerteOuVol:
+                  type: string
+                  format: date
+                heurePerteOuVol:
+                  type: string
+                  pattern: '^\d{2}:\d{2}:\d{2}$'
+                  example: '05:37:55'
+                topPerteCodeConf:
+                  type: string
+                  example: '1'
+                codConserverCode:
+                  type: string
+                  example: NON
+                serviceMetierPublicAller:
+                  allOf:
+                    - $ref: '#/components/schemas/serviceMetierPublicAller'
+                    - type: object
+                      properties:
+                        idService:
+                          example: CSD006
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: eav8d7mmrqlnk
+  '/card/{cardAlias}/ncf':
+    parameters:
+      - name: cardAlias
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/PanAlias/properties/alias'
+    patch:
+      security:
+        - ApiKey: []
+      summary: Change NFC
+      description: enable or disable NFC on card
+      operationId: changeNFC
+      tags:
+        - Card
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codDemande:
+                  type: string
+                  enum:
+                    - SCACT
+                    - SCDES
+                  description: |
+                    "SCACT" to enable NFC, "SCDES" to disable NFC
+                  example: SCACT
+                codCanalAcquisition:
+                  type: string
+                serviceMetierPublicAller:
+                  allOf:
+                    - $ref: '#/components/schemas/serviceMetierPublicAller'
+                    - type: object
+                      properties:
+                        idService:
+                          example: CSD006
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: 6sbfr0gktl60o
+  '/card/{cardAlias}/outstanding':
+    parameters:
+      - name: cardAlias
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/PanAlias/properties/alias'
+    post:
+      security:
+        - ApiKey: []
+      summary: Get card outstanding
+      operationId: getOutstanding
+      tags:
+        - Card
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refExtContSuppDist:
+                  type: string
+                  example: AVS-CARTEBP-D080119-004
+                codCanalAcquisition:
+                  type: string
+                serviceMetierPublicAller:
+                  allOf:
+                    - $ref: '#/components/schemas/serviceMetierPublicAller'
+                    - type: object
+                      properties:
+                        idService:
+                          example: CSQ004
+      responses:
+        '200':
+          $ref: '#/components/responses/OutsandingResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: uppf10ie4xyas
+  '/card/{cardAlias}/associate':
+    parameters:
+      - name: cardAlias
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/PanAlias/properties/alias'
+    patch:
+      security:
+        - ApiKey: []
+      summary: update an existing card
+      description: Associate tagpayId to an existing card
+      operationId: associateCard
+      tags:
+        - Card
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cardId:
+                  type: integer
+                  example: 42
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdatedCard'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: vwl3x3conqg3c
+  '/card/{cardAlias}/featuresUpdate':
+    parameters:
+      - name: cardAlias
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/PanAlias/properties/alias'
+    patch:
+      security:
+        - ApiKey: []
+      summary: update card's features
+      description: Block or unblock card's features. All blocked features (and only them) must always be sent
+      operationId: featuresUpdate
+      tags:
+        - Card
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serviceMetierPublicAller:
+                  allOf:
+                    - $ref: '#/components/schemas/serviceMetierPublicAller'
+                    - type: object
+                      properties:
+                        idService:
+                          example: CSD023
+                refExtContSuppDist:
+                  type: string
+                  description: Contract reference
+                  example: '123456789'
+                codDemande:
+                  type: string
+                  enum:
+                    - BL-CR
+                    - BL-AN
+                  description: |
+                    "BL-CR" for a blocking request, "BL-AN" for an unblocking request
+                  example: BL-CR
+                codCanalAcquisition:
+                  type: string
+                  description: Request's acquisition channel. Optional
+                datDebutEffet:
+                  type: string
+                  description: 'Blocking beginning date. Format YYYYMMDD. Mandatory in blocking requests, not specified in unblocking requests'
+                  example: '20211001'
+                heureDebutEffet:
+                  type: string
+                  description: 'Blocking beginning time. Format hhmmss. Mandatory in blocking requests, not specified in unblocking requests'
+                  example: '153959'
+                datFinEffet:
+                  type: string
+                  description: 'Blocking ending date.Format YYYYMMDD. Optional in blocking requests, not specified in unblocking requests'
+                haureFinEffet:
+                  type: string
+                  description: 'Blocking ending time. Format hhmmss. Optional in blocking requests, not specified in unblocking requests'
+                listOfService:
+                  type: object
+                  properties:
+                    service:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          licService:
+                            type: string
+                            enum:
+                              - VAD
+                              - PMDOM
+                              - PMEUR
+                              - PMINT
+                              - RTDOM
+                              - RTEUR
+                              - RTINT
+                              - TOUT
+                            description: Blocked feature's label
+                            example: VAD
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: clsx817zpp943
+components:
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: authorization
+  requestBodies:
+    ErrorRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - errorCode
+              - errorMessage
+            properties:
+              errorCode:
+                type: string
+                description: Error code (max. 50 characters)
+                example: 123ABC
+              errorMessage:
+                type: string
+                description: Error description (max. 255 characters)
+                example: Some error occurred
+    ConsumeRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - cardId
+            properties:
+              cardId:
+                type: integer
+                description: Card ID in platform
+                example: 42
+              codDemande:
+                type: string
+                example: SCRPT
+              codCanalAcquisition:
+                type: string
+              refExtContMone:
+                type: string
+                example: AVS-CARTEBP-D080119-004
+              refExtContPort:
+                type: string
+                example: AVS-CARTEBP-D080119-004
+              refExtContSuppDist:
+                type: string
+                example: AVS-CARTEBP-D080119-004
+              codNiveauOffre:
+                type: string
+                example: '30'
+              refExtCompOffre:
+                type: string
+                example: JAAB
+              refExtTiers:
+                type: string
+                example: TIERS-AVS-080119-0001
+              topTiersDomicilie:
+                type: string
+                example: '1'
+              refExtCompteImput:
+                type: string
+                example: FR7616808000019658514236980
+              topCompteImputDomi:
+                type: string
+                example: '1'
+              refExtAdresse:
+                type: string
+                example: TIERS-AVS-080119-0001
+              refExtEntiteSuivi:
+                type: string
+                example: '1'
+              indPresenceTiers:
+                type: string
+              ligne3Carte:
+                type: string
+              serviceMetierPublicAller:
+                $ref: '#/components/schemas/ServiceMetier'
+              donneesTiers:
+                $ref: '#/components/schemas/DonneesTiers'
+              donneesAdresse:
+                $ref: '#/components/schemas/DonneesAdresse'
+              donneesComptes:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DonneesCompte'
+              plafondContrats:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlafondContrat'
+              servAutresScritCSs:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServicesAutres'
+  responses:
+    OutsandingResponse:
+      description: List of card outstandings
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - outstandings
+            properties:
+              outstandings:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - maximumAmount
+                    - currentAmount
+                    - duration
+                  properties:
+                    id:
+                      type: string
+                      example: OUT1
+                    maximumAmount:
+                      $ref: '#/components/schemas/Amount'
+                    currentAmount:
+                      $ref: '#/components/schemas/Amount'
+                    duration:
+                      $ref: '#/components/schemas/Duration'
+                    termDay:
+                      type: integer
+                      minimum: 1
+                      maximum: 31
+                    period:
+                      type: object
+                      required:
+                        - startDate
+                        - endDate
+                      properties:
+                        startDate:
+                          type: string
+                          format: date-time
+                        endDate:
+                          type: string
+                          format: date-time
+    PanAlias:
+      description: Card was consumed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PanAlias'
+    ErrorResponse:
+      description: Some error occured
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    EmptyResponse:
+      description: 'Operation succeed, nothing returned'
+      content:
+        application/json:
+          schema:
+            type: object
+    UpdatedCard:
+      description: Card was associated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PanAlias'
+    AllStockResponse:
+      description: retrieve cards list with total
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: object
+                properties:
+                  ALL_CARDS:
+                    type: integer
+                    description: Total of all retrieved cards
+                  NEW:
+                    type: integer
+                    description: Total of all cards in 'NEW' status
+                  PENDING:
+                    type: integer
+                    description: Total of all cards in 'PENDING' status
+                  READY_TO_CONSUME:
+                    type: integer
+                    description: Total of all cards in 'READY_TO_CONSUME' status
+                  CONSUMED:
+                    type: integer
+                    description: Total of all cards in 'CONSUMED' status
+                  ERROR:
+                    type: integer
+                    description: Total of all cards in 'ERROR' status
+              items:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AnonymousCard'
+  schemas:
+    serviceMetierPublicAller:
+      type: object
+      properties:
+        refExtEmetteur:
+          type: string
+          example: '16808'
+        idService:
+          type: string
+          example: CSD002
+        version:
+          type: string
+          example: '1.0'
+        userid:
+          type: string
+          example: ADM12345
+        codLang:
+          type: string
+          example: fr_FR
+        refExtDemSMP:
+          type: string
+          example: TestActication1101_1
+      x-stoplight:
+        id: fdfi6unwvvwzy
+    ServiceMetier:
+      type: object
+      properties:
+        refExtEmetteur:
+          type: string
+          example: '16808'
+        idService:
+          type: string
+          example: CSD025
+        version:
+          type: string
+          example: '1'
+        userid:
+          type: string
+          example: ADM
+        codLang:
+          type: string
+          example: fr_FR
+        refExtDemSMP:
+          type: string
+          example: InstantIssuing-D080119-004
+      x-stoplight:
+        id: vx6a2zi5em1il
+    DonneesTiers:
+      type: object
+      properties:
+        civiliteTiers:
+          type: string
+        nomTiers:
+          type: string
+          example: BLANCHET
+        prenomTiers:
+          type: string
+          example: MAGALIE
+        nomNaissance:
+          type: string
+        datNaissance:
+          type: string
+          example: '19790421'
+        lieuNaissance:
+          type: string
+          example: ORLEANS
+        departmtNaissance:
+          type: string
+          example: '99'
+        codPaysNaissance:
+          type: string
+          example: '250'
+        nationaliteTiers:
+          type: string
+        numTelephonePrio:
+          type: string
+          example: '0033626408999'
+        numTelephone2:
+          type: string
+          example: '0033626999310'
+        numTelephone3:
+          type: string
+        numTelephone4:
+          type: string
+        communeResidence:
+          type: string
+        codPaysResidence:
+          type: string
+        datDebRelationBqe:
+          type: string
+        refExtSegmtClient:
+          type: string
+        refExtSegmtMarche:
+          type: string
+        refExtTypProfRisq:
+          type: string
+        codTypResident:
+          type: string
+        statutResidMonet:
+          type: string
+        prenomDeuxTiers:
+          type: string
+        nomMarital:
+          type: string
+        topSituationTiers:
+          type: string
+          example: '0'
+        adresseMail:
+          type: string
+        codLang:
+          type: string
+          example: FR
+        codAgentEco:
+          type: string
+        codClasseClient:
+          type: string
+          example: '00'
+        zoneInfoTiers:
+          type: string
+      x-stoplight:
+        id: fwoaaw61kbi80
+    DonneesAdresse:
+      type: object
+      properties:
+        ligne1Adresse:
+          type: string
+          example: MAGALIE BLANCHET
+        ligne2Adresse:
+          type: string
+        ligne3Adresse:
+          type: string
+        ligne4Adresse:
+          type: string
+          example: 45 AVENUE CARNOT
+        ligne5Adresse:
+          type: string
+        ligne6Adresse:
+          type: string
+          example: 67000 STRASBOURG
+        codPaysAdresse:
+          type: string
+          example: FRA
+        indQualAdressse:
+          type: string
+        datFinAdresse:
+          type: string
+          example: '99991231'
+      x-stoplight:
+        id: 4idhuqkxko41g
+    DonneesCompte:
+      type: object
+      properties:
+        refExtCompte:
+          type: string
+          example: FR7616808000019658514236980
+        codTypeCompte:
+          type: string
+          example: '0'
+        topCompteDomi:
+          type: string
+          example: '1'
+        codTypFormatCpte:
+          type: string
+          example: '1'
+        numeroCompte:
+          type: string
+          example: FR7616808000019658514236980
+        intituleCompte:
+          type: string
+          example: MAGALIE
+        codDeviseCpte:
+          type: string
+          example: EUR
+        refExtEntiteSuivi:
+          type: string
+        idPartenaireImput:
+          type: string
+        codRoleCpteImput:
+          type: string
+        topUtilPgmComm1:
+          type: string
+        licPgmComm1:
+          type: string
+        topUtilPgmComm2:
+          type: string
+        licPgmComm2:
+          type: string
+        topUtilPgmComm3:
+          type: string
+        licPgmComm3:
+          type: string
+        datClotureCpte:
+          type: string
+          example: '99991231'
+      x-stoplight:
+        id: bmlhpdn3y832t
+    PlafondContrat:
+      type: object
+      properties:
+        codPlafond:
+          type: string
+          example: PA0001
+        mntPlafNego:
+          type: string
+          example: '300000'
+        nbrPlafNego:
+          type: string
+          example: '0'
+        codDevisePlafond:
+          type: string
+          example: '978'
+        nbrDecimalePlafond:
+          type: string
+          example: '2'
+      x-stoplight:
+        id: d45axoaw5ijzx
+    ServicesAutres:
+      type: object
+      properties:
+        codServiceDist:
+          type: string
+          example: CVISU
+        zoneInfoSerig:
+          type: string
+        codVisuel:
+          type: string
+          example: DOCA
+        codSerigraphie1:
+          type: string
+        codSerigraphie2:
+          type: string
+        codTypeReleveDifPo:
+          type: string
+        codTypeReleveDifCt:
+          type: string
+      x-stoplight:
+        id: covlnajd75lu0
+    PanAlias:
+      type: object
+      required:
+        - alias
+        - expirationDate
+        - panDisplay
+      properties:
+        alias:
+          type: string
+          readOnly: true
+          description: Card alias
+          example: 3316fe25-d320-4201-9759-9476df4909dd
+        expirationDate:
+          type: string
+          readOnly: true
+          description: Card expiration date
+          example: 12/22
+        panDisplay:
+          type: string
+          readOnly: true
+          description: Displayable PAN
+          example: 123456XXXXXXXX12
+      x-stoplight:
+        id: s1y34csd7td0v
+    Stock:
+      type: object
+      required:
+        - embossedReference
+        - distributorId
+      properties:
+        embossedReference:
+          type: string
+          description: The embossedReference of the card in stock
+        distributorId:
+          type: string
+          description: The distributor id in platform
+          readOnly: true
+        alias:
+          $ref: '#/components/schemas/PanAlias/properties/alias'
+        panDisplay:
+          type: string
+          readOnly: true
+          example: 123456XXXXXXXX12
+          description: hidden PAN
+        status:
+          type: string
+          default: NEW
+          readOnly: true
+          enum:
+            - NEW
+            - PENDING
+            - CONSUMED
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      x-stoplight:
+        id: p6yfuc6tae6vi
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 42
+        message:
+          type: string
+          example: Something wrong occured
+      x-stoplight:
+        id: jxnhomhsi0dhn
+    AnonymousCard:
+      type: object
+      required:
+        - embossedReference
+        - distributorId
+      properties:
+        embossedReference:
+          type: string
+          description: The embossed reference of the card in stock
+        distributorId:
+          type: string
+          description: The distributor id in platform
+        status:
+          type: string
+          default: NEW
+          enum:
+            - NEW
+            - PENDING
+            - READY_TO_CONSUME
+            - CONSUMED
+            - ERROR
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        errorCode:
+          type: integer
+        errorMessage:
+          type: string
+      x-stoplight:
+        id: 6jifdlq5kaaff
+    Currency:
+      description: 'Three-letter ISO currency code, in uppercase. Read more at https://fr.wikipedia.org/wiki/ISO_4217.'
+      type: string
+      format: iso-4217
+      example: EUR
+      x-stoplight:
+        id: xp8p78y9ecv5o
+    Amount:
+      type: object
+      required:
+        - value
+        - currency
+      properties:
+        value:
+          description: Amount without separator and symbol
+          type: integer
+          example: 1337
+        currency:
+          $ref: '#/components/schemas/Currency'
+      x-stoplight:
+        id: kxj4d1jy0ybt5
+    Periodicity:
+      description: Available periodicities
+      type: string
+      enum:
+        - DAY
+        - WEEK
+        - MONTH
+      example: DAY
+      x-stoplight:
+        id: az5q3zbqpmftc
+    Duration:
+      type: object
+      properties:
+        value:
+          type: integer
+          example: 42
+        unit:
+          $ref: '#/components/schemas/Periodicity'
+      x-stoplight:
+        id: yo21aju7dm6lp
+x-internal: true

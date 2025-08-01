@@ -1,0 +1,10 @@
+title: Phone
+x-stoplight:
+  id: sdoapknabzmhq
+type: string
+description: |
+  Phone number in international format (E.164)
+
+  (without plus sign, dashes or spaces)
+example: '33612354678'
+pattern: '^[0-9]+$'

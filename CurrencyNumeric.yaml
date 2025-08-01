@@ -1,0 +1,10 @@
+title: Currency (numeric)
+x-stoplight:
+  id: no4b2lnjx99vi
+type: string
+description: Currency's ISO 4217 numeric code
+pattern: '^[0-9]{3}$'
+minLength: 3
+maxLength: 3
+readOnly: true
+example: '978'

@@ -1,0 +1,1171 @@
+swagger: '2.0'
+x-stoplight:
+  id: djq0wy17qi7yv
+x-internal: true
+info:
+  title: Moneypot API
+  description: Moneypot API.
+  version: 1.0.1
+  contact:
+    name: Skaleet
+    url: 'https://www.skaleet.com/en/'
+    email: api@skaleet.com
+  license:
+    name: Proprietary
+    url: 'https://www.skaleet.com/'
+host: sandbox.skaleet.com
+schemes:
+  - https
+basePath: /api/moneypot/v1
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  OAuth2:
+    description: |
+      ### Pre-requisites
+      To access this API you must have a registered distributor account on the platform.
+      The distributor will be the retailer of these moneypots.
+      Please see the platform documentation to find out how to obtain the login and password for the user account you wish to use to consume the platform's API services.
+
+
+
+      ### Obtaining an Access Token
+      In order to obtain an Access Token, you must `POST` to the URL **https://99906.tagpay.fr/api/moneypot/v1/oauth2/token** using a `Content-type: application/json` header and a JSON body containing the following items:
+
+      <table>
+      <tr><th>grant_type</th><td>string</td><td>MUST be "client_credentials"</td></tr>
+      <tr><th>client_id</th><td>string</td><td>the distributor's login</td></tr>
+      <tr><th>client_secret</th><td>string</td><td>the distributor password</td></tr>
+      </table>
+
+
+
+      #### Request body example
+
+      ```json
+      {
+          "grant_type": "client_credentials",
+          "client_id": "myApiDistributor",
+          "client_secret": "verySecurePassword",
+      }
+      ```
+
+      Calling the URL as described above will yield a response similar to this (actual token cut off with `[...]` for brevity):
+      ```json
+        {
+            "token_type": "Bearer",
+            "expires_in": 10800,
+            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImVjNTY0MzI5ODNiMzJj[...]"
+        }
+      ```
+
+
+
+      ### Now that you have an Access Token
+      The thus obtained access token must be provided in the HTTP request header `Authorization` **for each API call** prefixed by the word `Bearer ` (**with** the trailing space):
+
+      `Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImVjNTY0MzI5ODNiMzJj[...]`
+
+
+
+      ### Access token lifetime
+      The access token has the **same lifetime as an administrator's session** (defined in the platform's configuration), with the noteable difference that **it's lifetime is not extended** upon each API action.
+
+      Therefore, the access token will expire after it's predefined lifetime has expired, resulting in a `HTTP 401 Unauthorized` response with the message `Access token is invalid`.
+
+      It is the API consumer's responsibility to detect such response, to obtain a fresh access token using the process described above, and optionally to issue the failed request anew.
+
+      <br>
+
+      ### OAuth2 schema
+    type: oauth2
+    flow: application
+    tokenUrl: 'https://99906.tagpay.fr/api/moneypot/v1/oauth2/token'
+    scopes:
+      none: No scope is required
+security:
+  - OAuth2: []
+tags:
+  - name: Contribution
+  - name: Contributor
+  - name: Creator
+  - name: Moneypot
+paths:
+  /moneypot:
+    post:
+      security:
+        - OAuth2: []
+      summary: Create a new moneypot
+      operationId: MoneypotCreate
+      tags:
+        - Moneypot
+      parameters:
+        - name: CreateMoneypotRequest
+          in: body
+          description: Moneypot creation request.
+          required: true
+          schema:
+            $ref: '#/definitions/MoneypotCreateRequest'
+      responses:
+        '200':
+          description: Moneypot creation response
+          schema:
+            $ref: '#/definitions/MoneypotCreateResponse'
+        '400':
+          description: Bad request parameters
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: The server is currently temporarily unavailable
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      x-stoplight:
+        id: fyyp04rqfnxqu
+  '/moneypot/{moneypotId}/contributionEligibility':
+    parameters:
+      - name: moneypotId
+        in: path
+        description: Moneypot ID
+        required: true
+        type: string
+    post:
+      security:
+        - OAuth2: []
+      summary: Test eligibility for contribution to a moneypot
+      operationId: MoneypotContributionEligibility
+      tags:
+        - Contribution
+      parameters:
+        - name: ContributionEligibilityRequest
+          in: body
+          description: Contribution eligibility request
+          required: true
+          schema:
+            $ref: '#/definitions/MoneypotContributionEligibilityRequest'
+      responses:
+        '200':
+          description: Contribution eligibility response
+          schema:
+            $ref: '#/definitions/MoneypotContributionEligibilityResponse'
+        '400':
+          description: Bad request parameters
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: The server is currently temporarily unavailable
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      x-stoplight:
+        id: 5xdbpfwrm7u2e
+  '/contribution/{contributionId}/refund':
+    parameters:
+      - name: contributionId
+        in: path
+        description: Contribution id
+        required: true
+        type: string
+    put:
+      security:
+        - OAuth2: []
+      summary: Refund a contribution
+      operationId: ContributionRefund
+      tags:
+        - Contribution
+      parameters:
+        - name: ContributionRefundRequest
+          in: body
+          description: Contribution refund request
+          required: true
+          schema:
+            $ref: '#/definitions/ContributionRefundRequest'
+      responses:
+        '200':
+          description: Contribution refund response
+          schema:
+            $ref: '#/definitions/ContributionRefundResponse'
+        '400':
+          description: Bad request parameters
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: The server is currently temporarily unavailable
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      x-stoplight:
+        id: qo5fr9ye95bw5
+  '/moneypot/{moneypotId}/cancel':
+    parameters:
+      - name: moneypotId
+        in: path
+        description: Moneypot ID
+        required: true
+        type: string
+    put:
+      security:
+        - OAuth2: []
+      summary: Cancel a moneypot
+      operationId: MoneypotCancel
+      tags:
+        - Moneypot
+      parameters:
+        - name: CancelMoneypotRequest
+          in: body
+          description: Moneypot cancellation request
+          required: true
+          schema:
+            $ref: '#/definitions/MoneypotCancelRequest'
+      responses:
+        '200':
+          description: Moneypot cancellation response
+          schema:
+            $ref: '#/definitions/MoneypotCancelResponse'
+        '400':
+          description: Bad request parameters
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: The server is currently temporarily unavailable
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      x-stoplight:
+        id: 2eiqehsd95o63
+  '/moneypot/{moneypotId}/status':
+    parameters:
+      - name: moneypotId
+        in: path
+        description: Moneypot ID
+        required: true
+        type: string
+    put:
+      security:
+        - OAuth2: []
+      summary: Change a moneypot status
+      operationId: MoneypotChangeStatus
+      tags:
+        - Moneypot
+      parameters:
+        - name: ChangeMoneypotStatusRequest
+          in: body
+          description: Change Moneypot status request
+          required: true
+          schema:
+            $ref: '#/definitions/MoneypotChangeStatusRequest'
+      responses:
+        '200':
+          description: Change moneypot status response
+          schema:
+            $ref: '#/definitions/MoneypotChangeStatusResponse'
+        '400':
+          description: Bad request parameters
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: The server is currently temporarily unavailable
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      x-stoplight:
+        id: a49okum0n80x1
+  '/moneypot/{moneypotId}/disburse':
+    parameters:
+      - name: moneypotId
+        in: path
+        description: Moneypot ID
+        required: true
+        type: string
+    put:
+      security:
+        - OAuth2: []
+      summary: Disburse a moneypot
+      operationId: MoneypotDisburse
+      tags:
+        - Moneypot
+      parameters:
+        - name: DisburseMoneypotRequest
+          in: body
+          description: Moneypot disbursement request
+          required: true
+          schema:
+            $ref: '#/definitions/MoneypotDisburseRequest'
+      responses:
+        '200':
+          description: Moneypot disbursement response
+          schema:
+            $ref: '#/definitions/MoneypotDisburseResponse'
+        '400':
+          description: Bad request parameters
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: The server is currently temporarily unavailable
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      x-stoplight:
+        id: qmyh6fpguq4p7
+  '/moneypot/{moneypotId}':
+    parameters:
+      - name: moneypotId
+        in: path
+        description: Moneypot ID
+        required: true
+        type: string
+    get:
+      security:
+        - OAuth2: []
+      summary: Get information on moneypot
+      operationId: MoneypotInfo
+      tags:
+        - Moneypot
+      parameters:
+        - name: requesterId
+          in: query
+          required: true
+          type: string
+          description: Requester ID
+        - name: from
+          in: query
+          description: Pagination start position (from 0)
+          type: integer
+          minimum: 0
+          default: 0
+        - name: size
+          in: query
+          description: Page size (default 10)
+          type: integer
+          minimum: 0
+          maximum: 100
+          default: 10
+        - name: sort
+          in: query
+          description: Attribute to sort with
+          type: string
+        - name: direction
+          in: query
+          description: Direction to sort (default "ASC")
+          type: string
+          enum:
+            - ASC
+            - DESC
+      responses:
+        '200':
+          description: Moneypot information response
+          schema:
+            $ref: '#/definitions/MoneypotInfoResponse'
+        '400':
+          description: Bad request parameters
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: The server is currently temporarily unavailable
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      x-stoplight:
+        id: 9f3l30qpsyrnf
+  '/creator/{creatorId}':
+    parameters:
+      - name: creatorId
+        in: path
+        description: creator id
+        required: true
+        type: string
+    get:
+      security:
+        - OAuth2: []
+      summary: Get information on creator
+      operationId: CreatorInfo
+      tags:
+        - Creator
+      parameters:
+        - name: requesterId
+          in: query
+          required: true
+          type: string
+          description: Requester ID
+        - name: status
+          in: query
+          description: Moneypot status filter. "ALL" as status to get all status
+          default: OPENED
+          type: string
+          enum:
+            - OPENED
+            - BLOCKED
+            - CLOSED
+            - ALL
+        - name: from
+          in: query
+          description: Pagination start position (from 0)
+          type: integer
+          minimum: 0
+          default: 0
+        - name: size
+          in: query
+          description: Page size (default 10)
+          type: integer
+          minimum: 0
+          maximum: 100
+          default: 10
+        - name: sort
+          in: query
+          description: Attribute to sort with
+          type: string
+        - name: direction
+          in: query
+          description: Direction to sort (default "ASC")
+          type: string
+          enum:
+            - ASC
+            - DESC
+      responses:
+        '200':
+          description: Creator information response
+          schema:
+            $ref: '#/definitions/CreatorInfoResponse'
+        '400':
+          description: Bad request parameters
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: The server is currently temporarily unavailable
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      x-stoplight:
+        id: mw0gn4lpvpqni
+  '/contributor/{contributorId}':
+    parameters:
+      - name: contributorId
+        in: path
+        description: contributor id
+        required: true
+        type: string
+    get:
+      security:
+        - OAuth2: []
+      summary: Get information on contributor
+      operationId: ContributorInfo
+      tags:
+        - Contributor
+      parameters:
+        - name: requesterId
+          in: query
+          required: true
+          type: string
+          description: Requester ID
+        - name: from
+          in: query
+          description: Pagination start position (from 0)
+          type: integer
+          minimum: 0
+          default: 0
+        - name: size
+          in: query
+          description: Page size (default 10)
+          type: integer
+          minimum: 0
+          maximum: 100
+          default: 10
+        - name: sort
+          in: query
+          description: Attribute to sort with
+          type: string
+        - name: direction
+          in: query
+          description: Direction to sort (default "ASC")
+          type: string
+          enum:
+            - ASC
+            - DESC
+      responses:
+        '200':
+          description: Contributor information response
+          schema:
+            $ref: '#/definitions/ContributorInfoResponse'
+        '400':
+          description: Bad request parameters
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: The server is currently temporarily unavailable
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      x-stoplight:
+        id: 8fdc2n0aqh405
+definitions:
+  MoneypotCreateRequest:
+    type: object
+    required:
+      - mode
+      - creator
+      - requesterId
+      - currency
+    properties:
+      mode:
+        $ref: '#/definitions/OperationMode'
+      requesterId:
+        $ref: '#/definitions/RequesterId'
+      currency:
+        $ref: '#/definitions/Currency'
+      creator:
+        type: object
+        required:
+          - externalId
+        properties:
+          externalId:
+            $ref: '#/definitions/ExternalId'
+          iban:
+            type: string
+            description: |
+              creator's IBAN
+
+              Required if `externalId` is not known from platform
+          firstName:
+            type: string
+            description: |
+              creator's first name
+
+              Required if `externalId` is not known from platform.
+              Will update currently stored firstName if given.
+            example: John
+          lastName:
+            type: string
+            description: |
+              creator's last name
+
+              Required if `externalId` is not known from platform.
+              Will update currently stored lastName if given.
+            example: Doe
+          birthdate:
+            type: string
+            format: date
+            description: |
+              creator's birthdate
+
+              Required if `externalId` is not known from platform.
+              Will update currently stored birthdate if given.
+          email:
+            type: string
+            format: email
+            example: john.doe@example.com
+            description: |
+              creator's email address
+
+              Required if `externalId` is not known from platform.
+              Will update currently stored email if given.
+          nationality:
+            type: string
+            example: French
+            description: |
+              creator's nationality
+
+              Required if `externalId` is not known from platform.
+              Will update currently stored nationality if given.
+          countryOfResidence:
+            type: string
+            example: FR
+            description: |
+              creator's country of residence (ISO Alpha2)
+
+              Required if `externalId` is not known from platform.
+              Will update currently stored country of residence if given.
+    x-stoplight:
+      id: l5zb46skyyz2x
+  MoneypotCreateResponse:
+    type: object
+    required:
+      - moneypot
+    properties:
+      moneypot:
+        $ref: '#/definitions/Moneypot'
+    x-stoplight:
+      id: e3h6vkvcxc9u1
+  ErrorResponse:
+    type: object
+    required:
+      - error
+    properties:
+      error:
+        $ref: '#/definitions/Error'
+    x-stoplight:
+      id: 7qfmuqem36ry8
+  MoneypotContributionEligibilityRequest:
+    type: object
+    required:
+      - requesterId
+      - contributor
+      - transaction
+    properties:
+      requesterId:
+        $ref: '#/definitions/RequesterId'
+      contributor:
+        type: object
+        required:
+          - firstName
+          - lastName
+          - birthdate
+          - email
+        properties:
+          id:
+            $ref: '#/definitions/TierId'
+          externalId:
+            $ref: '#/definitions/ExternalId'
+          firstName:
+            type: string
+            description: contributor's first name
+            example: John
+          lastName:
+            type: string
+            description: contributor's last name
+            example: Doe
+          birthdate:
+            type: string
+            format: date
+            description: contributor's birthdate
+          email:
+            type: string
+            format: email
+            example: john.doe@example.com
+            description: contributor's email address
+          nationality:
+            type: string
+            example: French
+            description: contributor's nationality
+          countryOfResidence:
+            type: string
+            example: FR
+            description: contributor's country of residence (ISO Alpha2)
+      transaction:
+        $ref: '#/definitions/PSPTransaction'
+    x-stoplight:
+      id: hjxtx1oar19wz
+  MoneypotContributionEligibilityResponse:
+    type: object
+    required:
+      - contribution
+      - moneypotBalance
+      - moneypotRemainingBalance
+    properties:
+      contribution:
+        $ref: '#/definitions/Contribution'
+      moneypotBalance:
+        $ref: '#/definitions/Amount'
+      moneypotRemainingBalance:
+        $ref: '#/definitions/Amount'
+    x-stoplight:
+      id: fsrflcewcnlu2
+  ContributionRefundRequest:
+    type: object
+    required:
+      - mode
+      - requesterId
+    properties:
+      mode:
+        $ref: '#/definitions/OperationMode'
+      chargeMode:
+        $ref: '#/definitions/ChargeMode'
+      requesterId:
+        $ref: '#/definitions/RequesterId'
+      amount:
+        $ref: '#/definitions/Amount'
+        description: 'Amount to refund, if empty will refund whole contribution'
+    x-stoplight:
+      id: k45djk44c4y4f
+  ContributionRefundResponse:
+    type: object
+    required:
+      - contribution
+    properties:
+      contribution:
+        $ref: '#/definitions/Contribution'
+      refund:
+        $ref: '#/definitions/Contribution'
+    x-stoplight:
+      id: swaenac5nxvko
+  MoneypotCancelRequest:
+    type: object
+    required:
+      - requesterId
+      - mode
+    properties:
+      requesterId:
+        $ref: '#/definitions/RequesterId'
+      mode:
+        $ref: '#/definitions/OperationMode'
+      chargeMode:
+        $ref: '#/definitions/ChargeMode'
+    x-stoplight:
+      id: 67slk6va9fbsk
+  MoneypotCancelResponse:
+    type: object
+    required:
+      - transaction
+    properties:
+      transaction:
+        $ref: '#/definitions/Operation'
+    x-stoplight:
+      id: kqfidz76ou0ja
+  MoneypotChangeStatusRequest:
+    type: object
+    required:
+      - mode
+      - requesterId
+      - action
+    properties:
+      mode:
+        $ref: '#/definitions/OperationMode'
+      requesterId:
+        $ref: '#/definitions/RequesterId'
+      action:
+        $ref: '#/definitions/MoneypotChangeStatusAction'
+      reason:
+        type: string
+        description: Moneypot change status reason.
+    x-stoplight:
+      id: 9fz09qobpx7n7
+  MoneypotChangeStatusResponse:
+    type: object
+    required:
+      - status
+    properties:
+      status:
+        $ref: '#/definitions/MoneypotStatus'
+    x-stoplight:
+      id: v858m61i5fr65
+  MoneypotDisburseRequest:
+    type: object
+    required:
+      - requesterId
+      - mode
+    properties:
+      mode:
+        $ref: '#/definitions/OperationMode'
+      chargeMode:
+        $ref: '#/definitions/ChargeMode'
+      requesterId:
+        $ref: '#/definitions/RequesterId'
+      iban:
+        type: string
+        description: 'recipient''s IBAN, if empty will use creator''s IBAN'
+      purpose:
+        type: string
+        description: reason to disburse
+      userReference:
+        type: string
+        description: user reference
+      amount:
+        $ref: '#/definitions/Amount'
+        description: 'amount to disburse, if empty will disburse whole moneypot'
+    x-stoplight:
+      id: zk0ors3kpu648
+  MoneypotDisburseResponse:
+    type: object
+    required:
+      - transaction
+      - status
+    properties:
+      transaction:
+        $ref: '#/definitions/Operation'
+      status:
+        $ref: '#/definitions/MoneypotStatus'
+      iban:
+        type: string
+        description: IBAN
+    x-stoplight:
+      id: vq7ost4t9kbdm
+  MoneypotInfoResponse:
+    $ref: '#/definitions/MoneypotWithContributions'
+    x-stoplight:
+      id: 5h0vtryg39kp4
+  CreatorInfoResponse:
+    type: object
+    required:
+      - creator
+      - moneypots
+    properties:
+      creator:
+        $ref: '#/definitions/Creator'
+      moneypots:
+        type: array
+        items:
+          $ref: '#/definitions/MoneypotWithContributions'
+    x-stoplight:
+      id: pr7exo3lakopz
+  ContributorInfoResponse:
+    type: object
+    required:
+      - contributor
+      - contributions
+    properties:
+      contributor:
+        $ref: '#/definitions/Tier'
+      contributions:
+        $ref: '#/definitions/ContributionCollection'
+    x-stoplight:
+      id: 53ncerr6tqd3c
+  OperationMode:
+    type: string
+    enum:
+      - PREAUTH
+      - TRANSACTION
+    x-stoplight:
+      id: 9f73665uqn2jm
+  RequesterId:
+    type: string
+    description: Requester ID
+    x-stoplight:
+      id: n8p4lzxvdt3bl
+  Currency:
+    description: Numeric iso code of associated currency (3 digits)
+    type: string
+    minLength: 3
+    maxLength: 3
+    example: '978'
+    x-stoplight:
+      id: yba7od6xa8azt
+  ExternalId:
+    type: string
+    description: Tier ID in the distant system
+    x-stoplight:
+      id: t7xpsms9r86cc
+  Moneypot:
+    type: object
+    required:
+      - id
+      - status
+      - creatorId
+      - balance
+      - creationDate
+    properties:
+      id:
+        $ref: '#/definitions/MoneypotId'
+      status:
+        $ref: '#/definitions/MoneypotStatus'
+      creatorId:
+        $ref: '#/definitions/TierId'
+      balance:
+        $ref: '#/definitions/Amount'
+      creationDate:
+        type: string
+        format: date-time
+    x-stoplight:
+      id: bd05ws5jrpm49
+  Error:
+    type: object
+    required:
+      - code
+      - functionalMessage
+    properties:
+      code:
+        type: integer
+        description: error code
+        example: 1234
+      functionalMessage:
+        type: string
+        description: This is a functional error message that can be displayed to the end user
+        example: 'Dear user, sorry but something went wrong'
+      technicalMessage:
+        type: string
+        description: This is a technical error message to be keep secret in order to help diagnostic
+        example: something went wrong because requirement X was not met.
+    x-stoplight:
+      id: 7s8jmvrztxoea
+  TierId:
+    type: string
+    description: Tier ID
+    example: CLI42
+    x-stoplight:
+      id: 0n9y7do728maj
+  PSPTransaction:
+    type: object
+    description: Information on the transaction in the payment service provider's system
+    required:
+      - id
+      - date
+      - amount
+      - paymentMethod
+    properties:
+      id:
+        type: string
+        description: the transaction ID in the PSP system
+        example: ABCDE12345
+      date:
+        type: string
+        format: date-time
+        description: the transaction date in the PSP system
+      amount:
+        $ref: '#/definitions/Amount'
+      paymentMethod:
+        $ref: '#/definitions/PaymentMethod'
+    x-stoplight:
+      id: pog0n1n2v2820
+  Contribution:
+    type: object
+    allOf:
+      - $ref: '#/definitions/Operation'
+      - type: object
+        required:
+          - contributorId
+          - paymentMethod
+          - moneypotId
+          - contributor
+          - anonymous
+          - amountHidden
+        properties:
+          moneypotId:
+            $ref: '#/definitions/MoneypotId'
+          paymentMethod:
+            $ref: '#/definitions/PaymentMethod'
+          contributor:
+            $ref: '#/definitions/Tier'
+          refundTransaction:
+            $ref: '#/definitions/Operation'
+          anonymous:
+            type: boolean
+            description: |
+              Should contributor name be hidden to others ?
+          amountHidden:
+            type: boolean
+            description: |
+              Should contribution amount be hidden to others ?
+    x-stoplight:
+      id: 2i2pr7gp818g3
+  Amount:
+    type: object
+    required:
+      - value
+      - currency
+    properties:
+      value:
+        type: integer
+        example: 1337
+      currency:
+        $ref: '#/definitions/Currency'
+      display:
+        type: string
+        example: '13,37 €'
+    x-stoplight:
+      id: op622j6533viu
+  ChargeMode:
+    type: string
+    default: CLIENT
+    description: |
+      Determine whether charges must be applied to the CLIENT (creator or contributor) or to the DISTRIBUTOR.
+      If "NONE" is sent, no charges will be applied.
+    enum:
+      - NONE
+      - CLIENT
+      - DISTRIBUTOR
+    x-stoplight:
+      id: j4c7dx6141xqh
+  Operation:
+    type: object
+    required:
+      - id
+      - date
+      - amount
+    properties:
+      id:
+        $ref: '#/definitions/OperationId'
+      date:
+        type: string
+        format: date-time
+        description: operation date and time
+      amount:
+        $ref: '#/definitions/Amount'
+      fees:
+        $ref: '#/definitions/Charge'
+    x-stoplight:
+      id: pgvprj5w51qp1
+  MoneypotChangeStatusAction:
+    type: string
+    enum:
+      - BLOCK
+      - UNBLOCK
+      - CLOSE
+      - DEBIT_BLOCKED
+      - CREDIT_BLOCKED
+    x-stoplight:
+      id: m5zu186mzhnnd
+  MoneypotStatus:
+    type: string
+    enum:
+      - OPENED
+      - BLOCKED
+      - CLOSED
+      - DEBIT_BLOCKED
+      - CREDIT_BLOCKED
+    x-stoplight:
+      id: lhqa32i8zn7pf
+  MoneypotWithContributions:
+    type: object
+    required:
+      - moneypot
+      - contributions
+      - disbursementTransactions
+    properties:
+      moneypot:
+        $ref: '#/definitions/Moneypot'
+      contributions:
+        $ref: '#/definitions/ContributionCollection'
+      disbursementTransactions:
+        type: array
+        items:
+          $ref: '#/definitions/Operation'
+      cancelTransaction:
+        $ref: '#/definitions/Operation'
+    x-stoplight:
+      id: 9hcgj715dyk68
+  Creator:
+    type: object
+    allOf:
+      - $ref: '#/definitions/Tier'
+      - type: object
+        required:
+          - externalId
+          - iban
+        properties:
+          iban:
+            type: string
+            description: IBAN
+    x-stoplight:
+      id: 967f77vszfwec
+  Tier:
+    type: object
+    required:
+      - id
+      - firstName
+      - lastName
+      - birthdate
+      - email
+    properties:
+      id:
+        $ref: '#/definitions/TierId'
+      externalId:
+        $ref: '#/definitions/ExternalId'
+      firstName:
+        type: string
+        description: tier's first name
+        example: John
+      lastName:
+        type: string
+        description: tier's last name
+        example: Doe
+      birthdate:
+        type: string
+        format: date
+        description: tier's birthdate
+      email:
+        type: string
+        format: email
+        example: john.doe@example.com
+        description: tier's email address
+      nationality:
+        type: string
+        example: French
+        description: tier's nationality
+      countryOfResidence:
+        type: string
+        example: FR
+        description: tier's country of residence (ISO Alpha2)
+    x-stoplight:
+      id: 6b84axg6l7sbl
+  ContributionCollection:
+    type: object
+    description: Sorted and paginated list of contributions
+    allOf:
+      - $ref: '#/definitions/Collection'
+      - type: object
+        properties:
+          items:
+            type: array
+            description: collection of contributions
+            items:
+              $ref: '#/definitions/Contribution'
+    x-stoplight:
+      id: eyj4yssjouxsx
+  MoneypotId:
+    type: string
+    description: Moneypot ID
+    example: '1337'
+    x-stoplight:
+      id: 5u1wqs20xbgtm
+  PaymentMethod:
+    type: string
+    description: Payment method used to make the transaction
+    enum:
+      - CARD
+      - TRANSFER
+    x-stoplight:
+      id: dkgh1u3y1y71k
+  OperationId:
+    type: string
+    description: operation ID
+    example: TRX6789
+    x-stoplight:
+      id: r4mmjm7quafmz
+  Charge:
+    type: object
+    required:
+      - rate
+      - fixedAmount
+      - total
+    description: 'A charge (fee, commission or tax) in the form of "rate * X + fixedAmount = total"'
+    properties:
+      rate:
+        type: number
+        description: variable part of the charge
+        minimum: 0
+        maximum: 1
+        example: 0.04
+      fixedAmount:
+        $ref: '#/definitions/Amount'
+        description: fixed part of the charge
+      total:
+        $ref: '#/definitions/Amount'
+        description: the charge amount ( = "rate * X + fixedAmount")
+    x-stoplight:
+      id: yxt753uwcnsxe
+  Collection:
+    type: object
+    required:
+      - items
+      - from
+      - size
+    properties:
+      items:
+        type: array
+        items:
+          type: object
+      count:
+        type: integer
+        description: the total count of objects in collection
+        minimum: 0
+      from:
+        type: integer
+        description: Pagination start (from 0)
+        minimum: 0
+        default: 0
+      size:
+        type: integer
+        description: Number of results to display (default 10)
+        minimum: 0
+        maximum: 100
+        example: 10
+        default: 10
+      order:
+        $ref: '#/definitions/Order'
+    x-stoplight:
+      id: 2cn65pqrejgbu
+  Order:
+    type: object
+    properties:
+      attribute:
+        type: string
+      direction:
+        type: string
+        enum:
+          - ASC
+          - DESC
+    required:
+      - attribute
+    x-stoplight:
+      id: i1tiyakfnan6o

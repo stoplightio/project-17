@@ -1,0 +1,17 @@
+title: Card Operation Type
+x-stoplight:
+  id: 7d36nllo20lpo
+type: string
+example: card_features_update
+enum:
+  - card_activation
+  - card_blocking
+  - card_code_reissuing
+  - card_creation
+  - card_features_update
+  - card_limits_update
+  - card_opposition
+  - card_renew
+  - card_suppression
+  - card_unblocking
+  - refabrication

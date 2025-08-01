@@ -1,0 +1,6 @@
+title: PaymentTransactionInternalId
+x-stoplight:
+  id: 4rww2f6yrf5ck
+type: string
+description: Internal reference of the payment transaction with the platform
+example: '10028'

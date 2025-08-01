@@ -1,0 +1,134 @@
+title: VelocityRuleBase
+x-stoplight:
+  id: a89r51g0mww3z
+type: object
+properties:
+  id:
+    $ref: ./VelocityRuleId.yaml
+    x-stoplight:
+      id: xxqm0abe6thf3
+  description:
+    type: string
+    example: Velocity rule description
+    x-stoplight:
+      id: gx43bjbuyfsi2
+  transaction:
+    type: array
+    items:
+      type: string
+      enum:
+        - ACCOUNT_TO_ACCOUNT
+        - ACCOUNT_TO_DEDICATED
+        - CASHOUT
+        - CASHIN
+        - ACCOUNT_TO_TRANSIT
+        - PAYMENT
+        - CASHOUT_FROM_TRANSIT
+        - SALARY_TO_ACCOUNT
+        - ONLINE_PAYMENT
+        - CASHIN_TO_TRANSIT
+        - SELL_DEPOSIT
+        - BUY_DEPOSIT
+        - ACCOUNT_TO_EXTERNAL_TRF
+        - EXTERNAL_TRF_TO_ACCOUNT
+        - CASHOUT_FROM_EXTERNAL_TRF
+        - EXTERNAL_TRF_WITHDRAW
+        - PAYBILL_ACCOUNT
+        - PAYBILL_CASH
+        - TRANSIT_TO_ACCOUNT
+        - WALLET_TO_BANK
+        - BANK_TO_WALLET
+        - SALARY_TO_CASH
+        - TRANSFER_DEPOSIT
+        - STANDING_ORDER_PAYMENT
+        - RECHARGE_CREDIT_CARD
+        - AID_PAYMENT
+        - AGIOS_PAYMENT
+        - EXTERNAL_TO_MONEYPOT
+        - EXTERNAL_FROM_MONEYPOT
+        - POSTING
+        - ON_US_CREDIT_TRANSFER
+        - DISTRIBUTOR_POSTING
+        - CREDIT_TRANSFER_OUT
+        - CREDIT_TRANSFER_IN
+        - EXTERNAL_TO_ACCOUNT
+        - ACCOUNT_TO_EXTERNAL
+        - DIRECT_DEBIT_OUT
+        - ACCOUNT_FROM_EXTERNAL
+        - PAYMENT_FUNDS_RESERVATION
+        - CASHOUT_FUNDS_RESERVATION
+        - EXT_TO_ACCOUNT_FUNDS_RESERVATION
+        - ACCOUNT_TO_EXT_FUNDS_RESERVATION
+        - ON_US_CREDIT_FUNDS_RESERVATION
+        - DIRECT_DEBIT_IN
+        - EXTERNAL_FROM_ACCOUNT
+        - ETM_SCREENING
+        - ETM_SCREENING_SUCCESS
+        - ETM_SCREENING_FAIL
+        - ETM_SCREENING_FAIL_TO_SUCCESS
+        - VISA_PAYMENT_TO_EXTERNAL_SYSTEM
+        - VISA_CASHOUT_TO_EXTERNAL_SYSTEM
+        - VISA_CASHIN_TO_EXTERNAL_SYSTEM
+        - VISA_ACCOUNT_TO_EXTERNAL_SYSTEM
+        - VISA_PAYMENT_FROM_VISA_ON_MOBILE
+        - VISA_CASHIN_FROM_VISA_ON_MOBILE
+        - VISA_CASHOUT_FROM_VISA_ON_MOBILE
+        - ACCOUNT_RECHARGE
+      x-stoplight:
+        id: ewkdhyuieziti
+    x-stoplight:
+      id: r5epupmy5zvyy
+  media:
+    type: array
+    items:
+      type: string
+      enum:
+        - SMS
+        - USSD
+        - POS
+        - WEB
+        - BANK
+        - IVR
+        - API
+        - APP
+        - ONLINE
+      x-stoplight:
+        id: dj19yc6zoip6y
+    x-stoplight:
+      id: zmt32lfe2opev
+  direction:
+    type: string
+    enum:
+      - debit
+      - credit
+    x-stoplight:
+      id: 9rtjkg6fzox2n
+  role:
+    type: string
+    enum:
+      - CLIENT
+      - COMPANY
+      - AGENT
+      - MERCHANT
+      - DISTRIBUTOR
+    x-stoplight:
+      id: u0x77v0s9niba
+  status:
+    type: string
+    enum:
+      - INITIATED
+      - PENDING
+      - OPENED
+    x-stoplight:
+      id: b0nsa0ck40f53
+  period:
+    $ref: ./VelocityRulePeriod.yaml
+    x-stoplight:
+      id: og2ywgxcwog3e
+  limitType:
+    type: string
+    enum:
+      - amount
+      - transactions
+    x-stoplight:
+      id: vrncyipm3n2u9

@@ -1,0 +1,5734 @@
+openapi: 3.1.0
+x-stoplight:
+  id: yizqi172rimq4
+paths:
+  /calculation-engine/api/v1/end-date:
+    post:
+      operationId: EndDateController_computeEndDate
+      summary: Compute an end date given a start date and a duration
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  description: The start date
+                  type: string
+                  format: date
+                  pattern: '^\d{4}-\d{2}-\d{2}$'
+                  example: '2024-05-15'
+                duration:
+                  type: object
+                  properties:
+                    number:
+                      description: The duration number in unit of periodicity
+                      type: integer
+                      minimum: 0
+                      exclusiveMinimum: 0
+                    periodicity:
+                      description: The duration periodicity
+                      type: string
+                      enum:
+                        - DAILY
+                        - WEEKLY
+                        - MONTHLY
+                        - QUARTERLY
+                        - SEMESTER
+                        - ANNUALLY
+                  required:
+                    - number
+                    - periodicity
+              required:
+                - startDate
+                - duration
+              $ref: '#/components/schemas/ComputeEndDateRequestDtoOpenApi'
+            examples:
+              Compute end date:
+                value:
+                  startDate: '2021-01-01'
+                  duration:
+                    number: 1
+                    periodicity: DAILY
+      responses:
+        '200':
+          description: The end date
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  endDate:
+                    type: string
+                    example: '2021-01-02'
+                    description: The computed end date
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 400
+                    description: The status code
+                  message:
+                    type: string
+                    example: Validation failed
+                    description: The error message
+      tags:
+        - Compute end date
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_date_calculation
+      x-stoplight:
+        id: fynkznxf0nbb2
+  /calculation-engine/api/v1/duration:
+    post:
+      operationId: DurationController_computeDuration
+      summary: Compute a duration given a start date and an end date
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  description: The start date
+                  type: string
+                  format: date
+                  pattern: '^\d{4}-\d{2}-\d{2}$'
+                  example: '2024-05-22'
+                endDate:
+                  description: 'The end date: Must be after startDate'
+                  type: string
+                  format: date
+                  pattern: '^\d{4}-\d{2}-\d{2}$'
+                  example: '2024-05-22'
+                periodicity:
+                  description: The periodicity. day by default
+                  type: string
+                  enum:
+                    - DAILY
+                    - WEEKLY
+                    - MONTHLY
+                    - QUARTERLY
+                    - SEMESTER
+                    - ANNUALLY
+              required:
+                - startDate
+              $ref: '#/components/schemas/ComputeDurationRequestDtoOpenApi'
+            examples:
+              Compute duration:
+                value:
+                  startDate: '2021-01-01'
+                  endDate: '2021-01-02'
+                  periodicity: DAILY
+      responses:
+        '200':
+          description: The duration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  duration:
+                    type: number
+                    example: 1
+                    description: The computed duration
+                  periodicity:
+                    type: string
+                    example: DAILY
+                    description: The computed duration periodicity
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DurationErrorDto'
+      tags:
+        - Compute duration
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_date_calculation
+      x-stoplight:
+        id: jqglm8rw9o1fp
+  /calculation-engine/api/v1/interest/rate:
+    post:
+      operationId: InterestController_computeInterestWithRate
+      summary: 'Compute an interest given a rate, capital and duration'
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InterestRequestWithRateDto'
+            examples:
+              interest calculation with rate:
+                value:
+                  rate: '15'
+                  margin: '3.5'
+                  capital:
+                    amount: 100000
+                    currency: EUR
+                  startingDate: '2020-11-15'
+                  endingDate: '2020-12-15'
+                  rateBasis: RATE_BASIS_ACTUAL_365
+                  isInterestCapitalized: false
+      responses:
+        '200':
+          description: The computed interest
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  amount:
+                    type: number
+                    example: 1521
+                    description: The computed interest amount
+                  currency:
+                    type: string
+                    example: EUR
+                    description: The computed interest currency
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterestErrorDto'
+      tags:
+        - Compute interest
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_interest_calculation
+      x-stoplight:
+        id: se2dp0vbzuo69
+  /calculation-engine/api/v1/interest/index:
+    post:
+      operationId: InterestController_computeInterestWithIndex
+      summary: 'Compute an interest given an index code, capital and duration'
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InterestRequestWithIndexDto'
+            examples:
+              interest calculation with index:
+                value:
+                  index: myIndexCode
+                  margin: '3.5'
+                  capital:
+                    amount: 100000
+                    currency: EUR
+                  startingDate: '2020-11-15'
+                  endingDate: '2020-12-15'
+                  rateBasis: RATE_BASIS_ACTUAL_365
+                  rateFixingDate: '2020-11-19'
+                  cycleFrequency: WEEKLY
+                  isInterestCapitalized: false
+      responses:
+        '200':
+          description: The computed interest
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  amount:
+                    type: number
+                    example: 1521
+                    description: The computed interest amount
+                  currency:
+                    type: string
+                    example: EUR
+                    description: The computed interest currency
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterestErrorDto'
+      tags:
+        - Compute interest
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_interest_calculation
+      x-stoplight:
+        id: xpso1lqxcfeqe
+  /calculation-engine/api/v1/aer:
+    post:
+      operationId: ComputeAerController_computeAer
+      summary: Compute an Annual Equivalent Rate
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                initialAmount:
+                  type: object
+                  properties:
+                    amount:
+                      description: The amount
+                      type: integer
+                    currency:
+                      description: The ISO 4217 currency code
+                      type: string
+                      enum:
+                        - ALL
+                        - DZD
+                        - ARS
+                        - AUD
+                        - BSD
+                        - BHD
+                        - BDT
+                        - AMD
+                        - BBD
+                        - BMD
+                        - BTN
+                        - BOB
+                        - BWP
+                        - BZD
+                        - SBD
+                        - BND
+                        - MMK
+                        - BIF
+                        - KHR
+                        - CAD
+                        - CVE
+                        - KYD
+                        - LKR
+                        - CLP
+                        - CNY
+                        - COP
+                        - KMF
+                        - CRC
+                        - HRK
+                        - CUP
+                        - CZK
+                        - DKK
+                        - DOP
+                        - SVC
+                        - ETB
+                        - ERN
+                        - FKP
+                        - FJD
+                        - DJF
+                        - GMD
+                        - GIP
+                        - GTQ
+                        - GNF
+                        - GYD
+                        - HTG
+                        - HNL
+                        - HKD
+                        - HUF
+                        - ISK
+                        - INR
+                        - IDR
+                        - IRR
+                        - IQD
+                        - ILS
+                        - JMD
+                        - JPY
+                        - KZT
+                        - JOD
+                        - KES
+                        - KPW
+                        - KRW
+                        - KWD
+                        - KGS
+                        - LAK
+                        - LBP
+                        - LSL
+                        - LRD
+                        - LYD
+                        - MOP
+                        - MWK
+                        - MYR
+                        - MVR
+                        - MUR
+                        - MXN
+                        - MNT
+                        - MDL
+                        - MAD
+                        - OMR
+                        - NAD
+                        - NPR
+                        - ANG
+                        - AWG
+                        - VUV
+                        - NZD
+                        - NIO
+                        - NGN
+                        - NOK
+                        - PKR
+                        - PAB
+                        - PGK
+                        - PYG
+                        - PEN
+                        - PHP
+                        - QAR
+                        - RUB
+                        - RWF
+                        - SHP
+                        - STD
+                        - SAR
+                        - SCR
+                        - SLL
+                        - SGD
+                        - VND
+                        - SOS
+                        - ZAR
+                        - SSP
+                        - SZL
+                        - SEK
+                        - CHF
+                        - SYP
+                        - THB
+                        - TOP
+                        - TTD
+                        - AED
+                        - TND
+                        - UGX
+                        - MKD
+                        - EGP
+                        - GBP
+                        - TZS
+                        - USD
+                        - UYU
+                        - UZS
+                        - WST
+                        - YER
+                        - ZMK
+                        - TWD
+                        - MRU
+                        - CUC
+                        - ZWL
+                        - TMT
+                        - GHS
+                        - VEF
+                        - SDG
+                        - UYI
+                        - RSD
+                        - MZN
+                        - AZN
+                        - RON
+                        - CHE
+                        - CHW
+                        - TRY
+                        - XAF
+                        - XCD
+                        - XOF
+                        - XPF
+                        - XBA
+                        - XBB
+                        - XBC
+                        - XBD
+                        - XAU
+                        - XDR
+                        - XAG
+                        - XPT
+                        - XTS
+                        - XPD
+                        - XUA
+                        - ZMW
+                        - SRD
+                        - MGA
+                        - COU
+                        - AFN
+                        - TJS
+                        - AOA
+                        - BYR
+                        - BGN
+                        - CDF
+                        - BAM
+                        - EUR
+                        - MXV
+                        - UAH
+                        - GEL
+                        - BOV
+                        - PLN
+                        - BRL
+                        - CLF
+                        - XSU
+                        - USN
+                        - ZZZ
+                        - TAG
+                  required:
+                    - amount
+                    - currency
+                schedule:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      duration:
+                        type: object
+                        properties:
+                          startDate:
+                            description: The start date
+                            type: string
+                            format: date
+                            pattern: '^\d{4}-\d{2}-\d{2}$'
+                            example: '2024-05-22'
+                          endDate:
+                            description: 'The end date: Must be after startDate'
+                            type: string
+                            format: date
+                            pattern: '^\d{4}-\d{2}-\d{2}$'
+                            example: '2024-05-22'
+                        required:
+                          - startDate
+                          - endDate
+                      transactionAmount:
+                        type: object
+                        properties:
+                          amount:
+                            description: The amount
+                            type: integer
+                          currency:
+                            description: The ISO 4217 currency code
+                            type: string
+                            enum:
+                              - ALL
+                              - DZD
+                              - ARS
+                              - AUD
+                              - BSD
+                              - BHD
+                              - BDT
+                              - AMD
+                              - BBD
+                              - BMD
+                              - BTN
+                              - BOB
+                              - BWP
+                              - BZD
+                              - SBD
+                              - BND
+                              - MMK
+                              - BIF
+                              - KHR
+                              - CAD
+                              - CVE
+                              - KYD
+                              - LKR
+                              - CLP
+                              - CNY
+                              - COP
+                              - KMF
+                              - CRC
+                              - HRK
+                              - CUP
+                              - CZK
+                              - DKK
+                              - DOP
+                              - SVC
+                              - ETB
+                              - ERN
+                              - FKP
+                              - FJD
+                              - DJF
+                              - GMD
+                              - GIP
+                              - GTQ
+                              - GNF
+                              - GYD
+                              - HTG
+                              - HNL
+                              - HKD
+                              - HUF
+                              - ISK
+                              - INR
+                              - IDR
+                              - IRR
+                              - IQD
+                              - ILS
+                              - JMD
+                              - JPY
+                              - KZT
+                              - JOD
+                              - KES
+                              - KPW
+                              - KRW
+                              - KWD
+                              - KGS
+                              - LAK
+                              - LBP
+                              - LSL
+                              - LRD
+                              - LYD
+                              - MOP
+                              - MWK
+                              - MYR
+                              - MVR
+                              - MUR
+                              - MXN
+                              - MNT
+                              - MDL
+                              - MAD
+                              - OMR
+                              - NAD
+                              - NPR
+                              - ANG
+                              - AWG
+                              - VUV
+                              - NZD
+                              - NIO
+                              - NGN
+                              - NOK
+                              - PKR
+                              - PAB
+                              - PGK
+                              - PYG
+                              - PEN
+                              - PHP
+                              - QAR
+                              - RUB
+                              - RWF
+                              - SHP
+                              - STD
+                              - SAR
+                              - SCR
+                              - SLL
+                              - SGD
+                              - VND
+                              - SOS
+                              - ZAR
+                              - SSP
+                              - SZL
+                              - SEK
+                              - CHF
+                              - SYP
+                              - THB
+                              - TOP
+                              - TTD
+                              - AED
+                              - TND
+                              - UGX
+                              - MKD
+                              - EGP
+                              - GBP
+                              - TZS
+                              - USD
+                              - UYU
+                              - UZS
+                              - WST
+                              - YER
+                              - ZMK
+                              - TWD
+                              - MRU
+                              - CUC
+                              - ZWL
+                              - TMT
+                              - GHS
+                              - VEF
+                              - SDG
+                              - UYI
+                              - RSD
+                              - MZN
+                              - AZN
+                              - RON
+                              - CHE
+                              - CHW
+                              - TRY
+                              - XAF
+                              - XCD
+                              - XOF
+                              - XPF
+                              - XBA
+                              - XBB
+                              - XBC
+                              - XBD
+                              - XAU
+                              - XDR
+                              - XAG
+                              - XPT
+                              - XTS
+                              - XPD
+                              - XUA
+                              - ZMW
+                              - SRD
+                              - MGA
+                              - COU
+                              - AFN
+                              - TJS
+                              - AOA
+                              - BYR
+                              - BGN
+                              - CDF
+                              - BAM
+                              - EUR
+                              - MXV
+                              - UAH
+                              - GEL
+                              - BOV
+                              - PLN
+                              - BRL
+                              - CLF
+                              - XSU
+                              - USN
+                              - ZZZ
+                              - TAG
+                        required:
+                          - amount
+                          - currency
+                    required:
+                      - duration
+                      - transactionAmount
+              required:
+                - initialAmount
+                - schedule
+              $ref: '#/components/schemas/ComputeAerRequestDtoOpenApi'
+            examples:
+              Compute AER:
+                value:
+                  initialAmount:
+                    amount: 100000
+                    currency: EUR
+                  schedule:
+                    - duration:
+                        startDate: '2021-01-01'
+                        endDate: '2023-01-01'
+                      transactionAmount:
+                        amount: 20000
+                        currency: EUR
+      responses:
+        '200':
+          description: The AER
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  AER:
+                    type: string
+                    example: '12'
+                    description: The computed AER
+                  currency:
+                    type: string
+                    example: EUR
+                    description: The computed AER currency
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputeAerErrorDto'
+      tags:
+        - Annual Equivalent Rate
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_aer_calculation
+      x-stoplight:
+        id: e7rnncozubhge
+  /calculation-engine/api/v1/compute-rate-for-date:
+    post:
+      operationId: ComputeRateForDateController_computeRateForDate
+      summary: Compute the rate for the given dates and amounts
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComputeRateForDateRequestDto'
+            examples:
+              Compute an accrual cycle 1st example:
+                value:
+                  balancePerDate:
+                    - balance:
+                        amount: 1000000
+                        currency: EUR
+                      date: '2023-06-01'
+                    - balance:
+                        amount: 500000
+                        currency: EUR
+                      date: '2023-06-01'
+                  startDate: '2023-01-01'
+                  indexCode: ''
+                  calendarCode: CalendarOne
+                  matrixCells: []
+                  isInterestCapitalized: false
+                  frequency: MONTHLY
+                  floorRate: ''
+                  capRate: ''
+                  rate: '2.5'
+              Compute an accrual cycle 2nd example:
+                value:
+                  balancePerDate:
+                    - balance:
+                        amount: 1000000
+                        currency: EUR
+                      date: '2023-06-01'
+                  startDate: '2023-01-01'
+                  indexCode: IndexOne
+                  calendarCode: CalendarOne
+                  matrixCells: []
+                  isInterestCapitalized: false
+                  frequency: MONTHLY
+                  floorRate: ''
+                  capRate: ''
+                  rate: ''
+      responses:
+        '200':
+          description: Rate for each date
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputeRateForDateResponseDto'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputeRateForDateErrorDto'
+      tags:
+        - Rate For Date
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_interest_calculation
+      x-stoplight:
+        id: diws624d189qc
+  /calculation-engine/api/v1/healthz:
+    get:
+      operationId: HealthzController_getHealthz
+      summary: Check if the system is alive
+      security: []
+      parameters: []
+      responses:
+        '200':
+          description: Heart is beating
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alive:
+                    type: boolean
+                    example: true
+                    description: Is the system alive
+                  dbAlive:
+                    type: boolean
+                    example: true
+                    description: Is the database alive
+      tags:
+        - System check
+      x-stoplight:
+        id: h64gvxabkf3d3
+  /calculation-engine/api/v1/index:
+    post:
+      operationId: IndexController_createIndex
+      summary: Create an index
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIndexRequestDto'
+            examples:
+              Create a fixed rate index:
+                value:
+                  code: IndexOne
+                  names:
+                    en_US: index 1 us
+                    es_ES: index 1 es
+                    fr_FR: index 1 fr
+                  isActive: true
+                  rate:
+                    value: '2.1'
+                    type: FIXED
+                    startDate: '2023-01-01'
+              Create a float rate index:
+                value:
+                  code: IndexTwo
+                  names:
+                    en_US: index 1 us
+                    es_ES: index 1 es
+                    fr_FR: index 1 fr
+                  isActive: true
+                  rate:
+                    value: '3.05'
+                    type: FLOAT
+                    startDate: '2023-01-01'
+      responses:
+        '201':
+          description: The code of the index
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: IndexOne
+                    description: The index code
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexErrorDto'
+      tags:
+        - Index
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_index_write
+      x-stoplight:
+        id: s6wh8gv4i5pwm
+    get:
+      operationId: IndexController_getAllIndexes
+      summary: Get all indexes
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          description: The number of items per page
+          schema:
+            type: number
+        - name: offset
+          required: false
+          in: query
+          description: Starting item position number
+          schema:
+            type: number
+        - name: sort
+          required: false
+          in: query
+          description: 'Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +. Descending (newer first) fields may be prefixed with -'
+          schema:
+            type: string
+        - name: isActive
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: rateType
+          required: false
+          in: query
+          schema:
+            type: string
+            enum:
+              - FIXED
+              - FLOAT
+        - name: name
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: code
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: All indexes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllIndexesResponseDto'
+              example:
+                items:
+                  - code: I1
+                    names:
+                      en_US: index 1 us
+                      es_ES: index 1 es
+                      fr_FR: index 1 fr
+                    isActive: true
+                    rate:
+                      value: '3'
+                      type: FIXED
+                      startDate: '2023-05-01'
+                  - code: L2
+                    names:
+                      en_US: index 2 us
+                      es_ES: index 2 es
+                      fr_FR: index 2 fr
+                    isActive: true
+                    rate:
+                      value: '2'
+                      type: FIXED
+                      startDate: '2023-05-01'
+                count: 2
+                limit: 20
+                offset: 0
+                sort: +code
+      tags:
+        - Index
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_index_read
+      x-stoplight:
+        id: k4ujkyvyj8ba0
+  '/calculation-engine/api/v1/index/{code}/link':
+    post:
+      operationId: IndexController_linkIndex
+      summary: Link an index to an external entity
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkIndexRequestDto'
+            examples:
+              Link an index:
+                value:
+                  externalKey: Skaleet.savings.product.231123154155BA
+      responses:
+        '201':
+          description: Link an index to an external entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: MY_INDEX_CODE
+                    description: Code of the linked index
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexErrorDto'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexErrorDto'
+      tags:
+        - Index
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_index_write
+      x-stoplight:
+        id: dxwg6nwgs2hka
+    delete:
+      operationId: IndexController_unlinkIndex
+      summary: Unlink an index to an external entity
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkIndexRequestDto'
+            examples:
+              Unlink an index:
+                value:
+                  externalKey: Skaleet.savings.product.231123154155BA
+      responses:
+        '200':
+          description: Unlink an index to an external entity
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexErrorDto'
+      tags:
+        - Index
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_index_write
+      x-stoplight:
+        id: ukbfezm0gbmc5
+    parameters:
+      - name: code
+        required: true
+        in: path
+        schema:
+          type: string
+  '/calculation-engine/api/v1/index/{code}/history':
+    get:
+      operationId: IndexController_getIndexHistory
+      summary: Get an index history
+      parameters: []
+      responses:
+        '200':
+          description: The index history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetIndexHistoryResponseDto'
+              example:
+                - value: '3.05'
+                  startDate: '2023-05-01'
+                - value: '2.15'
+                  startDate: '2023-06-01'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexErrorDto'
+      tags:
+        - Index
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_index_read
+      x-stoplight:
+        id: j7orl6yuizrh5
+    parameters:
+      - name: code
+        required: true
+        in: path
+        schema:
+          type: string
+  '/calculation-engine/api/v1/index/{code}':
+    get:
+      operationId: IndexController_getIndex
+      summary: Get an index
+      parameters: []
+      responses:
+        '200':
+          description: The index
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetIndexResponseDto'
+              example:
+                code: IndexOne
+                names:
+                  en_US: Index 1 us
+                  es_ES: Index 1 es
+                  fr_FR: Index 1 fr
+                isActive: true
+                rate:
+                  value: '3.05'
+                  type: FIXED
+                  startDate: '2023-05-01'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexErrorDto'
+      tags:
+        - Index
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_index_read
+      x-stoplight:
+        id: cjgr4ctuy3y0n
+    delete:
+      operationId: IndexController_deleteIndex
+      summary: Delete an index
+      parameters: []
+      responses:
+        '204':
+          description: ''
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexErrorDto'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexErrorDto'
+      tags:
+        - Index
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_index_delete
+      x-stoplight:
+        id: dmj1cyb1y5cgx
+    put:
+      operationId: IndexController_updateIndex
+      summary: Update an index
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIndexRequestDto'
+            examples:
+              Update a fixed rate index:
+                value:
+                  names:
+                    en_US: index 1 us
+                    es_ES: index 1 es
+                    fr_FR: index 1 fr
+                  isActive: true
+                  rate:
+                    value: '2'
+                    startDate: '2023-01-01'
+              Update a float rate index:
+                value:
+                  names:
+                    en_US: index 1 us
+                    es_ES: index 1 es
+                    fr_FR: index 1 fr
+                  isActive: true
+                  rate:
+                    value: '2'
+                    startDate: '2023-01-01'
+      responses:
+        '200':
+          description: The index code
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: IndexOne
+                    description: The index code
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexErrorDto'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexErrorDto'
+      tags:
+        - Index
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_index_write
+      x-stoplight:
+        id: wymxirhulrwf4
+    parameters:
+      - name: code
+        required: true
+        in: path
+        schema:
+          type: string
+  '/calculation-engine/api/v1/index/{code}/{date}':
+    get:
+      operationId: IndexController_getIndexWithRateAtDate
+      summary: Get an index with rate at date
+      parameters: []
+      responses:
+        '200':
+          description: The index
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetIndexResponseDto'
+              example:
+                code: IndexOne
+                names:
+                  en_US: Index 1 us
+                  es_ES: Index 1 es
+                  fr_FR: Index 1 fr
+                isActive: true
+                rate:
+                  value: '3.05'
+                  type: FIXED
+                  startDate: '2023-05-01'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexErrorDto'
+      tags:
+        - Index
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_index_read
+      x-stoplight:
+        id: 87i6xr088ftzc
+    parameters:
+      - name: code
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: date
+        required: true
+        in: path
+        schema:
+          type: string
+  /calculation-engine/api/v1/calendar:
+    post:
+      operationId: CalendarController_createCalendar
+      summary: Create a calendar
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCalendarRequestDto'
+              example:
+                code: calendarCode
+                names:
+                  en_US: calendar 1 us
+                  es_ES: calendar 1 es
+                  fr_FR: calendar 1 fr
+                isActive: true
+                monday: true
+                tuesday: true
+                wednesday: true
+                thursday: true
+                friday: true
+                saturday: false
+                sunday: false
+            examples:
+              create a calendar:
+                value:
+                  code: calendarCode
+                  names:
+                    en_US: calendar 1 us
+                    es_ES: calendar 1 es
+                    fr_FR: calendar 1 fr
+                  isActive: true
+                  monday: true
+                  tuesday: true
+                  wednesday: true
+                  thursday: true
+                  friday: true
+                  saturday: false
+                  sunday: false
+      responses:
+        '200':
+          description: The code of the calendar
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: calendarCode
+                    description: The calendar code
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+      tags:
+        - Calendar
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_calendar_write
+      x-stoplight:
+        id: qjc9cx8cbck6t
+    get:
+      operationId: CalendarController_getAllCalendars
+      summary: Get all calendars
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          description: The number of items per page
+          schema:
+            type: number
+        - name: offset
+          required: false
+          in: query
+          description: Starting item position number
+          schema:
+            type: number
+        - name: sort
+          required: false
+          in: query
+          description: 'Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +. Descending (newer first) fields may be prefixed with -'
+          schema:
+            type: string
+        - name: sunday
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: saturday
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: friday
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: thursday
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: wednesday
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: tuesday
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: monday
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: name
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: isActive
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: code
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: All calendars
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllCalendarsResponseDto'
+              example:
+                items:
+                  - code: calendarCode
+                    names:
+                      en_US: Calendar 1 us
+                      es_ES: Calendar 1 es
+                      fr_FR: Calendar 1 fr
+                    isActive: true
+                    monday: true
+                    thursday: true
+                    wednesday: true
+                    tuesday: true
+                    friday: true
+                    saturday: false
+                    sunday: false
+                  - code: calendarCode2
+                    names:
+                      en_US: Calendar 2 us
+                      es_ES: Calendar 2 es
+                      fr_FR: Calendar 2 fr
+                    isActive: true
+                    monday: true
+                    thursday: true
+                    wednesday: true
+                    tuesday: true
+                    friday: true
+                    saturday: false
+                    sunday: false
+                    bankHolidays:
+                      - description: Fete du travail
+                        effectiveDate: '2023-05-01'
+                      - description: Noel
+                        effectiveDate: '2023-12-25'
+                count: 2
+                limit: 20
+                offset: 0
+                sort: +code
+      tags:
+        - Calendar
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_calendar_read
+      x-stoplight:
+        id: edzms711wxr1m
+  '/calculation-engine/api/v1/calendar/{code}':
+    get:
+      operationId: CalendarController_getCalendar
+      summary: Retrieve a calendar with code
+      parameters: []
+      responses:
+        '200':
+          description: The calendar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarResponseDto'
+              example:
+                code: calendarCode
+                names:
+                  en_US: Calendar 1 us
+                  es_ES: Calendar 1 es
+                  fr_FR: Calendar 1 fr
+                isActive: true
+                monday: true
+                thursday: true
+                wednesday: true
+                tuesday: true
+                friday: true
+                saturday: false
+                sunday: false
+                bankHolidays:
+                  - description: Fete du travail
+                    effectiveDate: '2023-05-01'
+                  - description: Noel
+                    effectiveDate: '2023-12-25'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+      tags:
+        - Calendar
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_calendar_read
+      x-stoplight:
+        id: z1o4emrogirzz
+    put:
+      operationId: CalendarController_updateCalendar
+      summary: Update a calendar
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCalendarRequestDto'
+            examples:
+              Update a calendar:
+                value:
+                  names:
+                    en_US: calendar 1 us
+                    es_ES: calendar 1 es
+                    fr_FR: calendar 1 fr
+                  isActive: true
+                  monday: true
+                  thursday: true
+                  wednesday: false
+                  tuesday: true
+                  friday: true
+                  saturday: false
+                  sunday: false
+      responses:
+        '200':
+          description: The calendar code
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: CalendarOne
+                    description: The calendar code
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+      tags:
+        - Calendar
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_calendar_write
+      x-stoplight:
+        id: wgplmz4ebl2hd
+    delete:
+      operationId: CalendarController_deleteCalendar
+      summary: Delete a calendar
+      parameters: []
+      responses:
+        '200':
+          description: Link a calendar to an external entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  calendarDeleted:
+                    type: string
+                    example: code
+                    description: The code of the calendar
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+      tags:
+        - Calendar
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_calendar_delete
+      x-stoplight:
+        id: a70iyofigttha
+    parameters:
+      - name: code
+        required: true
+        in: path
+        schema:
+          type: string
+  '/calculation-engine/api/v1/calendar/{code}/start-date-with-nbd':
+    get:
+      operationId: CalendarController_getDateWithNbd
+      summary: Retrieve a calendar with code
+      parameters:
+        - name: startDate
+          required: true
+          in: query
+          schema:
+            format: date-time
+            type: string
+        - name: nbdRule
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The date
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetCalendarDateWithNbdResponseDto'
+              example:
+                date: '2022-01-03'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+      tags:
+        - Calendar
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_calendar_read
+      x-stoplight:
+        id: v7o0zoyk7eoya
+    parameters:
+      - name: code
+        required: true
+        in: path
+        schema:
+          type: string
+  '/calculation-engine/api/v1/calendar/{code}/holiday':
+    post:
+      operationId: CalendarController_createBankHoliday
+      summary: Add bank holidays to calendar
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBankHolidaysRequestDto'
+            examples:
+              add bank holidays to a calendar:
+                value:
+                  bankHolidays:
+                    - effectiveDate: '2023-12-24'
+                      description: Noel
+                    - effectiveDate: '2023-05-01'
+                      description: Fete du travail
+      responses:
+        '200':
+          description: The code of the updated calendar
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: calendarCode
+                    description: The updated calendar code
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+      tags:
+        - Calendar
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_calendar_write
+      x-stoplight:
+        id: j3zowpwdzdc21
+    put:
+      operationId: CalendarController_updateBankHoliday
+      summary: Update description of a bank holiday
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BankHolidayDto'
+            examples:
+              update bank holiday of a calendar:
+                value:
+                  effectiveDate: '2023-12-24'
+                  description: Noel
+      responses:
+        '200':
+          description: The code of the updated calendar
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: calendarCode
+                    description: The updated calendar code
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+      tags:
+        - Calendar
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_calendar_write
+      x-stoplight:
+        id: cxe5xo85gkqyu
+    delete:
+      operationId: CalendarController_deleteBankHolidayToCalendar
+      summary: Delete bank holidays array of a calendar
+      parameters:
+        - name: dates
+          required: true
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: dates at yyyy-MM-dd format separated by comma
+      responses:
+        '200':
+          description: ''
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+      tags:
+        - Calendar
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_calendar_delete
+      x-stoplight:
+        id: w595q1oi99q48
+    parameters:
+      - name: code
+        required: true
+        in: path
+        schema:
+          type: string
+  '/calculation-engine/api/v1/calendar/{code}/link':
+    post:
+      operationId: CalendarController_linkCalendar
+      summary: Link a calendar to an external entity
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkOrUnlinkCalendarRequestDto'
+              example:
+                externalId: externalIdConsumer
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkOrUnlinkCalendarResponseDto'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+      tags:
+        - Calendar
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_calendar_read
+      x-stoplight:
+        id: kpygzjr37llpu
+    delete:
+      operationId: CalendarController_unLinkCalendar
+      summary: Unlink a calendar to an external entity
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkOrUnlinkCalendarRequestDto'
+              example:
+                externalId: externalIdConsumer
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkOrUnlinkCalendarResponseDto'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarErrorDto'
+      tags:
+        - Calendar
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_calendar_read
+      x-stoplight:
+        id: pzg2fjn4x1ozg
+    parameters:
+      - name: code
+        required: true
+        in: path
+        schema:
+          type: string
+  /calculation-engine/api/v1/accrual-cycle:
+    post:
+      operationId: AccrualCycleController_computeAccrualCycle
+      summary: Compute an accrual cycle
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComputeAccrualCycleRequestDto'
+            examples:
+              Compute an accrual cycle example:
+                value:
+                  capital:
+                    amount: 1000000
+                    currency: EUR
+                  indexCode: IndexOne
+                  calendarCode: CalendarOne
+                  startDate: '2023-01-01'
+                  endDate: '2023-12-31'
+                  cycleFrequency: ANNUALLY
+                  paymentFrequency: ANNUALLY
+                  rateFixingDays: 1
+                  rateBasis: RATE_BASIS_30_360
+                  margin: '2.36'
+                  rateSettings:
+                    capRate: '3.5'
+                    floorRate: '3.5'
+                  isInterestCapitalized: false
+                  nbdRule: SAME_DAY
+      responses:
+        '200':
+          description: The computed accrual cycle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputeAccrualCycleResponseDto'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccrualCycleErrorDto'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccrualCycleErrorDto'
+      tags:
+        - Accrual Cycle
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_interest_calculation
+      x-stoplight:
+        id: x04kybc6kiosh
+  /calculation-engine/api/v1/parameters:
+    get:
+      operationId: ParametersController_getParameters
+      summary: Get all parameters
+      parameters: []
+      responses:
+        '200':
+          description: All parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetParametersResponseDtoOpenApi'
+              example:
+                defaultLanguage: en_US
+                availableLanguages:
+                  - en_US
+                  - fr_FR
+                  - es_ES
+                userLanguage: en_US
+      tags:
+        - Parameters
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_parameters_read
+      x-stoplight:
+        id: 5ii0cpiojvax7
+  /calculation-engine/api/v1/parameters/update:
+    put:
+      operationId: ParametersController_updateParameters
+      summary: Update compute parameters
+      parameters: []
+      responses:
+        '200':
+          description: Update compute parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateParametersRequestDtoOpenApi'
+              example:
+                defaultLanguage: en_US
+                availableLanguages:
+                  - en_US
+                  - fr_FR
+      tags:
+        - Parameters
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_parameters_write
+      x-stoplight:
+        id: ypiqlqwr2v7xe
+  /calculation-engine/api/v1/compute-recurrence:
+    post:
+      operationId: ComputeRecurrenceController_computeDuration
+      summary: Compute recurrences of a given frequency between two dates
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComputeRecurrenceRequestDto'
+              example:
+                startDate: '2021-12-01'
+                endDate: '2021-12-31'
+                frequency: DAILY
+            examples:
+              create a calendar:
+                value:
+                  startDate: '2021-12-01'
+                  endDate: '2021-12-31'
+                  frequency: DAILY
+      responses:
+        '200':
+          description: All recurrences dates
+          content:
+            application/json:
+              example:
+                - '2021-12-01'
+                - '2021-12-02'
+                - '2021-12-03'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputeRecurrenceErrorDto'
+      tags:
+        - Compute recurrence
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_date_calculation
+      x-stoplight:
+        id: zq7edlatxvdg3
+  /calculation-engine/api/v1/version:
+    get:
+      operationId: VersionController_getCurrentVersion
+      summary: Check current version of the module
+      parameters: []
+      responses:
+        '200':
+          description: Version check response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalVersionResponseDto'
+              examples:
+                Not have file VERSION.json:
+                  value:
+                    version: latest
+                Have file VERSION.json:
+                  value:
+                    version: 1.0.0
+      tags:
+        - Version check
+      security:
+        - oauth2:
+            - cal_version_read
+      x-stoplight:
+        id: 00zyr1sqvnak3
+  /calculation-engine/api/v1/current-account-saving-account-accrual-cycles:
+    post:
+      operationId: CurrentAccountSavingAccountAccrualCycleController_computeAccrualCycle
+      summary: Compute Current Account Saving Account accrual cycles
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComputeCurrentAccountSavingAccountAccrualCycleRequestDto'
+            examples:
+              Compute Current Account Saving Account accrual cycles request example:
+                value:
+                  indexCode: IndexOne
+                  calendarCode: CalendarOne
+                  startDate: '2023-01-01'
+                  paymentDate: '2024-01-01'
+                  cycleFrequency: ANNUALLY
+                  rateFixingDays: 3
+                  rateBasis: RATE_BASIS_30_360
+                  margin: '2.36'
+                  rateSettings:
+                    capRate: '3.5'
+                    floorRate: '3.5'
+                  isInterestCapitalized: false
+                  accountNumber: '123456789'
+      responses:
+        '200':
+          description: The computed Current Account Saving Account accrual cycles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputeCurrentAccountSavingAccountAccrualCycleResponseDto'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentAccountSavingAccountAccrualCycleErrorDto'
+      tags:
+        - Current Account Saving Account Accrual Cycles
+      security:
+        - JWT: []
+        - oauth2:
+            - cal_interest_calculation
+      x-stoplight:
+        id: ydtezpnwyfvs9
+info:
+  title: Calculation
+  description: Calculation Engine API
+  version: '1.0'
+  contact:
+    name: Skaleet
+    url: 'https://www.skaleet.com/en/'
+    email: api@skaleet.com
+  license:
+    name: Proprietary
+    url: 'https://www.skaleet.com'
+tags:
+  - name: Accrual Cycle
+  - name: Annual Equivalent Rate
+  - name: Calendar
+  - name: Compute duration
+  - name: Compute end date
+  - name: Compute interest
+  - name: Compute recurrence
+  - name: Current Account Saving Account Accrual Cycles
+  - name: Index
+  - name: Parameters
+  - name: Rate For Date
+  - name: System check
+  - name: Version check
+servers:
+  - url: 'https://sandbox.skaleet.com'
+    description: Skaleet sandbox environment
+components:
+  securitySchemes:
+    JWT:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: /api/service-domain/v1/oauth2/token
+          scopes:
+            cal_aer_calculation: AER calculation
+            cal_calendar_delete: Delete calendar
+            cal_calendar_read: Read calendar
+            cal_calendar_write: Write calendar
+            cal_date_calculation: Date calculation
+            cal_index_delete: Delete index
+            cal_index_read: Read index
+            cal_index_write: Write index
+            cal_interest_calculation: Interest calculation
+            cal_parameters_read: Read calculation parameters
+            cal_parameters_write: Write calculation parameters
+            cal_version_read: Read calculation version
+  schemas:
+    ComputeEndDateRequestDtoOpenApi:
+      type: object
+      properties:
+        startDate:
+          description: The start date
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2024-05-22'
+        duration:
+          type: object
+          properties:
+            number:
+              description: The duration number in unit of periodicity
+              type: integer
+              minimum: 0
+              exclusiveMinimum: 0
+            periodicity:
+              description: The duration periodicity
+              type: string
+              enum:
+                - DAILY
+                - WEEKLY
+                - MONTHLY
+                - QUARTERLY
+                - SEMESTER
+                - ANNUALLY
+          required:
+            - number
+            - periodicity
+      required:
+        - startDate
+        - duration
+      x-stoplight:
+        id: imqjx5xw2sl1y
+    DurationErrorDto:
+      type: object
+      properties:
+        errorMessages:
+          type: string
+          enum:
+            - STARTDATE_GREATER_THAN_ENDDATE
+      required:
+        - errorMessages
+      x-stoplight:
+        id: ngj59saldw024
+    ComputeDurationRequestDtoOpenApi:
+      type: object
+      properties:
+        startDate:
+          description: The start date
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2024-05-22'
+        endDate:
+          description: 'The end date: Must be after startDate'
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2024-05-22'
+        periodicity:
+          description: The periodicity. day by default
+          type: string
+          enum:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - ANNUALLY
+      required:
+        - startDate
+      x-stoplight:
+        id: 4mwuxf9hk0tvt
+    InterestRequestWithRateDto:
+      type: object
+      properties:
+        rate:
+          description: The interest rate
+          type: string
+        margin:
+          description: The margin rate
+          type: string
+        capital:
+          type: object
+          properties:
+            amount:
+              description: The amount
+              type: integer
+            currency:
+              description: The ISO 4217 currency code
+              type: string
+              enum:
+                - ALL
+                - DZD
+                - ARS
+                - AUD
+                - BSD
+                - BHD
+                - BDT
+                - AMD
+                - BBD
+                - BMD
+                - BTN
+                - BOB
+                - BWP
+                - BZD
+                - SBD
+                - BND
+                - MMK
+                - BIF
+                - KHR
+                - CAD
+                - CVE
+                - KYD
+                - LKR
+                - CLP
+                - CNY
+                - COP
+                - KMF
+                - CRC
+                - HRK
+                - CUP
+                - CZK
+                - DKK
+                - DOP
+                - SVC
+                - ETB
+                - ERN
+                - FKP
+                - FJD
+                - DJF
+                - GMD
+                - GIP
+                - GTQ
+                - GNF
+                - GYD
+                - HTG
+                - HNL
+                - HKD
+                - HUF
+                - ISK
+                - INR
+                - IDR
+                - IRR
+                - IQD
+                - ILS
+                - JMD
+                - JPY
+                - KZT
+                - JOD
+                - KES
+                - KPW
+                - KRW
+                - KWD
+                - KGS
+                - LAK
+                - LBP
+                - LSL
+                - LRD
+                - LYD
+                - MOP
+                - MWK
+                - MYR
+                - MVR
+                - MUR
+                - MXN
+                - MNT
+                - MDL
+                - MAD
+                - OMR
+                - NAD
+                - NPR
+                - ANG
+                - AWG
+                - VUV
+                - NZD
+                - NIO
+                - NGN
+                - NOK
+                - PKR
+                - PAB
+                - PGK
+                - PYG
+                - PEN
+                - PHP
+                - QAR
+                - RUB
+                - RWF
+                - SHP
+                - STD
+                - SAR
+                - SCR
+                - SLL
+                - SGD
+                - VND
+                - SOS
+                - ZAR
+                - SSP
+                - SZL
+                - SEK
+                - CHF
+                - SYP
+                - THB
+                - TOP
+                - TTD
+                - AED
+                - TND
+                - UGX
+                - MKD
+                - EGP
+                - GBP
+                - TZS
+                - USD
+                - UYU
+                - UZS
+                - WST
+                - YER
+                - ZMK
+                - TWD
+                - MRU
+                - CUC
+                - ZWL
+                - TMT
+                - GHS
+                - VEF
+                - SDG
+                - UYI
+                - RSD
+                - MZN
+                - AZN
+                - RON
+                - CHE
+                - CHW
+                - TRY
+                - XAF
+                - XCD
+                - XOF
+                - XPF
+                - XBA
+                - XBB
+                - XBC
+                - XBD
+                - XAU
+                - XDR
+                - XAG
+                - XPT
+                - XTS
+                - XPD
+                - XUA
+                - ZMW
+                - SRD
+                - MGA
+                - COU
+                - AFN
+                - TJS
+                - AOA
+                - BYR
+                - BGN
+                - CDF
+                - BAM
+                - EUR
+                - MXV
+                - UAH
+                - GEL
+                - BOV
+                - PLN
+                - BRL
+                - CLF
+                - XSU
+                - USN
+                - ZZZ
+                - TAG
+          required:
+            - amount
+            - currency
+        rateBasis:
+          description: Rate basis for interest calculation
+          type: string
+          enum:
+            - RATE_BASIS_15_360
+            - RATE_BASIS_30_360
+            - RATE_BASIS_ACTUAL_360
+            - RATE_BASIS_ACTUAL_365
+            - RATE_BASIS_ACTUAL_ACTUAL
+        startingDate:
+          description: starting date of the saving contract (yyyy-MM-dd)
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2024-05-02'
+        endingDate:
+          description: ending date of the saving contract (yyyy-MM-dd)
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2024-05-22'
+        isInterestCapitalized:
+          description: The interest capitalized flag
+          type: boolean
+      required:
+        - rate
+        - capital
+        - rateBasis
+        - startingDate
+        - endingDate
+        - isInterestCapitalized
+      x-stoplight:
+        id: z3p2kftf0j6pq
+    InterestErrorDto:
+      type: object
+      properties:
+        errorMessages:
+          type: string
+          enum:
+            - INVALID_PARAMS
+            - INDEX_NOT_FOUND
+            - NO_RATE_FOR_THIS_DATE
+            - NO_CYCLE_FREQUENCY
+            - NO_INDEX_RATE_HISTORY
+            - STARTDATE_GREATER_THAN_ENDDATE
+        code:
+          type: string
+        translatedMessage:
+          type: string
+      required:
+        - errorMessages
+        - code
+        - translatedMessage
+      x-stoplight:
+        id: brueyegaiy61a
+    ComputeInterestWithCyclesRequestDto:
+      type: object
+      properties:
+        capital:
+          description: Amount upon which the calculation is based
+          type: object
+          properties:
+            amount:
+              description: The amount
+              type: integer
+            currency:
+              description: The ISO 4217 currency code
+              type: string
+              enum:
+                - ALL
+                - DZD
+                - ARS
+                - AUD
+                - BSD
+                - BHD
+                - BDT
+                - AMD
+                - BBD
+                - BMD
+                - BTN
+                - BOB
+                - BWP
+                - BZD
+                - SBD
+                - BND
+                - MMK
+                - BIF
+                - KHR
+                - CAD
+                - CVE
+                - KYD
+                - LKR
+                - CLP
+                - CNY
+                - COP
+                - KMF
+                - CRC
+                - HRK
+                - CUP
+                - CZK
+                - DKK
+                - DOP
+                - SVC
+                - ETB
+                - ERN
+                - FKP
+                - FJD
+                - DJF
+                - GMD
+                - GIP
+                - GTQ
+                - GNF
+                - GYD
+                - HTG
+                - HNL
+                - HKD
+                - HUF
+                - ISK
+                - INR
+                - IDR
+                - IRR
+                - IQD
+                - ILS
+                - JMD
+                - JPY
+                - KZT
+                - JOD
+                - KES
+                - KPW
+                - KRW
+                - KWD
+                - KGS
+                - LAK
+                - LBP
+                - LSL
+                - LRD
+                - LYD
+                - MOP
+                - MWK
+                - MYR
+                - MVR
+                - MUR
+                - MXN
+                - MNT
+                - MDL
+                - MAD
+                - OMR
+                - NAD
+                - NPR
+                - ANG
+                - AWG
+                - VUV
+                - NZD
+                - NIO
+                - NGN
+                - NOK
+                - PKR
+                - PAB
+                - PGK
+                - PYG
+                - PEN
+                - PHP
+                - QAR
+                - RUB
+                - RWF
+                - SHP
+                - STD
+                - SAR
+                - SCR
+                - SLL
+                - SGD
+                - VND
+                - SOS
+                - ZAR
+                - SSP
+                - SZL
+                - SEK
+                - CHF
+                - SYP
+                - THB
+                - TOP
+                - TTD
+                - AED
+                - TND
+                - UGX
+                - MKD
+                - EGP
+                - GBP
+                - TZS
+                - USD
+                - UYU
+                - UZS
+                - WST
+                - YER
+                - ZMK
+                - TWD
+                - MRU
+                - CUC
+                - ZWL
+                - TMT
+                - GHS
+                - VEF
+                - SDG
+                - UYI
+                - RSD
+                - MZN
+                - AZN
+                - RON
+                - CHE
+                - CHW
+                - TRY
+                - XAF
+                - XCD
+                - XOF
+                - XPF
+                - XBA
+                - XBB
+                - XBC
+                - XBD
+                - XAU
+                - XDR
+                - XAG
+                - XPT
+                - XTS
+                - XPD
+                - XUA
+                - ZMW
+                - SRD
+                - MGA
+                - COU
+                - AFN
+                - TJS
+                - AOA
+                - BYR
+                - BGN
+                - CDF
+                - BAM
+                - EUR
+                - MXV
+                - UAH
+                - GEL
+                - BOV
+                - PLN
+                - BRL
+                - CLF
+                - XSU
+                - USN
+                - ZZZ
+                - TAG
+          required:
+            - amount
+            - currency
+        indexCode:
+          description: The index code upon which the calculation is based
+          type: string
+        contractStartDate:
+          description: The contract starting date under the yyyy-MM-dd format
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+        cycleFrequency:
+          description: The product cycle frequency
+          type: string
+          enum:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - ANNUALLY
+        rateBasis:
+          description: The rate basis for interest calculation
+          type: string
+          enum:
+            - RATE_BASIS_30_360
+            - RATE_BASIS_15_360
+            - RATE_BASIS_ACTUAL_360
+            - RATE_BASIS_ACTUAL_365
+            - RATE_BASIS_ACTUAL_ACTUAL
+        margin:
+          description: The margin rate
+          type: string
+        rate:
+          description: The rate
+          type: string
+        rateFixingDays:
+          description: The rate fixing days
+          type: integer
+        calendarCode:
+          description: The calendar code
+          type: string
+        rateSettings:
+          description: The rate settings
+          type: object
+          properties:
+            capRate:
+              description: The cap rate
+              type: string
+            floorRate:
+              description: The floor rate
+              type: string
+        isInterestCapitalized:
+          description: The interest capitalized flag
+          type: boolean
+        totalTaxRate:
+          description: The total tax rate of the contract
+          type: number
+        matrixCells:
+          description: The matrix upon which the calculation is based
+          type: array
+          items:
+            type: object
+            properties:
+              rate:
+                description: The rate
+                type: string
+              minDuration:
+                description: The minimum duration
+                type: integer
+              minAmount:
+                description: The minimum amount
+                type: number
+            required:
+              - rate
+        cycles:
+          type: array
+          items:
+            type: object
+            properties:
+              startDate:
+                description: Starting date of the saving contract (yyyy-MM-dd)
+                type: string
+                pattern: '^\d{4}-\d{2}-\d{2}$'
+              endDate:
+                description: Ending date of the saving contract (yyyy-MM-dd)
+                type: string
+                pattern: '^\d{4}-\d{2}-\d{2}$'
+              maturityDate:
+                description: Maturity date of the saving contract (yyyy-MM-dd)
+                type: string
+                pattern: '^\d{4}-\d{2}-\d{2}$'
+              dueDate:
+                description: Due date of the saving contract (yyyy-MM-dd)
+                type: string
+                pattern: '^\d{4}-\d{2}-\d{2}$'
+              rate:
+                description: The rate of the cycle
+                type: string
+            required:
+              - startDate
+              - endDate
+              - maturityDate
+              - dueDate
+      required:
+        - capital
+        - contractStartDate
+        - cycleFrequency
+        - rateBasis
+        - margin
+        - rateFixingDays
+        - calendarCode
+        - isInterestCapitalized
+        - cycles
+      x-stoplight:
+        id: kp6oncxybu9rw
+    InterestRequestWithIndexDto:
+      type: object
+      properties:
+        index:
+          description: Code of index use for interest rate
+          type: string
+        margin:
+          description: The margin rate
+          type: string
+        capital:
+          type: object
+          properties:
+            amount:
+              description: The amount
+              type: integer
+            currency:
+              description: The ISO 4217 currency code
+              type: string
+              enum:
+                - ALL
+                - DZD
+                - ARS
+                - AUD
+                - BSD
+                - BHD
+                - BDT
+                - AMD
+                - BBD
+                - BMD
+                - BTN
+                - BOB
+                - BWP
+                - BZD
+                - SBD
+                - BND
+                - MMK
+                - BIF
+                - KHR
+                - CAD
+                - CVE
+                - KYD
+                - LKR
+                - CLP
+                - CNY
+                - COP
+                - KMF
+                - CRC
+                - HRK
+                - CUP
+                - CZK
+                - DKK
+                - DOP
+                - SVC
+                - ETB
+                - ERN
+                - FKP
+                - FJD
+                - DJF
+                - GMD
+                - GIP
+                - GTQ
+                - GNF
+                - GYD
+                - HTG
+                - HNL
+                - HKD
+                - HUF
+                - ISK
+                - INR
+                - IDR
+                - IRR
+                - IQD
+                - ILS
+                - JMD
+                - JPY
+                - KZT
+                - JOD
+                - KES
+                - KPW
+                - KRW
+                - KWD
+                - KGS
+                - LAK
+                - LBP
+                - LSL
+                - LRD
+                - LYD
+                - MOP
+                - MWK
+                - MYR
+                - MVR
+                - MUR
+                - MXN
+                - MNT
+                - MDL
+                - MAD
+                - OMR
+                - NAD
+                - NPR
+                - ANG
+                - AWG
+                - VUV
+                - NZD
+                - NIO
+                - NGN
+                - NOK
+                - PKR
+                - PAB
+                - PGK
+                - PYG
+                - PEN
+                - PHP
+                - QAR
+                - RUB
+                - RWF
+                - SHP
+                - STD
+                - SAR
+                - SCR
+                - SLL
+                - SGD
+                - VND
+                - SOS
+                - ZAR
+                - SSP
+                - SZL
+                - SEK
+                - CHF
+                - SYP
+                - THB
+                - TOP
+                - TTD
+                - AED
+                - TND
+                - UGX
+                - MKD
+                - EGP
+                - GBP
+                - TZS
+                - USD
+                - UYU
+                - UZS
+                - WST
+                - YER
+                - ZMK
+                - TWD
+                - MRU
+                - CUC
+                - ZWL
+                - TMT
+                - GHS
+                - VEF
+                - SDG
+                - UYI
+                - RSD
+                - MZN
+                - AZN
+                - RON
+                - CHE
+                - CHW
+                - TRY
+                - XAF
+                - XCD
+                - XOF
+                - XPF
+                - XBA
+                - XBB
+                - XBC
+                - XBD
+                - XAU
+                - XDR
+                - XAG
+                - XPT
+                - XTS
+                - XPD
+                - XUA
+                - ZMW
+                - SRD
+                - MGA
+                - COU
+                - AFN
+                - TJS
+                - AOA
+                - BYR
+                - BGN
+                - CDF
+                - BAM
+                - EUR
+                - MXV
+                - UAH
+                - GEL
+                - BOV
+                - PLN
+                - BRL
+                - CLF
+                - XSU
+                - USN
+                - ZZZ
+                - TAG
+          required:
+            - amount
+            - currency
+        rateBasis:
+          description: Rate basis for interest calculation
+          type: string
+          enum:
+            - RATE_BASIS_15_360
+            - RATE_BASIS_30_360
+            - RATE_BASIS_ACTUAL_360
+            - RATE_BASIS_ACTUAL_365
+            - RATE_BASIS_ACTUAL_ACTUAL
+        startingDate:
+          description: starting date of the saving contract (yyyy-MM-dd)
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2024-05-22'
+        endingDate:
+          description: ending date of the saving contract (yyyy-MM-dd)
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2024-05-22'
+        rateFixingDate:
+          description: 'date of the rate that is use in history. If not provide, we use the actual rate (yyyy-MM-dd)'
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2024-05-22'
+        cycleFrequency:
+          description: cycle frequency for FLOAT indexes
+          type: string
+          enum:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - ANNUALLY
+        isInterestCapitalized:
+          description: The interest capitalized flag
+          type: boolean
+      required:
+        - index
+        - capital
+        - rateBasis
+        - startingDate
+        - endingDate
+        - isInterestCapitalized
+      x-stoplight:
+        id: wyxm1fbu2yyym
+    ComputeAerErrorDto:
+      type: object
+      properties:
+        errorMessages:
+          type: string
+          enum:
+            - DURATION_STARTDATE_GREATER_THAN_ENDDATE
+        code:
+          type: string
+        translatedMessage:
+          type: string
+      required:
+        - errorMessages
+        - code
+        - translatedMessage
+      x-stoplight:
+        id: oisek4022hx32
+    ComputeAerRequestDtoOpenApi:
+      type: object
+      properties:
+        initialAmount:
+          type: object
+          properties:
+            amount:
+              description: The amount
+              type: integer
+            currency:
+              description: The ISO 4217 currency code
+              type: string
+              enum:
+                - ALL
+                - DZD
+                - ARS
+                - AUD
+                - BSD
+                - BHD
+                - BDT
+                - AMD
+                - BBD
+                - BMD
+                - BTN
+                - BOB
+                - BWP
+                - BZD
+                - SBD
+                - BND
+                - MMK
+                - BIF
+                - KHR
+                - CAD
+                - CVE
+                - KYD
+                - LKR
+                - CLP
+                - CNY
+                - COP
+                - KMF
+                - CRC
+                - HRK
+                - CUP
+                - CZK
+                - DKK
+                - DOP
+                - SVC
+                - ETB
+                - ERN
+                - FKP
+                - FJD
+                - DJF
+                - GMD
+                - GIP
+                - GTQ
+                - GNF
+                - GYD
+                - HTG
+                - HNL
+                - HKD
+                - HUF
+                - ISK
+                - INR
+                - IDR
+                - IRR
+                - IQD
+                - ILS
+                - JMD
+                - JPY
+                - KZT
+                - JOD
+                - KES
+                - KPW
+                - KRW
+                - KWD
+                - KGS
+                - LAK
+                - LBP
+                - LSL
+                - LRD
+                - LYD
+                - MOP
+                - MWK
+                - MYR
+                - MVR
+                - MUR
+                - MXN
+                - MNT
+                - MDL
+                - MAD
+                - OMR
+                - NAD
+                - NPR
+                - ANG
+                - AWG
+                - VUV
+                - NZD
+                - NIO
+                - NGN
+                - NOK
+                - PKR
+                - PAB
+                - PGK
+                - PYG
+                - PEN
+                - PHP
+                - QAR
+                - RUB
+                - RWF
+                - SHP
+                - STD
+                - SAR
+                - SCR
+                - SLL
+                - SGD
+                - VND
+                - SOS
+                - ZAR
+                - SSP
+                - SZL
+                - SEK
+                - CHF
+                - SYP
+                - THB
+                - TOP
+                - TTD
+                - AED
+                - TND
+                - UGX
+                - MKD
+                - EGP
+                - GBP
+                - TZS
+                - USD
+                - UYU
+                - UZS
+                - WST
+                - YER
+                - ZMK
+                - TWD
+                - MRU
+                - CUC
+                - ZWL
+                - TMT
+                - GHS
+                - VEF
+                - SDG
+                - UYI
+                - RSD
+                - MZN
+                - AZN
+                - RON
+                - CHE
+                - CHW
+                - TRY
+                - XAF
+                - XCD
+                - XOF
+                - XPF
+                - XBA
+                - XBB
+                - XBC
+                - XBD
+                - XAU
+                - XDR
+                - XAG
+                - XPT
+                - XTS
+                - XPD
+                - XUA
+                - ZMW
+                - SRD
+                - MGA
+                - COU
+                - AFN
+                - TJS
+                - AOA
+                - BYR
+                - BGN
+                - CDF
+                - BAM
+                - EUR
+                - MXV
+                - UAH
+                - GEL
+                - BOV
+                - PLN
+                - BRL
+                - CLF
+                - XSU
+                - USN
+                - ZZZ
+                - TAG
+          required:
+            - amount
+            - currency
+        schedule:
+          type: array
+          items:
+            type: object
+            properties:
+              duration:
+                type: object
+                properties:
+                  startDate:
+                    description: The start date
+                    type: string
+                    format: date
+                    pattern: '^\d{4}-\d{2}-\d{2}$'
+                    example: '2024-05-22'
+                  endDate:
+                    description: 'The end date: Must be after startDate'
+                    type: string
+                    format: date
+                    pattern: '^\d{4}-\d{2}-\d{2}$'
+                required:
+                  - startDate
+                  - endDate
+              transactionAmount:
+                type: object
+                properties:
+                  amount:
+                    description: The amount
+                    type: integer
+                  currency:
+                    description: The ISO 4217 currency code
+                    type: string
+                    enum:
+                      - ALL
+                      - DZD
+                      - ARS
+                      - AUD
+                      - BSD
+                      - BHD
+                      - BDT
+                      - AMD
+                      - BBD
+                      - BMD
+                      - BTN
+                      - BOB
+                      - BWP
+                      - BZD
+                      - SBD
+                      - BND
+                      - MMK
+                      - BIF
+                      - KHR
+                      - CAD
+                      - CVE
+                      - KYD
+                      - LKR
+                      - CLP
+                      - CNY
+                      - COP
+                      - KMF
+                      - CRC
+                      - HRK
+                      - CUP
+                      - CZK
+                      - DKK
+                      - DOP
+                      - SVC
+                      - ETB
+                      - ERN
+                      - FKP
+                      - FJD
+                      - DJF
+                      - GMD
+                      - GIP
+                      - GTQ
+                      - GNF
+                      - GYD
+                      - HTG
+                      - HNL
+                      - HKD
+                      - HUF
+                      - ISK
+                      - INR
+                      - IDR
+                      - IRR
+                      - IQD
+                      - ILS
+                      - JMD
+                      - JPY
+                      - KZT
+                      - JOD
+                      - KES
+                      - KPW
+                      - KRW
+                      - KWD
+                      - KGS
+                      - LAK
+                      - LBP
+                      - LSL
+                      - LRD
+                      - LYD
+                      - MOP
+                      - MWK
+                      - MYR
+                      - MVR
+                      - MUR
+                      - MXN
+                      - MNT
+                      - MDL
+                      - MAD
+                      - OMR
+                      - NAD
+                      - NPR
+                      - ANG
+                      - AWG
+                      - VUV
+                      - NZD
+                      - NIO
+                      - NGN
+                      - NOK
+                      - PKR
+                      - PAB
+                      - PGK
+                      - PYG
+                      - PEN
+                      - PHP
+                      - QAR
+                      - RUB
+                      - RWF
+                      - SHP
+                      - STD
+                      - SAR
+                      - SCR
+                      - SLL
+                      - SGD
+                      - VND
+                      - SOS
+                      - ZAR
+                      - SSP
+                      - SZL
+                      - SEK
+                      - CHF
+                      - SYP
+                      - THB
+                      - TOP
+                      - TTD
+                      - AED
+                      - TND
+                      - UGX
+                      - MKD
+                      - EGP
+                      - GBP
+                      - TZS
+                      - USD
+                      - UYU
+                      - UZS
+                      - WST
+                      - YER
+                      - ZMK
+                      - TWD
+                      - MRU
+                      - CUC
+                      - ZWL
+                      - TMT
+                      - GHS
+                      - VEF
+                      - SDG
+                      - UYI
+                      - RSD
+                      - MZN
+                      - AZN
+                      - RON
+                      - CHE
+                      - CHW
+                      - TRY
+                      - XAF
+                      - XCD
+                      - XOF
+                      - XPF
+                      - XBA
+                      - XBB
+                      - XBC
+                      - XBD
+                      - XAU
+                      - XDR
+                      - XAG
+                      - XPT
+                      - XTS
+                      - XPD
+                      - XUA
+                      - ZMW
+                      - SRD
+                      - MGA
+                      - COU
+                      - AFN
+                      - TJS
+                      - AOA
+                      - BYR
+                      - BGN
+                      - CDF
+                      - BAM
+                      - EUR
+                      - MXV
+                      - UAH
+                      - GEL
+                      - BOV
+                      - PLN
+                      - BRL
+                      - CLF
+                      - XSU
+                      - USN
+                      - ZZZ
+                      - TAG
+                required:
+                  - amount
+                  - currency
+            required:
+              - duration
+              - transactionAmount
+      required:
+        - initialAmount
+        - schedule
+      x-stoplight:
+        id: b0zpulhlofzqt
+    ComputeRateForDateResponseDto:
+      type: array
+      items:
+        type: object
+        properties:
+          date:
+            description: The reference date
+            type: string
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+          rate:
+            description: The rate for the referenced date
+            type: string
+        required:
+          - date
+          - rate
+      x-stoplight:
+        id: ljt92bzy8fz8s
+    ComputeRateForDateRequestDto:
+      type: object
+      properties:
+        indexCode:
+          description: The index code upon which the calculation is based
+          type: string
+        calendarCode:
+          description: Id of the the calendar in use
+          type: string
+        startDate:
+          description: The starting date of the fixed index under the yyyy-MM-dd format
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+        frequency:
+          description: The product cycle frequency
+          type: string
+          enum:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - ANNUALLY
+        matrixCells:
+          description: The matrix upon which the calculation is based
+          type: array
+          items:
+            type: object
+            properties:
+              rate:
+                description: The rate
+                type: string
+              minDuration:
+                description: The minimum duration
+                type: integer
+              minAmount:
+                description: The minimum amount
+                type: number
+            required:
+              - rate
+        balancePerDate:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                description: The date
+                type: string
+                pattern: '^\d{4}-\d{2}-\d{2}$'
+              balance:
+                description: The balance
+                type: object
+                properties:
+                  amount:
+                    description: The amount
+                    type: integer
+                  currency:
+                    description: The ISO 4217 currency code
+                    type: string
+                    enum:
+                      - ALL
+                      - DZD
+                      - ARS
+                      - AUD
+                      - BSD
+                      - BHD
+                      - BDT
+                      - AMD
+                      - BBD
+                      - BMD
+                      - BTN
+                      - BOB
+                      - BWP
+                      - BZD
+                      - SBD
+                      - BND
+                      - MMK
+                      - BIF
+                      - KHR
+                      - CAD
+                      - CVE
+                      - KYD
+                      - LKR
+                      - CLP
+                      - CNY
+                      - COP
+                      - KMF
+                      - CRC
+                      - HRK
+                      - CUP
+                      - CZK
+                      - DKK
+                      - DOP
+                      - SVC
+                      - ETB
+                      - ERN
+                      - FKP
+                      - FJD
+                      - DJF
+                      - GMD
+                      - GIP
+                      - GTQ
+                      - GNF
+                      - GYD
+                      - HTG
+                      - HNL
+                      - HKD
+                      - HUF
+                      - ISK
+                      - INR
+                      - IDR
+                      - IRR
+                      - IQD
+                      - ILS
+                      - JMD
+                      - JPY
+                      - KZT
+                      - JOD
+                      - KES
+                      - KPW
+                      - KRW
+                      - KWD
+                      - KGS
+                      - LAK
+                      - LBP
+                      - LSL
+                      - LRD
+                      - LYD
+                      - MOP
+                      - MWK
+                      - MYR
+                      - MVR
+                      - MUR
+                      - MXN
+                      - MNT
+                      - MDL
+                      - MAD
+                      - OMR
+                      - NAD
+                      - NPR
+                      - ANG
+                      - AWG
+                      - VUV
+                      - NZD
+                      - NIO
+                      - NGN
+                      - NOK
+                      - PKR
+                      - PAB
+                      - PGK
+                      - PYG
+                      - PEN
+                      - PHP
+                      - QAR
+                      - RUB
+                      - RWF
+                      - SHP
+                      - STD
+                      - SAR
+                      - SCR
+                      - SLL
+                      - SGD
+                      - VND
+                      - SOS
+                      - ZAR
+                      - SSP
+                      - SZL
+                      - SEK
+                      - CHF
+                      - SYP
+                      - THB
+                      - TOP
+                      - TTD
+                      - AED
+                      - TND
+                      - UGX
+                      - MKD
+                      - EGP
+                      - GBP
+                      - TZS
+                      - USD
+                      - UYU
+                      - UZS
+                      - WST
+                      - YER
+                      - ZMK
+                      - TWD
+                      - MRU
+                      - CUC
+                      - ZWL
+                      - TMT
+                      - GHS
+                      - VEF
+                      - SDG
+                      - UYI
+                      - RSD
+                      - MZN
+                      - AZN
+                      - RON
+                      - CHE
+                      - CHW
+                      - TRY
+                      - XAF
+                      - XCD
+                      - XOF
+                      - XPF
+                      - XBA
+                      - XBB
+                      - XBC
+                      - XBD
+                      - XAU
+                      - XDR
+                      - XAG
+                      - XPT
+                      - XTS
+                      - XPD
+                      - XUA
+                      - ZMW
+                      - SRD
+                      - MGA
+                      - COU
+                      - AFN
+                      - TJS
+                      - AOA
+                      - BYR
+                      - BGN
+                      - CDF
+                      - BAM
+                      - EUR
+                      - MXV
+                      - UAH
+                      - GEL
+                      - BOV
+                      - PLN
+                      - BRL
+                      - CLF
+                      - XSU
+                      - USN
+                      - ZZZ
+                      - TAG
+                required:
+                  - amount
+                  - currency
+            required:
+              - date
+              - balance
+        floorRate:
+          description: The floor rate
+          type: string
+        capRate:
+          description: The cap rate
+          type: string
+        rateFixingDays:
+          description: The number of fixing days
+          type: number
+        rate:
+          description: A provided rate
+          type: string
+        indexedAmountMatrixCells:
+          type: array
+          items:
+            type: object
+            properties:
+              minAmount:
+                description: The minimum amount
+                type: number
+              index:
+                description: The index to be used (can be a float or a fixed index)
+                type: string
+              marginRate:
+                description: The margin rate
+                type: string
+            required:
+              - minAmount
+              - index
+              - marginRate
+      required:
+        - startDate
+        - balancePerDate
+      x-stoplight:
+        id: pbppdzusp70sy
+    ComputeRateForDateErrorDto:
+      type: object
+      properties:
+        errorMessages:
+          type: string
+          enum:
+            - DURATION_STARTDATE_GREATER_THAN_ENDDATE
+            - ERROR_WHILE_COMPUTING_CYCLE_DATES
+            - NO_INDEX_FOUND
+            - INDEX_IS_MISSING_HISTORY
+            - CALENDAR_NOT_FOUND
+            - INCORRECT_INPUT_PROVIDED
+            - INVALID_CELLS_IN_MATRIX
+            - UNKNOWN_FAILURE_TYPE
+            - ACCRUAL_CYCLES_MUST_BE_PROVIDED_FOR_FLOAT_INDEX
+            - UNABLE_TO_FIND_CYCLE_FOR_DATE_FOR_FLOAT_INDEX
+            - INVALID_INDEXED_AMOUNT_MATRIX
+        code:
+          type: string
+        translatedMessage:
+          type: string
+      required:
+        - errorMessages
+        - code
+        - translatedMessage
+      x-stoplight:
+        id: 5tgt9ge9rvb0e
+    CreateIndexRequestDto:
+      type: object
+      properties:
+        code:
+          description: The index code
+          type: string
+        isActive:
+          description: Whether the index is active
+          type: boolean
+        names:
+          description: Translated names list
+          type: object
+          example:
+            fr_FR: nom en francais
+            en_US: english name
+        rate:
+          type: object
+          properties:
+            type:
+              description: The rate type
+              type: string
+              enum:
+                - FIXED
+                - FLOAT
+              x-enumNames:
+                - FIXED
+                - FLOAT
+            value:
+              description: The rate value (%)
+              type: string
+            startDate:
+              description: The rate starting date under the yyyy-MM-dd format
+              type: string
+              format: date
+              pattern: '^\d{4}-\d{2}-\d{2}$'
+          required:
+            - type
+            - value
+            - startDate
+      required:
+        - code
+        - isActive
+        - names
+        - rate
+      x-stoplight:
+        id: 9gzxm3cxmbnji
+    IndexErrorDto:
+      type: object
+      properties:
+        errorMessages:
+          type: string
+          enum:
+            - INDEX_NOT_FOUND
+            - INDEX_IS_IN_USE
+            - AN_INDEX_IS_MISSING_HISTORY
+            - INDEX_IS_MISSING_HISTORY
+            - INDEX_ALREADY_LINKED_TO_THIS_KEY
+            - INVALID_CODE
+            - CODE_ALREADY_EXISTS
+            - INVALID_START_DATE
+            - INVALID_RATE_VALUE
+            - MISSING_DEFAULT_LANGUAGE
+            - AVAILABLE_LANGUAGE_IS_NULL
+        code:
+          type: string
+        translatedMessage:
+          type: string
+      required:
+        - errorMessages
+        - code
+        - translatedMessage
+      x-stoplight:
+        id: vpxs9vmj8lqyc
+    LinkIndexRequestDto:
+      type: object
+      properties:
+        externalKey:
+          description: The external key of the entity to link
+          type: string
+      required:
+        - externalKey
+      x-stoplight:
+        id: dxja4hh8sfr4n
+    GetIndexHistoryResponseDto:
+      type: array
+      items:
+        type: object
+        properties:
+          value:
+            description: The rate value (%)
+            type: string
+          startDate:
+            description: The rate starting date under the yyyy-MM-dd format
+            type: string
+        required:
+          - value
+          - startDate
+      x-stoplight:
+        id: lbtno6g8oesyp
+    GetIndexResponseDto:
+      type: object
+      properties:
+        code:
+          description: The index code
+          type: string
+        isActive:
+          description: Whether the index is active
+          type: boolean
+        names:
+          description: Translated names list
+          type: object
+          example:
+            fr_FR: nom en francais
+            en_US: english name
+        rate:
+          type: object
+          properties:
+            type:
+              description: The rate type
+              type: string
+              enum:
+                - FIXED
+                - FLOAT
+            value:
+              description: The rate value (%)
+              type: string
+            startDate:
+              description: The rate starting date under the yyyy-MM-dd format
+              type: string
+          required:
+            - type
+            - value
+            - startDate
+      required:
+        - code
+        - isActive
+        - names
+        - rate
+      x-stoplight:
+        id: nkiisexiy7eh3
+    GetAllIndexesResponseDto:
+      type: object
+      properties:
+        items:
+          description: The items returned by the query
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                description: The index code
+                type: string
+              isActive:
+                description: Whether the index is active
+                type: boolean
+              names:
+                description: Translated names list
+                type: object
+                example:
+                  fr_FR: nom en francais
+                  en_US: english name
+              rate:
+                type: object
+                properties:
+                  type:
+                    description: The rate type
+                    type: string
+                    enum:
+                      - FIXED
+                      - FLOAT
+                  value:
+                    description: The rate value (%)
+                    type: string
+                  startDate:
+                    description: The rate starting date under the yyyy-MM-dd format
+                    type: string
+                required:
+                  - type
+                  - value
+                  - startDate
+            required:
+              - code
+              - isActive
+              - names
+              - rate
+        count:
+          description: The number of items found
+          type: integer
+        limit:
+          description: The number of results to display
+          type: integer
+        offset:
+          description: The start of pagination
+          type: integer
+        sort:
+          description: The sorting order
+          type: string
+      required:
+        - items
+        - count
+        - limit
+        - offset
+        - sort
+      x-stoplight:
+        id: hj2w6p7qho2p0
+    UpdateIndexRequestDto:
+      type: object
+      properties:
+        names:
+          description: Translated names list
+          type: object
+          example:
+            fr_FR: nom en francais
+            en_US: english name
+        isActive:
+          description: Whether the index is active
+          type: boolean
+        rate:
+          type: object
+          properties:
+            value:
+              description: The rate value (%)
+              type: string
+            startDate:
+              description: The rate starting date under the yyyy-MM-dd format
+              type: string
+              format: date
+              pattern: '^\d{4}-\d{2}-\d{2}$'
+          required:
+            - value
+            - startDate
+      required:
+        - names
+        - isActive
+        - rate
+      x-stoplight:
+        id: y2jfxuwfoxhmw
+    CreateCalendarRequestDto:
+      type: object
+      properties:
+        code:
+          type: string
+        isActive:
+          type: boolean
+        names:
+          description: Translated names list
+          type: object
+          example:
+            fr_FR: nom en francais
+            en_US: english name
+        monday:
+          type: boolean
+        tuesday:
+          type: boolean
+        wednesday:
+          type: boolean
+        thursday:
+          type: boolean
+        friday:
+          type: boolean
+        saturday:
+          type: boolean
+        sunday:
+          type: boolean
+      required:
+        - code
+        - isActive
+        - names
+        - monday
+        - tuesday
+        - wednesday
+        - thursday
+        - friday
+        - saturday
+        - sunday
+      x-stoplight:
+        id: h8gl5kr2o83l6
+    CalendarErrorDto:
+      type: object
+      properties:
+        errorMessages:
+          type: string
+          enum:
+            - CALENDAR_CODE_ALREADY_EXIST
+            - INVALID_CODE
+            - CALENDAR_NOT_FOUND
+            - EXISTING_BANK_HOLIDAYS_FOR_DATES
+            - CALENDAR_ALREADY_LINKED_TO_THIS_KEY
+            - CALENDAR_USED_BY_EXTERNAL
+            - NO_BANK_HOLIDAY_FOR_DATES
+            - BANK_HOLIDAY_NOT_FOUND
+            - BANK_HOLIDAY_DESCRIPTION_TOO_LONG
+            - REPOSITORY_ERROR
+            - MISSING_DEFAULT_LANGUAGE
+            - AVAILABLE_LANGUAGE_IS_NULL
+            - COMPUTE_DEFAULT_LANGUAGE_NOT_FOUND
+            - COMPUTE_AVAILABLE_LANGUAGES_NOT_FOUND
+        code:
+          type: number
+        translatedMessage:
+          type: string
+      required:
+        - errorMessages
+        - code
+        - translatedMessage
+      x-stoplight:
+        id: fjis3n51s4xik
+    CalendarResponseDto:
+      type: object
+      properties:
+        code:
+          type: string
+        isActive:
+          type: boolean
+        names:
+          description: Translated names list
+          type: object
+          example:
+            fr_FR: nom en francais
+            en_US: english name
+        monday:
+          type: boolean
+        tuesday:
+          type: boolean
+        wednesday:
+          type: boolean
+        thursday:
+          type: boolean
+        friday:
+          type: boolean
+        saturday:
+          type: boolean
+        sunday:
+          type: boolean
+        bankHolidays:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+              effectiveDate:
+                type: string
+            required:
+              - description
+              - effectiveDate
+      required:
+        - code
+        - isActive
+        - names
+        - monday
+        - tuesday
+        - wednesday
+        - thursday
+        - friday
+        - saturday
+        - sunday
+        - bankHolidays
+      x-stoplight:
+        id: s7fbmgvhn2ugx
+    AllCalendarsResponseDto:
+      type: object
+      properties:
+        items:
+          description: The items returned by the query
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              isActive:
+                type: boolean
+              names:
+                description: Translated names list
+                type: object
+                example:
+                  fr_FR: nom en francais
+                  en_US: english name
+              monday:
+                type: boolean
+              tuesday:
+                type: boolean
+              wednesday:
+                type: boolean
+              thursday:
+                type: boolean
+              friday:
+                type: boolean
+              saturday:
+                type: boolean
+              sunday:
+                type: boolean
+            required:
+              - code
+              - isActive
+              - names
+              - monday
+              - tuesday
+              - wednesday
+              - thursday
+              - friday
+              - saturday
+              - sunday
+        count:
+          description: The number of items found
+          type: integer
+        limit:
+          description: The number of results to display
+          type: integer
+        offset:
+          description: The start of pagination
+          type: integer
+        sort:
+          description: The sorting order
+          type: string
+      required:
+        - items
+        - count
+        - limit
+        - offset
+        - sort
+      x-stoplight:
+        id: e5dxsdxlz6d5c
+    GetCalendarDateWithNbdResponseDto:
+      type: object
+      properties:
+        date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+      required:
+        - date
+      x-stoplight:
+        id: n046embhds5z3
+    UpdateCalendarRequestDto:
+      type: object
+      properties:
+        isActive:
+          type: boolean
+        monday:
+          type: boolean
+        tuesday:
+          type: boolean
+        wednesday:
+          type: boolean
+        thursday:
+          type: boolean
+        friday:
+          type: boolean
+        saturday:
+          type: boolean
+        sunday:
+          type: boolean
+        names:
+          description: Translated names list
+          type: object
+          example:
+            fr_FR: nom en francais
+            en_US: english name
+      required:
+        - isActive
+        - monday
+        - tuesday
+        - wednesday
+        - thursday
+        - friday
+        - saturday
+        - sunday
+        - names
+      x-stoplight:
+        id: qykcdjx73cfc3
+    CreateBankHolidaysRequestDto:
+      type: object
+      properties:
+        bankHolidays:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+              effectiveDate:
+                type: string
+                format: date
+                pattern: '^\d{4}-\d{2}-\d{2}$'
+            required:
+              - description
+              - effectiveDate
+      required:
+        - bankHolidays
+      x-stoplight:
+        id: qpmge4x37ko14
+    LinkOrUnlinkCalendarRequestDto:
+      type: object
+      properties:
+        externalId:
+          type: string
+      required:
+        - externalId
+      x-stoplight:
+        id: xz9zbweevbvsy
+    LinkOrUnlinkCalendarResponseDto:
+      type: object
+      properties:
+        calendarCode:
+          type: string
+      required:
+        - calendarCode
+      x-stoplight:
+        id: gbogo63afexf0
+    BankHolidayDto:
+      type: object
+      properties:
+        description:
+          type: string
+        effectiveDate:
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+      required:
+        - description
+        - effectiveDate
+      x-stoplight:
+        id: i8c3wmu2fhqdi
+    ComputeAccrualCycleResponseDto:
+      type: array
+      items:
+        type: object
+        properties:
+          startDate:
+            description: The cycle starting date under the yyyy-MM-dd format
+            type: string
+            format: date
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+          endDate:
+            description: The cycle's end date under the yyyy-MM-dd format
+            type: string
+            format: YYYY-MM-DD
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+          maturityDate:
+            description: The cycle's maturity date under the yyyy-MM-dd format
+            type: string
+            format: date
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+          dueDate:
+            description: The cycle due date under the yyyy-MM-dd format
+            type: string
+            format: date
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+          interestRateValue:
+            description: The interest rate value for this cycle
+            type: string
+          interestProjected:
+            description: The projected amount of generated interest
+            type: object
+            properties:
+              amount:
+                description: The amount
+                type: integer
+              currency:
+                description: The ISO 4217 currency code
+                type: string
+                enum:
+                  - ALL
+                  - DZD
+                  - ARS
+                  - AUD
+                  - BSD
+                  - BHD
+                  - BDT
+                  - AMD
+                  - BBD
+                  - BMD
+                  - BTN
+                  - BOB
+                  - BWP
+                  - BZD
+                  - SBD
+                  - BND
+                  - MMK
+                  - BIF
+                  - KHR
+                  - CAD
+                  - CVE
+                  - KYD
+                  - LKR
+                  - CLP
+                  - CNY
+                  - COP
+                  - KMF
+                  - CRC
+                  - HRK
+                  - CUP
+                  - CZK
+                  - DKK
+                  - DOP
+                  - SVC
+                  - ETB
+                  - ERN
+                  - FKP
+                  - FJD
+                  - DJF
+                  - GMD
+                  - GIP
+                  - GTQ
+                  - GNF
+                  - GYD
+                  - HTG
+                  - HNL
+                  - HKD
+                  - HUF
+                  - ISK
+                  - INR
+                  - IDR
+                  - IRR
+                  - IQD
+                  - ILS
+                  - JMD
+                  - JPY
+                  - KZT
+                  - JOD
+                  - KES
+                  - KPW
+                  - KRW
+                  - KWD
+                  - KGS
+                  - LAK
+                  - LBP
+                  - LSL
+                  - LRD
+                  - LYD
+                  - MOP
+                  - MWK
+                  - MYR
+                  - MVR
+                  - MUR
+                  - MXN
+                  - MNT
+                  - MDL
+                  - MAD
+                  - OMR
+                  - NAD
+                  - NPR
+                  - ANG
+                  - AWG
+                  - VUV
+                  - NZD
+                  - NIO
+                  - NGN
+                  - NOK
+                  - PKR
+                  - PAB
+                  - PGK
+                  - PYG
+                  - PEN
+                  - PHP
+                  - QAR
+                  - RUB
+                  - RWF
+                  - SHP
+                  - STD
+                  - SAR
+                  - SCR
+                  - SLL
+                  - SGD
+                  - VND
+                  - SOS
+                  - ZAR
+                  - SSP
+                  - SZL
+                  - SEK
+                  - CHF
+                  - SYP
+                  - THB
+                  - TOP
+                  - TTD
+                  - AED
+                  - TND
+                  - UGX
+                  - MKD
+                  - EGP
+                  - GBP
+                  - TZS
+                  - USD
+                  - UYU
+                  - UZS
+                  - WST
+                  - YER
+                  - ZMK
+                  - TWD
+                  - MRU
+                  - CUC
+                  - ZWL
+                  - TMT
+                  - GHS
+                  - VEF
+                  - SDG
+                  - UYI
+                  - RSD
+                  - MZN
+                  - AZN
+                  - RON
+                  - CHE
+                  - CHW
+                  - TRY
+                  - XAF
+                  - XCD
+                  - XOF
+                  - XPF
+                  - XBA
+                  - XBB
+                  - XBC
+                  - XBD
+                  - XAU
+                  - XDR
+                  - XAG
+                  - XPT
+                  - XTS
+                  - XPD
+                  - XUA
+                  - ZMW
+                  - SRD
+                  - MGA
+                  - COU
+                  - AFN
+                  - TJS
+                  - AOA
+                  - BYR
+                  - BGN
+                  - CDF
+                  - BAM
+                  - EUR
+                  - MXV
+                  - UAH
+                  - GEL
+                  - BOV
+                  - PLN
+                  - BRL
+                  - CLF
+                  - XSU
+                  - USN
+                  - ZZZ
+                  - TAG
+            required:
+              - amount
+              - currency
+          balance:
+            description: The balance of the cycle
+            type: object
+            properties:
+              amount:
+                description: The amount
+                type: integer
+              currency:
+                description: The ISO 4217 currency code
+                type: string
+                enum:
+                  - ALL
+                  - DZD
+                  - ARS
+                  - AUD
+                  - BSD
+                  - BHD
+                  - BDT
+                  - AMD
+                  - BBD
+                  - BMD
+                  - BTN
+                  - BOB
+                  - BWP
+                  - BZD
+                  - SBD
+                  - BND
+                  - MMK
+                  - BIF
+                  - KHR
+                  - CAD
+                  - CVE
+                  - KYD
+                  - LKR
+                  - CLP
+                  - CNY
+                  - COP
+                  - KMF
+                  - CRC
+                  - HRK
+                  - CUP
+                  - CZK
+                  - DKK
+                  - DOP
+                  - SVC
+                  - ETB
+                  - ERN
+                  - FKP
+                  - FJD
+                  - DJF
+                  - GMD
+                  - GIP
+                  - GTQ
+                  - GNF
+                  - GYD
+                  - HTG
+                  - HNL
+                  - HKD
+                  - HUF
+                  - ISK
+                  - INR
+                  - IDR
+                  - IRR
+                  - IQD
+                  - ILS
+                  - JMD
+                  - JPY
+                  - KZT
+                  - JOD
+                  - KES
+                  - KPW
+                  - KRW
+                  - KWD
+                  - KGS
+                  - LAK
+                  - LBP
+                  - LSL
+                  - LRD
+                  - LYD
+                  - MOP
+                  - MWK
+                  - MYR
+                  - MVR
+                  - MUR
+                  - MXN
+                  - MNT
+                  - MDL
+                  - MAD
+                  - OMR
+                  - NAD
+                  - NPR
+                  - ANG
+                  - AWG
+                  - VUV
+                  - NZD
+                  - NIO
+                  - NGN
+                  - NOK
+                  - PKR
+                  - PAB
+                  - PGK
+                  - PYG
+                  - PEN
+                  - PHP
+                  - QAR
+                  - RUB
+                  - RWF
+                  - SHP
+                  - STD
+                  - SAR
+                  - SCR
+                  - SLL
+                  - SGD
+                  - VND
+                  - SOS
+                  - ZAR
+                  - SSP
+                  - SZL
+                  - SEK
+                  - CHF
+                  - SYP
+                  - THB
+                  - TOP
+                  - TTD
+                  - AED
+                  - TND
+                  - UGX
+                  - MKD
+                  - EGP
+                  - GBP
+                  - TZS
+                  - USD
+                  - UYU
+                  - UZS
+                  - WST
+                  - YER
+                  - ZMK
+                  - TWD
+                  - MRU
+                  - CUC
+                  - ZWL
+                  - TMT
+                  - GHS
+                  - VEF
+                  - SDG
+                  - UYI
+                  - RSD
+                  - MZN
+                  - AZN
+                  - RON
+                  - CHE
+                  - CHW
+                  - TRY
+                  - XAF
+                  - XCD
+                  - XOF
+                  - XPF
+                  - XBA
+                  - XBB
+                  - XBC
+                  - XBD
+                  - XAU
+                  - XDR
+                  - XAG
+                  - XPT
+                  - XTS
+                  - XPD
+                  - XUA
+                  - ZMW
+                  - SRD
+                  - MGA
+                  - COU
+                  - AFN
+                  - TJS
+                  - AOA
+                  - BYR
+                  - BGN
+                  - CDF
+                  - BAM
+                  - EUR
+                  - MXV
+                  - UAH
+                  - GEL
+                  - BOV
+                  - PLN
+                  - BRL
+                  - CLF
+                  - XSU
+                  - USN
+                  - ZZZ
+                  - TAG
+            required:
+              - amount
+              - currency
+        required:
+          - startDate
+          - endDate
+          - dueDate
+          - interestRateValue
+          - interestProjected
+          - balance
+      x-stoplight:
+        id: gf4l7neg8kp3c
+    ComputeAccrualCycleRequestDto:
+      type: object
+      properties:
+        capital:
+          description: Amount upon which the calculation is based
+          type: object
+          properties:
+            amount:
+              description: The amount
+              type: integer
+            currency:
+              description: The ISO 4217 currency code
+              type: string
+              enum:
+                - ALL
+                - DZD
+                - ARS
+                - AUD
+                - BSD
+                - BHD
+                - BDT
+                - AMD
+                - BBD
+                - BMD
+                - BTN
+                - BOB
+                - BWP
+                - BZD
+                - SBD
+                - BND
+                - MMK
+                - BIF
+                - KHR
+                - CAD
+                - CVE
+                - KYD
+                - LKR
+                - CLP
+                - CNY
+                - COP
+                - KMF
+                - CRC
+                - HRK
+                - CUP
+                - CZK
+                - DKK
+                - DOP
+                - SVC
+                - ETB
+                - ERN
+                - FKP
+                - FJD
+                - DJF
+                - GMD
+                - GIP
+                - GTQ
+                - GNF
+                - GYD
+                - HTG
+                - HNL
+                - HKD
+                - HUF
+                - ISK
+                - INR
+                - IDR
+                - IRR
+                - IQD
+                - ILS
+                - JMD
+                - JPY
+                - KZT
+                - JOD
+                - KES
+                - KPW
+                - KRW
+                - KWD
+                - KGS
+                - LAK
+                - LBP
+                - LSL
+                - LRD
+                - LYD
+                - MOP
+                - MWK
+                - MYR
+                - MVR
+                - MUR
+                - MXN
+                - MNT
+                - MDL
+                - MAD
+                - OMR
+                - NAD
+                - NPR
+                - ANG
+                - AWG
+                - VUV
+                - NZD
+                - NIO
+                - NGN
+                - NOK
+                - PKR
+                - PAB
+                - PGK
+                - PYG
+                - PEN
+                - PHP
+                - QAR
+                - RUB
+                - RWF
+                - SHP
+                - STD
+                - SAR
+                - SCR
+                - SLL
+                - SGD
+                - VND
+                - SOS
+                - ZAR
+                - SSP
+                - SZL
+                - SEK
+                - CHF
+                - SYP
+                - THB
+                - TOP
+                - TTD
+                - AED
+                - TND
+                - UGX
+                - MKD
+                - EGP
+                - GBP
+                - TZS
+                - USD
+                - UYU
+                - UZS
+                - WST
+                - YER
+                - ZMK
+                - TWD
+                - MRU
+                - CUC
+                - ZWL
+                - TMT
+                - GHS
+                - VEF
+                - SDG
+                - UYI
+                - RSD
+                - MZN
+                - AZN
+                - RON
+                - CHE
+                - CHW
+                - TRY
+                - XAF
+                - XCD
+                - XOF
+                - XPF
+                - XBA
+                - XBB
+                - XBC
+                - XBD
+                - XAU
+                - XDR
+                - XAG
+                - XPT
+                - XTS
+                - XPD
+                - XUA
+                - ZMW
+                - SRD
+                - MGA
+                - COU
+                - AFN
+                - TJS
+                - AOA
+                - BYR
+                - BGN
+                - CDF
+                - BAM
+                - EUR
+                - MXV
+                - UAH
+                - GEL
+                - BOV
+                - PLN
+                - BRL
+                - CLF
+                - XSU
+                - USN
+                - ZZZ
+                - TAG
+          required:
+            - amount
+            - currency
+        indexCode:
+          description: The index code upon which the calculation is based
+          type: string
+        calendarCode:
+          description: The calendar code upon which the calculation is based
+          type: string
+        startDate:
+          description: The contract starting date under the yyyy-MM-dd format
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+        endDate:
+          description: The contract ending date under the yyyy-MM-dd format
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+        cycleFrequency:
+          description: The product cycle frequency
+          type: string
+          enum:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - ANNUALLY
+        paymentFrequency:
+          description: The product payment frequency
+          type: string
+          enum:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - ANNUALLY
+            - ATMATURITY
+          x-enumNames:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - ANNUALLY
+            - ATMATURITY
+        rateFixingDays:
+          description: The contract rate fixing days
+          type: integer
+          minimum: 0
+          exclusiveMinimum: -1
+        rateBasis:
+          description: The rate basis for interest calculation
+          type: string
+          enum:
+            - RATE_BASIS_15_360
+            - RATE_BASIS_30_360
+            - RATE_BASIS_ACTUAL_360
+            - RATE_BASIS_ACTUAL_365
+            - RATE_BASIS_ACTUAL_ACTUAL
+        margin:
+          description: The margin rate
+          type: string
+        rate:
+          description: The rate
+          type: string
+        rateSettings:
+          description: The rate settings
+          type: object
+          properties:
+            capRate:
+              oneOf:
+                - type: 'null'
+                - description: The cap rate
+                  type: string
+            floorRate:
+              oneOf:
+                - type: 'null'
+                - description: The floor rate
+                  type: string
+        isInterestCapitalized:
+          description: The interest capitalized flag
+          type: boolean
+        firstCycleMaturityDate:
+          description: The first cycle end date
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+        matrixCells:
+          description: The matrix upon which the calculation is based
+          type: array
+          items:
+            type: object
+            properties:
+              rate:
+                description: The rate
+                type: string
+              minDuration:
+                description: The minimum duration
+                type: integer
+              minAmount:
+                description: The minimum amount
+                type: number
+            required:
+              - rate
+        nbdRule:
+          description: Non banking days rule
+          type: string
+          enum:
+            - SAME_DAY
+            - NEXT_BUSINESS_DAY
+            - PREVIOUS_BUSINESS_DAY
+            - MODIFIED_NEXT_BUSINESS_DAY
+            - MODIFIED_PREVIOUS_BUSINESS_DAY
+      required:
+        - capital
+        - calendarCode
+        - startDate
+        - endDate
+        - cycleFrequency
+        - paymentFrequency
+        - rateFixingDays
+        - rateBasis
+        - margin
+        - nbdRule
+        - isInterestCapitalized
+      x-stoplight:
+        id: kaiqx1ssss0v6
+    AccrualCycleErrorDto:
+      type: object
+      properties:
+        errorMessages:
+          type: string
+          enum:
+            - START_DATE_GREATER_THAN_OR_EQUAL_TO_END_DATE
+            - PAYMENT_FREQUENCY_AND_CYCLE_FREQUENCY_ARE_NOT_COMPATIBLE
+            - NO_INDEX_FOUND
+            - PAYMENT_FREQUENCY_NOT_YET_SUPPORTED
+            - CALENDAR_NOT_FOUND
+            - CALENDAR_IS_EMPTY
+            - INDEX_IS_MISSING_HISTORY
+            - INTERESTS_COULD_NOT_BE_COMPUTED
+            - INVALID_FIRST_CYCLE_END_DATE
+            - ERROR_WHILE_COMPUTING_CYCLE_DATES
+            - NO_RATE_NOR_INDEX_NOR_MATRIX_PROVIDED
+            - RATE_OR_INDEX_OR_MATRIX_ARE_BOTH_PROVIDE
+            - INCONSISTENT_MATRIX
+            - NBD_RULE_AND_CYCLE_FREQUENCY_ARE_NOT_COMPATIBLE
+        code:
+          type: number
+        translatedMessage:
+          type: string
+      required:
+        - errorMessages
+        - code
+        - translatedMessage
+      x-stoplight:
+        id: vdpq487krcygd
+    GetParametersResponseDtoOpenApi:
+      type: object
+      properties:
+        defaultLanguage:
+          description: The default language
+          type: string
+        availableLanguages:
+          description: The available languages
+          type: array
+          items:
+            type: string
+        userLanguage:
+          description: The user language
+          type: string
+      required:
+        - defaultLanguage
+        - availableLanguages
+        - userLanguage
+      x-stoplight:
+        id: ytiwerz5zs6kt
+    UpdateParametersRequestDtoOpenApi:
+      type: object
+      properties:
+        defaultLanguage:
+          description: The default language
+          type: string
+        availableLanguages:
+          description: The available languages
+          type: array
+          items:
+            type: string
+      required:
+        - defaultLanguage
+        - availableLanguages
+      x-stoplight:
+        id: hpf9hvw58ovmx
+    ComputeRecurrenceRequestDto:
+      type: object
+      properties:
+        startDate:
+          description: The start date of the recurrence
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2024-05-22'
+        endDate:
+          description: The end date of the recurrence
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2024-05-22'
+        frequency:
+          description: The frequency of the recurrence
+          type: string
+          enum:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - ANNUALLY
+      required:
+        - startDate
+        - endDate
+        - frequency
+      x-stoplight:
+        id: 4pkmiltmyiuxp
+    CalVersionResponseDto:
+      type: object
+      properties:
+        version:
+          description: Current module version
+          type: string
+      required:
+        - version
+      x-stoplight:
+        id: yj1dup9w7o53j
+    ComputeCurrentAccountSavingAccountAccrualCycleResponseDto:
+      type: array
+      items:
+        type: object
+        properties:
+          startDate:
+            description: The cycle starting date under the yyyy-MM-dd format
+            type: string
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+          endDate:
+            description: The cycle's end date under the yyyy-MM-dd format
+            type: string
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+          maturityDate:
+            description: The cycle's maturity date under the yyyy-MM-dd format
+            type: string
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+          interestAmount:
+            description: The cycle interest amount
+            type: object
+            properties:
+              amount:
+                description: The amount
+                type: integer
+              currency:
+                description: The ISO 4217 currency code
+                type: string
+                enum:
+                  - ALL
+                  - DZD
+                  - ARS
+                  - AUD
+                  - BSD
+                  - BHD
+                  - BDT
+                  - AMD
+                  - BBD
+                  - BMD
+                  - BTN
+                  - BOB
+                  - BWP
+                  - BZD
+                  - SBD
+                  - BND
+                  - MMK
+                  - BIF
+                  - KHR
+                  - CAD
+                  - CVE
+                  - KYD
+                  - LKR
+                  - CLP
+                  - CNY
+                  - COP
+                  - KMF
+                  - CRC
+                  - HRK
+                  - CUP
+                  - CZK
+                  - DKK
+                  - DOP
+                  - SVC
+                  - ETB
+                  - ERN
+                  - FKP
+                  - FJD
+                  - DJF
+                  - GMD
+                  - GIP
+                  - GTQ
+                  - GNF
+                  - GYD
+                  - HTG
+                  - HNL
+                  - HKD
+                  - HUF
+                  - ISK
+                  - INR
+                  - IDR
+                  - IRR
+                  - IQD
+                  - ILS
+                  - JMD
+                  - JPY
+                  - KZT
+                  - JOD
+                  - KES
+                  - KPW
+                  - KRW
+                  - KWD
+                  - KGS
+                  - LAK
+                  - LBP
+                  - LSL
+                  - LRD
+                  - LYD
+                  - MOP
+                  - MWK
+                  - MYR
+                  - MVR
+                  - MUR
+                  - MXN
+                  - MNT
+                  - MDL
+                  - MAD
+                  - OMR
+                  - NAD
+                  - NPR
+                  - ANG
+                  - AWG
+                  - VUV
+                  - NZD
+                  - NIO
+                  - NGN
+                  - NOK
+                  - PKR
+                  - PAB
+                  - PGK
+                  - PYG
+                  - PEN
+                  - PHP
+                  - QAR
+                  - RUB
+                  - RWF
+                  - SHP
+                  - STD
+                  - SAR
+                  - SCR
+                  - SLL
+                  - SGD
+                  - VND
+                  - SOS
+                  - ZAR
+                  - SSP
+                  - SZL
+                  - SEK
+                  - CHF
+                  - SYP
+                  - THB
+                  - TOP
+                  - TTD
+                  - AED
+                  - TND
+                  - UGX
+                  - MKD
+                  - EGP
+                  - GBP
+                  - TZS
+                  - USD
+                  - UYU
+                  - UZS
+                  - WST
+                  - YER
+                  - ZMK
+                  - TWD
+                  - MRU
+                  - CUC
+                  - ZWL
+                  - TMT
+                  - GHS
+                  - VEF
+                  - SDG
+                  - UYI
+                  - RSD
+                  - MZN
+                  - AZN
+                  - RON
+                  - CHE
+                  - CHW
+                  - TRY
+                  - XAF
+                  - XCD
+                  - XOF
+                  - XPF
+                  - XBA
+                  - XBB
+                  - XBC
+                  - XBD
+                  - XAU
+                  - XDR
+                  - XAG
+                  - XPT
+                  - XTS
+                  - XPD
+                  - XUA
+                  - ZMW
+                  - SRD
+                  - MGA
+                  - COU
+                  - AFN
+                  - TJS
+                  - AOA
+                  - BYR
+                  - BGN
+                  - CDF
+                  - BAM
+                  - EUR
+                  - MXV
+                  - UAH
+                  - GEL
+                  - BOV
+                  - PLN
+                  - BRL
+                  - CLF
+                  - XSU
+                  - USN
+                  - ZZZ
+                  - TAG
+            required:
+              - amount
+              - currency
+          interestRate:
+            description: The interest rate value for this cycle
+            type: string
+          balance:
+            description: The balance of the cycle
+            type: object
+            properties:
+              amount:
+                description: The amount
+                type: integer
+              currency:
+                description: The ISO 4217 currency code
+                type: string
+                enum:
+                  - ALL
+                  - DZD
+                  - ARS
+                  - AUD
+                  - BSD
+                  - BHD
+                  - BDT
+                  - AMD
+                  - BBD
+                  - BMD
+                  - BTN
+                  - BOB
+                  - BWP
+                  - BZD
+                  - SBD
+                  - BND
+                  - MMK
+                  - BIF
+                  - KHR
+                  - CAD
+                  - CVE
+                  - KYD
+                  - LKR
+                  - CLP
+                  - CNY
+                  - COP
+                  - KMF
+                  - CRC
+                  - HRK
+                  - CUP
+                  - CZK
+                  - DKK
+                  - DOP
+                  - SVC
+                  - ETB
+                  - ERN
+                  - FKP
+                  - FJD
+                  - DJF
+                  - GMD
+                  - GIP
+                  - GTQ
+                  - GNF
+                  - GYD
+                  - HTG
+                  - HNL
+                  - HKD
+                  - HUF
+                  - ISK
+                  - INR
+                  - IDR
+                  - IRR
+                  - IQD
+                  - ILS
+                  - JMD
+                  - JPY
+                  - KZT
+                  - JOD
+                  - KES
+                  - KPW
+                  - KRW
+                  - KWD
+                  - KGS
+                  - LAK
+                  - LBP
+                  - LSL
+                  - LRD
+                  - LYD
+                  - MOP
+                  - MWK
+                  - MYR
+                  - MVR
+                  - MUR
+                  - MXN
+                  - MNT
+                  - MDL
+                  - MAD
+                  - OMR
+                  - NAD
+                  - NPR
+                  - ANG
+                  - AWG
+                  - VUV
+                  - NZD
+                  - NIO
+                  - NGN
+                  - NOK
+                  - PKR
+                  - PAB
+                  - PGK
+                  - PYG
+                  - PEN
+                  - PHP
+                  - QAR
+                  - RUB
+                  - RWF
+                  - SHP
+                  - STD
+                  - SAR
+                  - SCR
+                  - SLL
+                  - SGD
+                  - VND
+                  - SOS
+                  - ZAR
+                  - SSP
+                  - SZL
+                  - SEK
+                  - CHF
+                  - SYP
+                  - THB
+                  - TOP
+                  - TTD
+                  - AED
+                  - TND
+                  - UGX
+                  - MKD
+                  - EGP
+                  - GBP
+                  - TZS
+                  - USD
+                  - UYU
+                  - UZS
+                  - WST
+                  - YER
+                  - ZMK
+                  - TWD
+                  - MRU
+                  - CUC
+                  - ZWL
+                  - TMT
+                  - GHS
+                  - VEF
+                  - SDG
+                  - UYI
+                  - RSD
+                  - MZN
+                  - AZN
+                  - RON
+                  - CHE
+                  - CHW
+                  - TRY
+                  - XAF
+                  - XCD
+                  - XOF
+                  - XPF
+                  - XBA
+                  - XBB
+                  - XBC
+                  - XBD
+                  - XAU
+                  - XDR
+                  - XAG
+                  - XPT
+                  - XTS
+                  - XPD
+                  - XUA
+                  - ZMW
+                  - SRD
+                  - MGA
+                  - COU
+                  - AFN
+                  - TJS
+                  - AOA
+                  - BYR
+                  - BGN
+                  - CDF
+                  - BAM
+                  - EUR
+                  - MXV
+                  - UAH
+                  - GEL
+                  - BOV
+                  - PLN
+                  - BRL
+                  - CLF
+                  - XSU
+                  - USN
+                  - ZZZ
+                  - TAG
+            required:
+              - amount
+              - currency
+          isOngoing:
+            description: The cycle is ongoing
+            type: boolean
+        required:
+          - startDate
+          - endDate
+          - maturityDate
+          - interestAmount
+          - interestRate
+          - balance
+          - isOngoing
+      x-stoplight:
+        id: hg3kgmz9xjp13
+    ComputeCurrentAccountSavingAccountAccrualCycleRequestDto:
+      type: object
+      properties:
+        indexCode:
+          description: The index code upon which the calculation is based
+          type: string
+        calendarCode:
+          description: The calendar code upon which the calculation is based
+          type: string
+        startDate:
+          description: The cycle start date under the yyyy-MM-dd format
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+        firstCycleStartDate:
+          description: The start date of previous cycle under the yyyy-MM-dd format
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+        paymentDate:
+          description: The cycle payment date under the yyyy-MM-dd format
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+        cycleFrequency:
+          description: The cycle frequency
+          type: string
+          enum:
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - QUARTERLY
+            - SEMESTER
+            - ANNUALLY
+        rateFixingDays:
+          description: The rate fixing days
+          type: integer
+          minimum: 0
+          exclusiveMinimum: -1
+        amountMatrixRateItems:
+          description: The matrix of the product
+          type: array
+          items:
+            type: object
+            properties:
+              minAmount:
+                description: The minimum amount for this item
+                type: integer
+              index:
+                type: string
+              margin:
+                type: string
+            required:
+              - minAmount
+              - index
+        rateBasis:
+          description: The rate basis for interest calculation
+          type: string
+          enum:
+            - RATE_BASIS_15_360
+            - RATE_BASIS_30_360
+            - RATE_BASIS_ACTUAL_360
+            - RATE_BASIS_ACTUAL_365
+            - RATE_BASIS_ACTUAL_ACTUAL
+        margin:
+          description: The margin rate
+          type: string
+        rateSettings:
+          description: The rate settings
+          type: object
+          properties:
+            capRate:
+              description: The cap rate
+              type: string
+            floorRate:
+              description: The floor rate
+              type: string
+        isInterestCapitalized:
+          description: The interest capitalized flag
+          type: boolean
+        accountNumber:
+          description: The account number
+          type: string
+      required:
+        - startDate
+        - cycleFrequency
+        - rateFixingDays
+        - rateBasis
+        - margin
+        - accountNumber
+        - isInterestCapitalized
+      x-stoplight:
+        id: 3fjr42i0cna0v
+    CurrentAccountSavingAccountAccrualCycleErrorDto:
+      type: object
+      properties:
+        errorMessages:
+          type: string
+          enum:
+            - START_DATE_GREATER_THAN_CURRENT_DATE
+            - PAYMENT_DATE_LESS_THAN_CURRENT_DATE
+            - NO_INDEX_FOUND
+            - CALENDAR_NOT_FOUND
+            - CALENDAR_IS_EMPTY
+            - INDEX_IS_MISSING_HISTORY
+            - INTERESTS_COULD_NOT_BE_COMPUTED
+            - CURRENCY_NOT_FOUND
+            - INDEX_CODE_AND_AMOUNT_MATRIX_RATE_ITEMS_BOTH_PROVIDED
+            - INDEX_CODE_OR_AMOUNT_MATRIX_RATE_ITEMS_NOT_PROVIDED
+        code:
+          type: number
+        translatedMessage:
+          type: string
+      required:
+        - errorMessages
+        - code
+        - translatedMessage
+      x-stoplight:
+        id: dmrv99hm1jt0t
+    ComputeRecurrenceErrorDto:
+      type: object
+      properties:
+        errorMessages:
+          type: string
+          enum:
+            - START_DATE_GREATER_THAN_END_DATE
+        code:
+          type: string
+        translatedMessage:
+          type: string
+      required:
+        - errorMessages
+        - code
+        - translatedMessage
+      x-stoplight:
+        id: f89jf45qy8a4f

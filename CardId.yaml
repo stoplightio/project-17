@@ -1,0 +1,6 @@
+title: Card ID
+x-stoplight:
+  id: xue6zuzumadct
+type: string
+description: Card unique identifier.
+example: CARD123

@@ -1,0 +1,15 @@
+title: PendingManagementOperation
+x-stoplight:
+  id: ugk56bmt1gu4e
+type: object
+required:
+  - operationType
+properties:
+  operationType:
+    $ref: ./OperationType.yaml
+    x-stoplight:
+      id: qdh6wgrdh7nea
+  featureId:
+    $ref: ./CardFeatureId.yaml
+    x-stoplight:
+      id: m391r6x2pt8gj

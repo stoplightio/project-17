@@ -1,0 +1,32 @@
+title: RelationNature
+x-stoplight:
+  id: wcwnuh2r1c8ip
+type: object
+required:
+  - id
+  - label
+  - relationLabelForTarget
+  - relationLabelForOriginator
+properties:
+  id:
+    $ref: ./RelationNatureId.yaml
+    x-stoplight:
+      id: 0ht6lampu4t3c
+  label:
+    type: string
+    description: Relation nature's label
+    example: Board Member
+    x-stoplight:
+      id: 54s1ppnitsrrv
+  relationLabelForTarget:
+    type: string
+    description: Relation nature's target label
+    example: is board member of
+    x-stoplight:
+      id: z95d6uxbhzov7
+  relationLabelForOriginator:
+    type: string
+    description: Relation nature's originator label
+    example: has as board member
+    x-stoplight:
+      id: c0cwll01vvzhg

@@ -1,0 +1,45 @@
+title: Relation
+x-stoplight:
+  id: gzofspzoarqeh
+type: object
+required:
+  - relationId
+  - nature
+  - associatedParty
+  - self
+  - links
+properties:
+  relationId:
+    $ref: ./RelationId.yaml
+    x-stoplight:
+      id: hsqufafapwlda
+  self:
+    $ref: ./RelationSide.yaml
+    x-stoplight:
+      id: zoabsjz0li6wg
+  nature:
+    $ref: ./RelationNature.yaml
+    x-stoplight:
+      id: c4cuztgr154ry
+  associatedParty:
+    $ref: ./AssociatedIdentity.yaml
+    x-stoplight:
+      id: xsjq82wkubgfr
+  links:
+    type: array
+    readOnly: true
+    description: |
+      Can contain the following actions (identified by their `rel` attribute):
+        * `self` [GET] Get the party informations
+        * `getAssociatedParty` [GET] Load associated party
+    items:
+      $ref: ./Link.yaml
+      x-stoplight:
+        id: xswbt5xpail1f
+    example:
+      - rel: self
+        href: 'https://sandbox.skaleet.com/api/company/v1/company-relations?id=42'
+      - rel: getAssociatedParty
+        href: 'https://sandbox.skaleet.com/api/company/v1/identities/42'
+    x-stoplight:
+      id: ckgs1xdnmswn8

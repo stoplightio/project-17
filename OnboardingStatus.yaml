@@ -1,0 +1,11 @@
+title: OnboardingStatus
+x-stoplight:
+  id: d7a12uxeis62w
+type: string
+readOnly: true
+description: Onboarding status
+enum:
+  - INITIATED
+  - COMPLETION_PENDING
+  - READY_TO_SUBMIT
+  - SUBMITTED

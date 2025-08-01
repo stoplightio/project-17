@@ -1,0 +1,1334 @@
+openapi: 3.1.0
+x-stoplight:
+  id: 93kok5llkw2tx
+tags:
+  - name: External System Monitoring
+    description: Client system monitoring.
+  - name: SAE API
+    description: Emitter Authorization Server API.
+  - name: Strong customer authentication
+    description: Strong customer authentication (SCA) management.
+servers:
+  - url: 'https://sandbox.skaleet.com/api/sae/v1'
+    description: Skaleet sandbox environment.
+info:
+  title: Card Authorization API
+  version: 0.0.6
+  description: |-
+    Card Authorization API|  |
+    ---------|----------|
+     Use Cases Examples | **Authorization**<br>- Check available funds<br>- Hold funds<br>- Authorization advice<br>- Authorization adjustment<br>**Settlement**<br>- Initiate card settlement<br>**3D Secure 2 Authentication**<br>- Initiate authentication<br>- Search authentication<br>- Update authentication |
+
+    This API acts as an interface from external system to reach the Emitter Authorization Server (SAE stands for the French Serveur Autorisation Emetteur) for payment card operations.
+
+    To use this API, a back-office has to create an SAE API key through its web portal. When creating or editing an API key, the back-office can specify the scopes available for this key, determining wether access to specific endpoints is authorized or not.
+  contact:
+    name: Skaleet API
+    url: 'https://www.skaleet.com/en/'
+    email: api@skaleet.com
+  license:
+    name: Proprietary
+    url: 'https://www.skaleet.com/en/'
+paths:
+  '/heartbeat/{externalSystemId}':
+    parameters:
+      - in: path
+        required: true
+        name: externalSystemId
+        description: 'Configured external system id, that should be associated with current API Key.'
+        schema:
+          type: string
+          example: my-external-service
+    post:
+      security:
+        - OAuth2: []
+      tags:
+        - External System Monitoring
+      summary: Heartbeat
+      description: To send notifications on the status of a third-party service.
+      operationId: HeartbeatExternalService
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  default: ALIVE
+                  enum:
+                    - ALIVE
+                    - WARNING
+                    - ALERT
+                value:
+                  type: integer
+                  description: custom metric value
+                  example: 124
+      responses:
+        '201':
+          description: OK.
+        '400':
+          description: Request body invalid.
+        '403':
+          description: 'System {externalServiceId} is not found or current API Key is not authorized.'
+        default:
+          $ref: '#/components/responses/RestfulErrorResponse'
+      x-stoplight:
+        id: wygqyxzkcc42i
+  /authorizations/check:
+    post:
+      security:
+        - OAuth2:
+            - 'authorization:check'
+        - OAuth2:
+            - 'authorization:hold'
+        - OAuth2:
+            - 'authorization:advice'
+      tags:
+        - SAE API
+      summary: Authorization check
+      description: |
+        Checks that the account has sufficient funds for the amount given, and that a transaction could be processed. No authorization hold is created.
+      operationId: Preauthorization
+      requestBody:
+        required: true
+        description: |
+          Must contain all required information to perform an authorization hold.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorizationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PreAuthorizationResponse'
+        default:
+          $ref: '#/components/responses/AuthorizationErrorResponse'
+      x-stoplight:
+        id: gbbf90df4kwya
+  /authorizations/hold:
+    post:
+      security:
+        - OAuth2:
+            - 'authorization:hold'
+      tags:
+        - SAE API
+      summary: Authorization hold
+      description: |
+        Checks that the account has sufficient funds for the amount given, if so, an authorization hold is created.
+      operationId: Authorization
+      requestBody:
+        required: true
+        description: |
+          Must contain all required information to perform an authorization hold.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorizationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AuthorizationResponse'
+        default:
+          $ref: '#/components/responses/AuthorizationErrorResponse'
+      x-stoplight:
+        id: tzc17rf7t1s97
+  /authorizations/treezor/hold:
+    post:
+      security:
+        - Treezor:
+            - 'authorization:hold'
+      tags:
+        - SAE API
+      summary: Treezor authorization hold
+      description: |
+        Authorization hold endpoint for Treezor.
+      operationId: TreezorAuthorization
+      requestBody:
+        required: true
+        description: |
+          Must contain all required information to perform an authorization hold.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TreezorAuthorizationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/TreezorAuthorizationResponse'
+      x-stoplight:
+        id: 87jfm5opyke3u
+      x-internal: true
+  /authorizations/marqeta/hold:
+    post:
+      security:
+        - OAuth2:
+            - 'authorization:hold'
+      tags:
+        - SAE API
+      summary: Marqeta authorization hold
+      description: |
+        Authorization hold endpoint for Marqeta.
+      operationId: MarqetaAuthorization
+      requestBody:
+        required: true
+        description: |
+          Must contain all required information to perform an authorization hold.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarqetaAuthorizationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AuthorizationResponse'
+        default:
+          $ref: '#/components/responses/AuthorizationErrorResponse'
+      x-stoplight:
+        id: a4hvhq3yfrbrx
+      x-internal: true
+  /authorizations/advice:
+    post:
+      security:
+        - OAuth2:
+            - 'authorization:advice'
+      tags:
+        - SAE API
+      summary: Authorization advice
+      description: |
+        Does not make any checks, an authorization hold is created.
+      operationId: AuthorizationAdvice
+      requestBody:
+        required: true
+        description: |
+          Must contain all required information to perform an authorization hold.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorizationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AuthorizationResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: ijgg5hpc8dg9j
+  /settlement:
+    post:
+      security:
+        - OAuth2:
+            - settlement
+      tags:
+        - SAE API
+      summary: Compensation settlement
+      description: |
+        Create a card settlement process
+      operationId: Settlement
+      requestBody:
+        required: true
+        description: |
+          Must contain all required information to perform a settlement process.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettlementRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SettlementResponse'
+      x-stoplight:
+        id: ode2gemysl7az
+  '/cards/{cardId}/balances':
+    parameters:
+      - name: cardId
+        description: Card system identifier
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/CardId'
+    get:
+      security:
+        - OAuth2:
+            - card_balances
+      tags:
+        - SAE API
+      summary: Card balances
+      description: |
+        Retrieve the balances of the account associated to the card
+      operationId: GetCardBalances
+      responses:
+        '200':
+          $ref: '#/components/responses/BalancesResponse'
+      x-stoplight:
+        id: q053vig4ukn7z
+  /heartbeats:
+    get:
+      security:
+        - OAuth2: []
+      tags:
+        - SAE API
+      summary: System check
+      description: |
+        Checks that the server is alive.
+      operationId: Heartbeat
+      responses:
+        '200':
+          description: Heart is beating.
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: a25kuuzxr0830
+  /three-ds/authentications:
+    post:
+      security:
+        - OAuth2:
+            - authentication
+      tags:
+        - Strong customer authentication
+      summary: Initiate strong customer authentication
+      description: |
+        Request initiates a strong customer authentication business process.
+      operationId: AuthenticationInitiation
+      requestBody:
+        required: true
+        description: |
+          Must contain all required information to initiate a strong customer authentication.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StrongCustomerAuthenticationRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/StrongCustomerAuthenticationResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: 43ses5und7ryc
+    get:
+      security:
+        - OAuth2:
+            - authentication
+      tags:
+        - Strong customer authentication
+      summary: List all strong customer authentication
+      description: |
+        List all strong customer authentication
+      operationId: SearchAuthentication
+      parameters:
+        - name: id
+          in: query
+          description: Strong customer authentication identifier.
+          schema:
+            type: string
+            example: '42'
+        - name: acsTransactionId
+          in: query
+          description: Identifier used to connect strong customer authentication request to ensuing card authorization request.
+          schema:
+            type: string
+            example: '123456789'
+        - name: cardId
+          in: query
+          description: Card identifier
+          schema:
+            type: string
+            example: CARD123
+        - name: state
+          in: query
+          description: Strong customer authentication state
+          schema:
+            type: string
+            example: INITIATED
+            enum:
+              - INITIATED
+              - IS_NOT_VALID
+              - IS_VALID
+              - INT_AUTH_ACCEPTED
+              - AUTH_ACCEPTED
+              - AUTH_FAILED
+              - AUTH_REFUSED
+              - APP_NOTIFICATION_SENT
+      responses:
+        '200':
+          $ref: '#/components/responses/StrongCustomerAuthenticationCollectionResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: ar20e2t9u1j0t
+  '/three-ds/authentication/{id}':
+    parameters:
+      - name: id
+        in: path
+        description: Strong customer authentication id
+        required: true
+        schema:
+          type: string
+          example: '42'
+    get:
+      security:
+        - OAuth2:
+            - authentication
+      tags:
+        - SAE API
+      summary: Strong customer authentication
+      operationId: GetAuthentication
+      description: Request returns the information tied to a strong customer authentication business process.
+      responses:
+        '200':
+          $ref: '#/components/responses/LoadStrongCustomerAuthenticationResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: wvzp6w02l9urb
+    patch:
+      security:
+        - OAuth2:
+            - authentication
+      tags:
+        - SAE API
+      summary: Update strong customer authentication
+      operationId: UpdateAuthentication
+      description: Update a strong customer authentication business process.
+      requestBody:
+        required: true
+        description: |
+          Must contain all required information to update a strong customer authentication.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - authenticationResult
+              properties:
+                authenticationResult:
+                  type: string
+                  description: Authentication result
+                  example: AUTH_ACCEPTED
+                  enum:
+                    - AUTH_ACCEPTED
+                    - AUTH_FAILED
+                resultReason:
+                  type: string
+                  description: Short explanation for the given result
+      responses:
+        '200':
+          $ref: '#/components/responses/LoadStrongCustomerAuthenticationResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+      x-stoplight:
+        id: nyr0x8t1vtnti
+x-tagGroups:
+  - name: General
+    tags:
+      - External System Monitoring
+      - SAE API
+      - Skaleet
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: 'https://kommander.dev.tagpay.fr/api/sae/v1/oauth2/token'
+          scopes:
+            'authorization:check': Client will be allowed to make authorization checks
+            'authorization:hold': Client will be allowed to make authorization holds and checks
+            'authorization:advice': Client will be allowed to make authorization advices and checks
+            settlement: Client will be allowed to make settlements
+            card_balances: Client will be allowed to check his or her card's balances
+            authentication: Client will be allowed to initiate and load a strong customer authentication process
+    Treezor:
+      type: http
+      scheme: bearer
+      bearerFormat: 'Same as Basic HTTP Authentication (https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#basic_authentication_scheme), with credentials being the apiKey id and secret, separated by a ":" and base64 encoded, and the scheme being Bearer instead of Basic. Note that the api key must be allowed to make authorization holds.'
+  responses:
+    RestfulErrorResponse:
+      description: Request could not be processed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    PreAuthorizationResponse:
+      description: Account has sufficient funds to perform the transaction.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PreAuthorizationResponseContent'
+    AuthorizationErrorResponse:
+      description: 'Request could not be processed, if balance is sent, insufficient funds available'
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - error
+            properties:
+              error:
+                $ref: '#/components/schemas/Error'
+              balance:
+                allOf:
+                  - description: |
+                      Account available balance, expressed in card holder account's currency, shifted by the number of decimal places of the currency (ex : 1.23€ will be 123).
+                      Can be negative. Only present if insufficient funds are available on the account.
+                  - $ref: ./Amount.yaml
+    AuthorizationResponse:
+      description: Authorization OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthorizationResponseContent'
+    TreezorAuthorizationResponse:
+      description: 'Authorization response, can be AUTHORIZED or DECLINED'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TreezorAuthorizationResponseContent'
+    ErrorResponse:
+      description: Request could not be processed
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - error
+            properties:
+              error:
+                $ref: '#/components/schemas/Error'
+    SettlementResponse:
+      description: Settlement has been performed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PreAuthorizationResponseContent'
+    BalancesResponse:
+      description: Card balances
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BalancesResponseContent'
+    StrongCustomerAuthenticationResponse:
+      description: Strong customer authentication business process created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StrongCustomerAuthenticationResponseContent'
+    StrongCustomerAuthenticationCollectionResponse:
+      description: Strong customer authentication business process collection
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StrongCustomerAuthenticationCollection'
+    LoadStrongCustomerAuthenticationResponse:
+      description: Strong customer authentication business process returned successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoadStrongCustomerAuthenticationResponseContent'
+  schemas:
+    AuthorizationRequest:
+      type: object
+      x-stoplight:
+        id: ssnzpe5xzono3
+      required:
+        - amount
+        - operationReference
+        - externalId
+      properties:
+        cardId:
+          type: string
+          description: Card identifier
+          example: CARD123
+        cardExternalId:
+          type: string
+          description: Card identifier by external ID
+          example: CARD123
+        requestDate:
+          type: string
+          format: date-time
+          description: date when the authorization was requested
+        bic:
+          allOf:
+            - $ref: ./BIC.yaml
+        iban:
+          allOf:
+            - $ref: ./IBAN.yaml
+        amount:
+          allOf:
+            - description: |
+                Authorization amount, expressed in card holder account's currency, shifted by the number of decimal places of the currency (ex : 1.23€ will be 123)
+            - $ref: ./Amount.yaml
+        operationReference:
+          type: string
+          description: Identifier for the operation (authorization and capture)
+        externalId:
+          type: string
+          description: 'Authorization identifier, will be used when doing the capture'
+        seller:
+          type: string
+          description: Description of the seller
+        mcc:
+          type: string
+          description: 4 digits MCC code of the acquirer (Merchant Category Code)
+        country:
+          allOf:
+            - $ref: ./Country.yaml
+        initialAmount:
+          allOf:
+            - description: |
+                Initial operation amount, expressed in local currency, shifted by the number of decimal places of the currency (ex : 1.23€ will be 123)
+            - $ref: ./Amount.yaml
+        acquirerIdentifier:
+          type: string
+          description: Acquirer identifier
+        operation:
+          type: string
+          description: 'Operation value is used to customize the charges applied to operationType. It must be configured in advance. If set, will override operationType. If not set or empty, defaults to PAYMENT_FUNDS_RESERVATION or CASHOUT_FUNDS_RESERVATION, depending the value of operationType.'
+          example: PAYMENT_FUNDS_RESERVATION
+        operationType:
+          $ref: '#/components/schemas/CardOperationType'
+        cardEntryMode:
+          $ref: '#/components/schemas/CardEntryMode'
+        label:
+          type: string
+          description: Authorization hold label
+        sellerId:
+          type: string
+          description: Merchant id of the transaction
+          example: '18571564'
+        sellerCity:
+          type: string
+          description: Merchant city of the transaction
+          example: La Rochelle
+        companyIdentifier:
+          type: string
+          description: Company identifier number e.g. SIRET
+          example: '18571564'
+        paymentLocalTime:
+          type: string
+          description: Time of the transaction
+          example: '145120'
+        externalData:
+          $ref: ./ExternalData.yaml
+    TreezorAuthorizationRequest:
+      type: object
+      properties:
+        request_id:
+          type: string
+          description: UUIDv5
+          example: e03df174-ff01-571c-8677-e52af53affda
+        card_public_token:
+          type: string
+          description: Card Public Token
+          example: '988927734'
+        request_date:
+          type: string
+          description: Date-time of sending (RFC 3339 format)
+          example: '2021-04-20T10:29:44+00:00'
+        payment_amount:
+          allOf:
+            - $ref: '#/components/schemas/TreezorAmount'
+        payment_local_amount:
+          allOf:
+            - $ref: '#/components/schemas/TreezorAmount'
+        payment_local_time:
+          type: string
+          description: Local time of transaction - "hhmmss"
+          example: '145958'
+        authorization_issuer_id:
+          type: string
+          description: Transaction unique Id from Processor
+          example: '928257521'
+        pan_entry_method:
+          type: integer
+          description: Pan Entry method from Processor
+          example: 0
+          default: 0
+        merchant_data:
+          allOf:
+            - $ref: '#/components/schemas/TreezorMerchantData'
+      required:
+        - request_id
+        - card_public_token
+        - payment_amount
+        - authorization_issuer_id
+      x-stoplight:
+        id: 2mda10axkioji
+    MarqetaAuthorizationRequest:
+      type: object
+      properties:
+        card_token:
+          type: string
+          description: Card identifier
+          example: '123'
+        gpa_order:
+          allOf:
+            - $ref: '#/components/schemas/GpaOrder'
+        token:
+          type: string
+          description: 'Authorization identifier, will be used when doing the capture'
+        created_time:
+          type: string
+          description: Date-time of sending (RFC 3339 format)
+          example: '2021-04-20T10:29:44+00:00'
+        amount:
+          description: Amount without separator and symbol
+          type: integer
+          example: 1337
+        currency_code:
+          description: 'Three-letter ISO currency code, in uppercase. Read more https://fr.wikipedia.org/wiki/ISO_4217.'
+          type: string
+          format: iso-4217
+          example: EUR
+        card_acceptor:
+          allOf:
+            - $ref: '#/components/schemas/CardAcceptor'
+        acquirer:
+          allOf:
+            - $ref: '#/components/schemas/Acquirer'
+      required:
+        - card_token
+        - gpa_order
+        - token
+        - currency_code
+        - amount
+      x-stoplight:
+        id: 6ikaj70xuni6y
+    SettlementRequest:
+      type: object
+      x-stoplight:
+        id: bb2g38mcew3ea
+      required:
+        - cardId
+        - externalId
+        - operationReference
+        - amount
+      properties:
+        cardId:
+          type: string
+          description: Card's identifier
+          example: CARD123
+        externalId:
+          type: string
+          description: Settlement request's External identifier
+        operation:
+          $ref: '#/components/schemas/OperationType'
+        operationReference:
+          type: string
+          description: Payment's identifier.
+        amount:
+          allOf:
+            - description: |
+                Request's amount
+            - $ref: ./Amount.yaml
+        cardEntryMode:
+          $ref: '#/components/schemas/CardEntryMode'
+        requestDate:
+          type: string
+          format: date-time
+          description: date when the authorization was requested
+        requestLocalDate:
+          type: string
+          format: date-time
+          description: local date when the authorization was requested (for foreign payment for example)
+        initialAmount:
+          allOf:
+            - description: |
+                Initial operation amount, expressed in local currency, shifted by the number of decimal places of the currency (ex : 1.23€ will be 123)
+            - $ref: ./Amount.yaml
+        bic:
+          allOf:
+            - $ref: '#/components/schemas/BIC'
+        iban:
+          allOf:
+            - $ref: '#/components/schemas/IBAN'
+        seller:
+          type: string
+          description: Description of the seller
+        acquirerIdentifier:
+          type: string
+          description: Acquirer identifier
+        sellerId:
+          type: string
+          description: Merchant id of the transaction
+          example: '18571564'
+        sellerCity:
+          type: string
+          description: Merchant city of the transaction
+          example: La Rochelle
+        companyIdentifier:
+          type: string
+          description: Company identifier number e.g. SIRET
+          example: '18571564'
+        mcc:
+          type: string
+          description: 4 digits MCC code of the acquirer (Merchant Category Code)
+        country:
+          $ref: '#/components/schemas/Country'
+        operationType:
+          $ref: '#/components/schemas/CardOperationType'
+        label:
+          type: string
+          description: Settlement label
+        externalData:
+          $ref: ./ExternalData.yaml
+        accountingConfiguration:
+          $ref: '#/components/schemas/CardAccountingConfiguration'
+          x-stoplight:
+            id: jh571ocrz6n6l
+        accountingOperations:
+          type: array
+          x-stoplight:
+            id: yqvkjz6h903lm
+          description: 'Optional, additional accounting entries to register with this operation. Warning: this only allows you to **add** accounting entries with the operation, the cart settlement accounting operation will still be done along with it, do not specify it here.'
+          items:
+            $ref: '#/components/schemas/SettlementAccountingEntryRequest'
+            x-stoplight:
+              id: crgg72z4lxntv
+    CardId:
+      type: string
+      description: Card identifier
+      example: CARD123
+      x-stoplight:
+        id: knv25da4q0c3a
+    StrongCustomerAuthenticationRequest:
+      type: object
+      x-stoplight:
+        id: pm3dovrsjm4u6
+      properties:
+        acsTransactionId:
+          type: string
+          example: '123456789'
+          description: Identifier used to connect strong customer authentication request to ensuing card authorization request
+        authenticationType:
+          type: string
+          description: Authentication type allows definition of authentication path to follow
+          example: OUT_OF_BAND
+          enum:
+            - OUT_OF_BAND
+        cardId:
+          type: string
+          description: Card identifier
+          example: CARD123
+        creationDateTime:
+          type: string
+          format: date-time
+          description: Date when the authentication was requested
+        authenticationRequestType:
+          type: string
+          example: PAYMENT
+          enum:
+            - PAYMENT
+            - RECURRING
+            - INSTALLMENT
+        maxResponseTime:
+          type: integer
+          description: Maximum amount of time (in minutes) before request reaches expiration
+        messageVersion:
+          type: string
+          description: 3DS version
+        amount:
+          allOf:
+            - $ref: ./Amount.yaml
+        seller:
+          type: string
+          description: Seller name
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          description: The error numeric code
+        message:
+          type: string
+          description: The error's localized message
+        hint:
+          type: string
+          description: 'On certain types of error, a localized message will be sent to indicate a way to solve the error'
+      example:
+        code: 1337
+        message: Something went wrong because requirement X was not met.
+        hint: Field X does not match the field requirements
+      x-stoplight:
+        id: sb5asjd4hveqh
+    PreAuthorizationResponseContent:
+      type: object
+      x-stoplight:
+        id: ffxtmfajzhnjp
+      required:
+        - balance
+      properties:
+        date:
+          type: string
+          format: date-time
+          description: date when the response to authorization request was sent
+        balance:
+          allOf:
+            - description: |
+                Account balance, expressed in card holder account's currency, shifted by the number of decimal places of the currency (ex : 1.23€ will be 123).
+                Can be negative.
+            - $ref: ./Amount.yaml
+    AuthorizationResponseContent:
+      allOf:
+        - $ref: '#/components/schemas/PreAuthorizationResponseContent'
+        - type: object
+          properties:
+            authorizationHold:
+              $ref: '#/components/schemas/AuthorizationHold'
+      x-stoplight:
+        id: fivokuibmq281
+    TreezorAuthorizationResponseContent:
+      type: object
+      properties:
+        response_date:
+          type: string
+          description: Date-time of response sending (RFC 3339 format)
+          example: '2021-04-20T10:29:49+00:00'
+        response_code:
+          type: string
+          description: Response code
+          enum:
+            - AUTHORIZED
+            - DECLINED_INSUFFICIENT_FUNDS
+            - DECLINED_CARD_UNKNOWN
+            - DECLINED_MCC_INVALID
+            - DECLINED_MERCHANT_COUNTRY_INVALID
+            - DECLINED
+          example: AUTHORIZED
+        response_id:
+          type: string
+          description: Unique response ID
+          example: e03df174-ff01-571c-8677-e52af53affda
+      x-stoplight:
+        id: 9m9tk3y9qbopm
+    BalancesResponseContent:
+      type: object
+      x-stoplight:
+        id: ev2hktr6qha81
+      properties:
+        holderIdentityId:
+          $ref: ./IdentityId.yaml
+        holderAccount:
+          $ref: '#/components/schemas/HolderAccount'
+    StrongCustomerAuthenticationResponseContent:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '42'
+          description: Strong customer authentication identifier.
+      x-stoplight:
+        id: i5208zez1di9z
+    StrongCustomerAuthenticationCollection:
+      description: Sorted and paginated list of strong customer authentication
+      allOf:
+        - $ref: ./PaginatedCollection.yaml
+        - type: object
+          properties:
+            items:
+              type: array
+              description: Collection of strong customer authentication
+              items:
+                $ref: '#/components/schemas/LoadStrongCustomerAuthenticationResponseContent'
+      x-stoplight:
+        id: kbmq34vm1jri5
+    LoadStrongCustomerAuthenticationResponseContent:
+      type: object
+      x-stoplight:
+        id: kb0jzuf5enb6l
+      properties:
+        id:
+          type: string
+          example: '42'
+          description: Strong customer authentication business process id
+        token:
+          type: string
+          description: Authentication session token
+          example: 44654rgergre-gregregreh-grthtrh545-gregregrehr
+          readOnly: true
+        acsTransactionId:
+          type: string
+          example: '123456789'
+          description: Identifier used to connect strong customer authentication request to ensuing card authorization request
+        authenticationType:
+          type: string
+          description: Authentication type allows definition of authentication path to follow
+          example: OUT_OF_BAND
+          enum:
+            - OUT_OF_BAND
+        cardId:
+          $ref: ./CardId.yaml
+        creationDateTime:
+          type: string
+          format: date-time
+          description: Date when the authentication was requested
+        authenticationRequestType:
+          type: string
+          example: PAYMENT
+          enum:
+            - PAYMENT
+            - RECURRING
+            - INSTALLMENT
+        maxResponseTime:
+          type: integer
+          description: Maximum amount of time (in minutes) before request reaches expiration
+        messageVersion:
+          type: string
+          description: 3DS version
+        amount:
+          $ref: ./Amount.yaml
+        seller:
+          type: string
+          description: Seller name
+        state:
+          type: string
+          description: Business process state
+          example: INITIATED
+          enum:
+            - INITIATED
+            - ACCEPTED
+            - IS_NOT_VALID
+            - APP_NOTIFICATION_SENT
+            - AUTH_FAILED
+        isSuspicious:
+          type: boolean
+          description: To identify authentication session as suspicious or not
+        suspiciousComment:
+          type: string
+          description: Comment to identify the reason for marking the authentication session as suspicious
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+              example: 71000
+              description: The error code if any
+            message:
+              type: string
+              example: Debit card authentication cannot be requested
+              description: The error message if any
+    BIC:
+      type: string
+      description: Bank Identifier Code.
+      example: FRGAILP1
+      x-stoplight:
+        id: pfo8zm7zi55ug
+    IBAN:
+      type: string
+      description: 'IBAN (International Bank Account Number), e.g. FR791680810000000538'
+      example: FR791680810000000538
+      x-stoplight:
+        id: m92pbkf3uvb0s
+    Country:
+      description: Two letter ISO code of associated country (2 letters code)
+      type: string
+      minLength: 2
+      maxLength: 2
+      example: FR
+      x-stoplight:
+        id: p5xzzvswu6xvh
+    CardOperationType:
+      type: string
+      default: PAYMENT
+      example: PAYMENT
+      description: the type of card operation
+      enum:
+        - PAYMENT
+        - FOREIGN_PAYMENT
+        - WITHDRAW
+        - FOREIGN_WITHDRAW
+        - DEPOSIT
+        - ONLINE_PAYMENT
+        - EU_WITHDRAW
+        - EU_PAYMENT
+        - FOREIGN_ALL
+      x-stoplight:
+        id: mpf3c0xkikwvy
+    CardEntryMode:
+      type: string
+      default: UNKNOWN
+      example: UNKNOWN
+      description: |
+        Card entry mode
+
+          * `UNKNOWN` - Unknown
+          * `MANUAL` - Card number was entered manually into a terminal
+          * `SWIPE` - The card was physically swiped in a terminal
+          * `CHIP` - The card was physically inserted into a terminal
+          * `CONTACTLESS` - The card was tapped on a contactless-enabled terminal
+          * `ONLINE` - The card was used in a card-not-present scenario, such as a transaction made over the phone or internet
+      enum:
+        - UNKNOWN
+        - MANUAL
+        - SWIPE
+        - CHIP
+        - CONTACTLESS
+        - ONLINE
+      x-stoplight:
+        id: ceae6k445712q
+    TreezorAmount:
+      type: object
+      required:
+        - value_smallest_unit
+        - currency_code
+      properties:
+        value:
+          type: number
+          description: 'Float payment amount, including all fees. Positive for a Debit, negative for a credit.'
+          example: 17.01
+        value_smallest_unit:
+          type: integer
+          description: 'Payment amount, including all fees, in the smallest unit of associated currency'
+          example: 1701
+        currency_code:
+          type: string
+          description: Currency - ISO 4217 3 digit
+          example: '978'
+      x-stoplight:
+        id: n1vi61qqrjaj6
+    TreezorMerchantData:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Merchant ID
+          example: '000980200909995'
+        name:
+          type: string
+          description: Merchant Name
+          example: MerchantName
+        city:
+          type: string
+          description: Merchant city
+          example: Paris
+        country_code:
+          type: string
+          description: Merchant country - ISO 3-alpha country code
+          example: FRA
+        mcc:
+          type: string
+          description: Merchant Category Code
+          example: '4512'
+        acquirer_id:
+          type: string
+          description: Acquirer ID
+          example: '06004441'
+      x-stoplight:
+        id: 7gzw18spawtx3
+    GpaOrder:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Operation Reference - Identifier for the operation (authorization and capture)
+      x-stoplight:
+        id: ffp2dzsel710o
+    CardAcceptor:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Description of the seller
+        mcc:
+          type: string
+          description: 4 digits MCC code of the acquirer (Merchant Category Code)
+        country_code:
+          description: Two letter ISO code of associated country (2 letters code)
+          type: string
+          minLength: 2
+          maxLength: 2
+          example: FR
+        mid:
+          type: string
+          description: Seller - Merchant id of the transaction
+          example: '18571564'
+        city:
+          type: string
+          description: Seller - Merchant city of the transaction
+          example: La Rochelle
+      x-stoplight:
+        id: pqhjsuu0y06hg
+    Acquirer:
+      type: object
+      properties:
+        institution_id_code:
+          type: string
+          description: Acquirer identifier
+      x-stoplight:
+        id: 4xyd80qkwfbg2
+    OperationType:
+      type: string
+      default: CARD_PAYMENT
+      example: CARD_PAYMENT
+      description: the type of operation to be used by the platform for this compensation
+      enum:
+        - CARD_PAYMENT
+        - CASHOUT_BY_CARD
+      x-stoplight:
+        id: r7zt98ycxmd1d
+    AuthorizationHold:
+      type: object
+      required:
+        - id
+        - operationId
+      properties:
+        id:
+          description: Unique identifier
+          type: integer
+          example: 1337
+        operationId:
+          description: Unique identifier of the operation that created the authorization hold
+          type: integer
+          example: 1337
+      x-stoplight:
+        id: wuld2ajnccdt6
+    HolderAccount:
+      type: object
+      x-stoplight:
+        id: o2xci25tftakr
+      description: Card's holder linked banking account details. Account balance is expressed in card holder account's currency.
+      properties:
+        id:
+          $ref: ./AccountId.yaml
+        balance:
+          type: object
+        availableBalance:
+          type: object
+        status:
+          $ref: ./AccountStatus.yaml
+        label:
+          type: string
+          description: Account's label
+          example: Current account
+        externalId:
+          $ref: ./AccountExternalId.yaml
+        createdAt:
+          type: string
+          format: date-time
+          description: Account's creation date & time
+        lastUsedAt:
+          type: string
+          format: date-time
+          description: Account's last transaction date
+        deletedAt:
+          type: string
+          format: date-time
+          description: Account's closing date. Only if the account is closed
+    CardAccountingConfiguration:
+      title: CardAccountingConfiguration
+      x-stoplight:
+        id: u9dxp7aebsc6m
+      type: object
+      description: 'Card operation accouting configuration override. Only define the accounts you want to override in this object. Note: a same account must not be used as both settlement and suspense account.'
+      properties:
+        settlementWithReservationAccountNumber:
+          type: string
+          x-stoplight:
+            id: ztuqu1pkh6zuq
+          description: 'Destination account number, for a card operation compensation when a valid funds reservation was found and source account balance is sufficient.'
+        settlementWithoutReservationAccountNumber:
+          type: string
+          x-stoplight:
+            id: ya3pic58aufsp
+          description: 'Destination account number, for a card operation compensation without a valid funds reservation was found and source account balance is sufficient.'
+        settlementAfterReservationExpirationAccountNumber:
+          type: string
+          x-stoplight:
+            id: t9heb6ekt7eub
+          description: 'Destination account number, for a card operation compensation when an expired funds reservation was found and source account balance is sufficient.'
+        settlementClosedAccountNumber:
+          type: string
+          x-stoplight:
+            id: wr6jbnnmo45vn
+          description: 'Destination account number, for a card operation compensation, when the source account is closed.'
+        settlementBlockedAccountNumber:
+          type: string
+          x-stoplight:
+            id: law9u22w5k5gp
+          description: 'Destination account number, for a card operation compensation, when the source account is blocked.'
+        settlementInsufficientBalanceAccountNumber:
+          type: string
+          x-stoplight:
+            id: ff9oljmn670ok
+          description: 'Destination account number, for a card operation compensation, when the source account balance is not sufficient.'
+        suspenseClosedAccountNumber:
+          type: string
+          x-stoplight:
+            id: 1wwg8n7j6q5ta
+          description: 'Source account number, for a card operation compensation, when the original source account (linked to the card) is closed.'
+        suspenseBlockedAccountNumber:
+          type: string
+          x-stoplight:
+            id: cyemk1fvdjrkt
+          description: 'Source account number, for a card operation compensation, when the original source account (linked to the card) is blocked.'
+        suspenseInsufficientBalanceAccountNumber:
+          type: string
+          x-stoplight:
+            id: ld9oybih0ehvq
+          description: 'Source account number, for a card operation compensation, when the original source account''s (linked to the card) balance is not sufficient. In this situation, the original source account is debited of the available amount, and the rest is debited from this suspense account.'
+      examples:
+        - settlementWithReservationAccountNumber: '10000000001'
+          settlementWithoutReservationAccountNumber: '10000000001'
+          settlementAfterReservationExpirationAccountNumber: '10000000001'
+          settlementClosedAccountNumber: '10000000001'
+          settlementBlockedAccountNumber: '10000000001'
+          settlementInsufficientBalanceAccountNumber: '10000000001'
+          suspenseClosedAccountNumber: '10000000002'
+          suspenseBlockedAccountNumber: '10000000002'
+          suspenseInsufficientBalanceAccountNumber: '10000000002'
+    SettlementAccountingEntryRequest:
+      title: SettlementAccountingEntryRequest
+      x-stoplight:
+        id: c8ve91g3xdzv3
+      type: object
+      required:
+        - sourceAccount
+        - destinationAccount
+        - amount
+      properties:
+        sourceAccount:
+          $ref: ./AccountNumber.yaml
+          x-stoplight:
+            id: m9lyzdf9yorkv
+          description: Account number from which the amount will be debited
+        destinationAccount:
+          $ref: ./AccountNumber.yaml
+          x-stoplight:
+            id: 4er4ziy27jco9
+          description: Account number to which the amount will be credited
+        amount:
+          $ref: '#/components/schemas/AmountInput'
+          x-stoplight:
+            id: g23q4ty3ioqsx
+        type:
+          $ref: ./AccountingEntryType.yaml
+          x-stoplight:
+            id: gg9slixqajfem
+          description: Optional type for this accounting entry. Defaults to `TRANSFER`.
+    AmountInput:
+      title: AmountInput
+      x-stoplight:
+        id: vj988udw7l24f
+      type: object
+      required:
+        - value
+        - currency
+      properties:
+        value:
+          type: integer
+          x-stoplight:
+            id: dhn6qxg7tk65n
+          example: 1337
+          description: Amount without separator and symbol
+        currency:
+          type: string
+          x-stoplight:
+            id: n2xjhimsvmrmw
+          example: EUR
+          minLength: 3
+          maxLength: 3
+          description: Currency's ISO 4217 alpha code
+      examples:
+        - value: 1337
+          currency: EUR
+      description: ''

@@ -1,0 +1,9 @@
+title: Country
+x-stoplight:
+  id: uwcvl9tu3ab1m
+type: string
+description: ISO-3166 numeric code of associated country (3 digits)
+format: iso-3166
+minLength: 3
+maxLength: 3
+example: '250'

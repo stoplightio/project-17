@@ -1,0 +1,9 @@
+title: AuthenticationMethodType
+x-stoplight:
+  id: pyfcaofbowlmf
+type: string
+description: Method of the authentication
+enum:
+  - SMS
+  - PINCODE
+example: SMS

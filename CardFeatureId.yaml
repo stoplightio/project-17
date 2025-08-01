@@ -1,0 +1,27 @@
+title: CardFeatureId
+x-stoplight:
+  id: kfdqj5n30h7on
+type: string
+description: |
+  Feature Identitifier - Depends on product configuration
+  - `NFC` : card can be used for contactless payment
+  - `CASH_OPERATION` : card can be used to withdraw cash
+  - `EUR_WITHDRAWAL` : card can be used to withdraw cash in euro zone
+  - `FOREIGN_WITHDRAWAL` : card can be used to withdraw cash in foreign countries
+  - `PAYMENT_AUTHORIZED` : card can be used to pay
+  - `EUR_PAYMENT` : card can be used to pay in euro zone
+  - `FOREIGN_PAYMENT` : card can be used to pay in foreign countries
+  - `FOREIGN_ALL` : card can be used to pay or withdraw cash in foreign countries
+  - `ONLINE_PAYMENT` : card can be used to pay online
+  - `FOREIGN_ONLINE_PAYMENT` : card can be used to pay online in foreign countries
+enum:
+  - NFC
+  - CASH_OPERATION
+  - EUR_WITHDRAWAL
+  - FOREIGN_WITHDRAWAL
+  - PAYMENT_AUTHORIZED
+  - EUR_PAYMENT
+  - FOREIGN_PAYMENT
+  - FOREIGN_ALL
+  - ONLINE_PAYMENT
+  - FOREIGN_ONLINE_PAYMENT

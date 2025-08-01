@@ -1,0 +1,9 @@
+title: LegalType
+x-stoplight:
+  id: 1y3yb3k9wn9tg
+type: string
+description: |
+  The user can be a natural person (physical person with firstname and lastname) or a legal entity (company or non-profit with legalName)
+enum:
+  - NATURAL_PERSON
+  - LEGAL_ENTITY

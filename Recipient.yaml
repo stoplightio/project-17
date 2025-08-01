@@ -1,0 +1,71 @@
+title: Recipient
+x-stoplight:
+  id: kdgawk2l5ruxg
+type: object
+description: at least one of phone or iban is required
+required:
+  - id
+  - name
+properties:
+  id:
+    allOf:
+      - $ref: ./RecipientId.yaml
+        x-stoplight:
+          id: ll66idijyi9wz
+      - readOnly: true
+        x-stoplight:
+          id: 55er4txvszal9
+    x-stoplight:
+      id: flre8apphdba9
+  name:
+    type: string
+    description: 'Recipient alias, if any'
+    example: John Doe
+    x-stoplight:
+      id: vt98jifnn3j49
+  iban:
+    $ref: ./IBAN.yaml
+    x-stoplight:
+      id: i6kv7ylmyh0kp
+  accountReference:
+    type: string
+    description: External account reference. BIC is optional when using accountReference.
+    x-stoplight:
+      id: eleafhm7ctxlj
+  bic:
+    $ref: ./BIC.yaml
+    x-stoplight:
+      id: 7167686jxlr3b
+  bankName:
+    type: string
+    description: Name of the recipient bank
+    x-stoplight:
+      id: 163z7vjj9bjo3
+  phone:
+    $ref: ./Phone.yaml
+    x-stoplight:
+      id: fc0oawyemxhxu
+  externalData:
+    allOf:
+      - $ref: ./ExternalData.yaml
+        x-stoplight:
+          id: 1jbdp07knjz7g
+      - type: object
+        description: Additional information on recipient
+        example:
+          firstname: John
+          lastname: Doe
+          countryCode: FR
+        x-stoplight:
+          id: peny9n6h7u2p9
+    x-stoplight:
+      id: 9dzxlw32dixva
+  counterparty:
+    type: boolean
+    description: Indicate if the Recipient is an External Counterparty for the owner
+    x-stoplight:
+      id: u7bd2989tusd9
+  postalAddress:
+    $ref: ./RecipientAddress.yaml
+    x-stoplight:
+      id: skwuemg9t45gu

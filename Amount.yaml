@@ -1,0 +1,22 @@
+title: Amount
+x-stoplight:
+  id: zesqi0nhxgafm
+description: 'Amount without display, with Currency represented by its ISO alpha code.'
+type: object
+examples:
+  - value: 1337
+    currency: EUR
+required:
+  - value
+  - currency
+properties:
+  value:
+    type: integer
+    x-stoplight:
+      id: p9ju9p4n4e6cj
+    example: 1337
+    description: Amount without separator and symbol
+  currency:
+    $ref: ./CurrencyAlpha.yaml
+    x-stoplight:
+      id: s0oh7whb3wudm

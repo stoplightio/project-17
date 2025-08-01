@@ -1,0 +1,8 @@
+title: External data
+x-stoplight:
+  id: lrbigg9ifsazd
+type: object
+description: Set of key-value pairs that you can attach to a resource. This can be useful for storing your additional information about the resource in a structured format.
+example:
+  key1: value1
+  key2: value2
