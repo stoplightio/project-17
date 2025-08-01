@@ -20,7 +20,7 @@ info:
   license:
     name: Proprietary
     url: 'https://www.skaleet.com/'
-  summary: dfsf5454 dsdfdsfsd FDFSDFS fdfgdf
+  summary: dfsf5454 dsdfdsfsd FDFSDFS fdfgdf dfsdf
 servers:
   - url: 'https://sandbox.skaleet.com/credit/api/v1'
     description: Skaleet sandbox environment.
