@@ -930,6 +930,8 @@ definitions:
       id: 2i2pr7gp818g3
   Amount:
     type: object
+    x-stoplight:
+      id: op622j6533viu
     required:
       - value
       - currency
@@ -942,8 +944,14 @@ definitions:
       display:
         type: string
         example: '13,37 €'
-    x-stoplight:
-      id: op622j6533viu
+      dfssddsf:
+        type: string
+        x-stoplight:
+          id: 3hbndrz5fdwyr
+      sdadasdasd:
+        type: string
+        x-stoplight:
+          id: 4nopnxvovmdxk
   ChargeMode:
     type: string
     default: CLIENT
