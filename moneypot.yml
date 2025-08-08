@@ -1004,6 +1004,10 @@ definitions:
         type: string
         x-stoplight:
           id: lxsefhwqjckqt
+      sdadasd:
+        type: string
+        x-stoplight:
+          id: uk5cii1r9ifw9
   ChargeMode:
     type: string
     default: CLIENT
