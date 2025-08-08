@@ -1000,6 +1000,10 @@ definitions:
         type: string
         x-stoplight:
           id: f3qu9831tvno3
+      dsffds:
+        type: string
+        x-stoplight:
+          id: lxsefhwqjckqt
   ChargeMode:
     type: string
     default: CLIENT
