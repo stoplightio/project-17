@@ -980,6 +980,10 @@ definitions:
         type: string
         x-stoplight:
           id: 86sdsw6vx3q6l
+      dsdfsdds:
+        type: string
+        x-stoplight:
+          id: azevyajtzr0ct
   ChargeMode:
     type: string
     default: CLIENT
