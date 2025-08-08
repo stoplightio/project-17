@@ -992,6 +992,10 @@ definitions:
         type: string
         x-stoplight:
           id: igwnbk87xrpxh
+      dfsdsdfds:
+        type: string
+        x-stoplight:
+          id: omfv6e5el66zt
   ChargeMode:
     type: string
     default: CLIENT
